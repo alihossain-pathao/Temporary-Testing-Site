@@ -601,19 +601,19 @@ try {
 </div>
 <div class="space-y-1.5" data-hide-key="navAnalytics">
 <p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Analytics</p>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" onclick="openHubOverviewModal(); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navOverview" onclick="openHubOverviewModal(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-sky-950/60 border border-sky-800/40 flex items-center justify-center flex-shrink-0 text-sky-400 text-sm">
 <i class="fa-solid fa-table-list"></i>
 </span>
 <span class="truncate">Cluster Hubs Overview</span>
 </button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" id="sideBtnMatrix" onclick="switchDashboardTab('matrix'); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navMatrix" id="sideBtnMatrix" onclick="switchDashboardTab('matrix'); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center flex-shrink-0 text-cyan-400 text-sm">
 <i class="fa-solid fa-chart-simple"></i>
 </span>
 <span class="truncate">All-Hub Comparison Matrix</span>
 </button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" id="sideBtnLeaderboard" onclick="switchDashboardTab('leaderboard'); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navLeaderboard" id="sideBtnLeaderboard" onclick="switchDashboardTab('leaderboard'); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center flex-shrink-0 text-amber-400 text-sm">
 <i class="fa-solid fa-trophy"></i>
 </span>
@@ -651,18 +651,12 @@ try {
 </div>
 <div class="space-y-1.5">
 <p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Display</p>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-owner-only="" id="sideBtnHideMode" onclick="toggleHideMode()">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-owner-only="" id="sideBtnHideMode" onclick="openVisibilityModal(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center flex-shrink-0 text-amber-400 text-sm">
 <i class="fa-solid fa-eye" id="sideHideModeIcon"></i>
 </span>
-<span class="truncate flex-1 text-left">Hide Selected Sections</span>
+<span class="truncate flex-1 text-left">Hide From Users</span>
 <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-800 text-slate-400" id="sideHideModePill">OFF</span>
-</button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-owner-only="" onclick="openVisibilityModal(); toggleSidebar();">
-<span class="w-8 h-8 rounded-lg bg-violet-950/60 border border-violet-800/40 flex items-center justify-center flex-shrink-0 text-violet-400 text-sm">
-<i class="fa-solid fa-list-check"></i>
-</span>
-<span class="truncate">Choose What To Hide</span>
 </button>
 </div>
 <div class="space-y-1.5">
@@ -679,13 +673,13 @@ try {
 </span>
 <span class="truncate">Import Data</span>
 </button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" onclick="triggerExcelReportImport(); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="cardPerformance" onclick="triggerExcelReportImport(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center flex-shrink-0 text-amber-400 text-sm">
 <i class="fa-solid fa-file-excel"></i>
 </span>
 <span class="truncate">Performance Checker</span>
 </button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" onclick="triggerAgeingReportImport(); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="cardAgeing" onclick="triggerAgeingReportImport(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center flex-shrink-0 text-cyan-400 text-sm">
 <i class="fa-solid fa-table"></i>
 </span>
@@ -750,13 +744,13 @@ try {
 <input accept=".xlsx,.xls,.csv" class="hidden" id="ageingReportInput" onchange="importAgeingReport(event)" type="file"/>
 </div>
 <!-- NOTICE TICKER (unread notifications scroll until marked Read) -->
-<div class="notice-bar" id="dashboardNoticeTicker">
+<div class="notice-bar" data-hide-key="noticeTicker" id="dashboardNoticeTicker">
 <div class="notice-badge"><span class="notice-bell"><i class="fa-solid fa-bell"></i></span><span class="notice-badge-text">Notice</span></div>
 <div class="notice-ticker-wrap"><div class="notice-ticker-track" id="dashboardNoticeTickerTrack"></div></div>
 </div>
 <!-- TOP 4 QUICK ACTION CARDS -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-hide-key="kpiCards">
-<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-violet-800/60 transition-all duration-200 cursor-pointer" onclick="toggleDashboardNotificationPanel()" title="Open Notice">
+<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-violet-800/60 transition-all duration-200 cursor-pointer" onclick="toggleDashboardNotificationPanel()" title="Open Notice" data-hide-key="cardNotice">
 <div>
 <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">NOTICE</span>
 <div class="text-3xl font-black text-violet-400 mt-1">Notice</div>
@@ -768,7 +762,7 @@ try {
 <i class="fa-solid fa-bell"></i>
 </div>
 </div>
-<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-amber-800/60 transition-all duration-200 cursor-pointer" onclick="triggerExcelReportImport()" title="Open Performance Checker">
+<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-amber-800/60 transition-all duration-200 cursor-pointer" onclick="triggerExcelReportImport()" title="Open Performance Checker" data-hide-key="cardPerformance">
 <div>
 <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">PERFORMANCE CHECKER</span>
 <div class="text-3xl font-black text-amber-400 mt-1">Performance</div>
@@ -780,7 +774,7 @@ try {
 <i class="fa-solid fa-file-excel"></i>
 </div>
 </div>
-<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-cyan-800/60 transition-all duration-200 cursor-pointer" onclick="triggerAgeingReportImport()" title="Open Ageing Report">
+<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-cyan-800/60 transition-all duration-200 cursor-pointer" onclick="triggerAgeingReportImport()" title="Open Ageing Report" data-hide-key="cardAgeing">
 <div>
 <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">AGEING REPORT</span>
 <div class="text-3xl font-black text-cyan-400 mt-1">Ageing Report</div>
@@ -792,7 +786,7 @@ try {
 <i class="fa-solid fa-table"></i>
 </div>
 </div>
-<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-emerald-800/60 transition-all duration-200 cursor-pointer" onclick="openCurrentDayKpiReport()" title="Open KPI Report">
+<div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-lg hover:-translate-y-1 hover:border-emerald-800/60 transition-all duration-200 cursor-pointer" onclick="openCurrentDayKpiReport()" title="Open KPI Report" data-hide-key="cardKpi">
 <div>
 <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">KPI REPORT</span>
 <div class="text-3xl font-black text-emerald-400 mt-1">KPI Report</div>
@@ -811,11 +805,8 @@ try {
 <button class="px-4 py-2 text-xs font-bold rounded-lg transition bg-sky-600 text-white shadow-sm flex items-center gap-2" onclick="toggleSidebar()">
 <i class="fa-solid fa-bars"></i> Navigation Menu
                 </button>
-<button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700" data-owner-only="" id="topBtnHideMode" onclick="toggleHideMode()" title="Hide / show the sections you selected">
+<button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700" data-owner-only="" id="topBtnHideMode" onclick="openVisibilityModal()" title="Choose what to hide from users (you always see everything)">
 <i class="fa-solid fa-eye" id="topHideModeIcon"></i> <span id="topHideModeLabel">Hide</span>
-</button>
-<button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700" data-owner-only="" onclick="openVisibilityModal()" title="Choose what to hide">
-<i class="fa-solid fa-list-check"></i>
 </button>
 </div>
 <!-- TASK TABS (dynamic) -->
@@ -1014,29 +1005,32 @@ try {
 </div>
 </div>
 </div>
-<!-- SHOW / HIDE SECTIONS MODAL -->
+<!-- HIDE FROM USERS MODAL -->
 <div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4" id="visibilityModal">
 <div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 shadow-2xl">
 <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
 <h3 class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-solid fa-eye-slash text-amber-400"></i> Choose What To Hide
+<i class="fa-solid fa-eye-slash text-amber-400"></i> Hide From Users
                 </h3>
 <button class="text-slate-400 hover:text-white hover:bg-slate-800 p-1.5 rounded-lg transition" onclick="closeVisibilityModal()">
 <i class="fa-solid fa-xmark text-lg"></i>
 </button>
 </div>
-<button class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-700 bg-[#0b1329] text-xs font-bold text-slate-300 transition mb-3" id="visMasterBtn" onclick="toggleHideMode()">
-<span class="flex items-center gap-2"><i class="fa-solid fa-eye" id="visMasterIcon"></i> <span id="visMasterText">Hidden mode is OFF (everything visible)</span></span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-800 text-slate-400" id="visMasterPill">OFF</span>
-</button>
-<div class="flex flex-wrap gap-2 mb-4">
-<button class="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" onclick="setHidePreset('controls')">Only edit / add / remove buttons</button>
-<button class="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" onclick="setHidePreset('all')">Everything</button>
-<button class="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" onclick="setHidePreset('none')">Clear</button>
+<div class="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-[11px] font-semibold text-amber-200 leading-relaxed mb-3">
+<i class="fa-solid fa-user-shield mt-0.5"></i>
+<span>Switch ON anything you want to hide from other users. <b>You (owner) will always see everything.</b> Items hidden from users show a dashed amber outline on your screen.</span>
 </div>
+<div class="flex items-center justify-between gap-2 mb-3">
+<span class="text-[11px] font-black text-slate-300" id="visCount">Nothing is hidden - all users see everything</span>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition" onclick="setHidePreset('all')">Hide all</button>
+<button class="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" onclick="setHidePreset('none')">Show all</button>
+</div>
+</div>
+<input autocomplete="off" class="w-full bg-[#0b1329] text-xs text-slate-200 placeholder-slate-500 rounded-lg px-3 py-2 border border-slate-700/60 focus:outline-none focus:border-amber-500 transition mb-4" id="visSearch" oninput="renderVisibilityList()" placeholder="Search a feature..." type="text"/>
 <div class="space-y-4" id="visibilityList"></div>
 <p class="text-[10px] text-slate-500 font-semibold mt-4 leading-relaxed">
-<i class="fa-solid fa-circle-info"></i> Ticked items get hidden when Hidden mode is ON. Only the owner account can change these settings. Other signed-in users will see the shared Hidden/Visible state. This does not delete any data.
+<i class="fa-solid fa-circle-info"></i> Changes save automatically and apply to all other users in real time. Any new tab, hub or sheet you add appears here automatically (marked AUTO) - it is visible to users until you switch it ON. This only hides things on screen; it does not delete any data.
             </p>
 </div>
 </div>
@@ -2223,6 +2217,7 @@ try {
             });
             const modal = document.getElementById('visibilityModal');
             if (modal && pending) modal.classList.add('hidden');
+            try { applyUiHide(); } catch (e) {}
         }
 
         setTimeout(() => { if (!ownerPermissionReady) { try { finishOwnerPermissionCheck(true); } catch (e) {} } }, 10000);
@@ -3229,7 +3224,7 @@ try {
                         if (!dashboardOwnerUid) return;
                         const hideDoc = await cloudDb.doc('ownerSettings/' + dashboardOwnerUid).get();
                         if (hideDoc.exists && hideDoc.data().uiHide && Array.isArray(hideDoc.data().uiHide.keys)) {
-                            uiHide = hideDoc.data().uiHide;
+                            uiHide = normalizeUiHide(hideDoc.data().uiHide);
                             try { localStorage.setItem(UI_HIDE_LS, JSON.stringify(uiHide)); } catch (e) {}
                         } else if (myAccess.isOwner) {
                             await cloudDb.doc('ownerSettings/' + dashboardOwnerUid).set({ uiHide, updatedAt: Date.now() });
@@ -3420,7 +3415,7 @@ try {
             if (dashboardOwnerUid) {
                 cloudDb.doc('ownerSettings/' + dashboardOwnerUid).onSnapshot(snap => {
                     if (snap.exists && snap.data().uiHide && Array.isArray(snap.data().uiHide.keys)) {
-                        uiHide = snap.data().uiHide;
+                        uiHide = normalizeUiHide(snap.data().uiHide);
                         try { localStorage.setItem(UI_HIDE_LS, JSON.stringify(uiHide)); } catch (e) {}
                         applyUiHide();
                         renderVisibilityList();
@@ -4895,7 +4890,7 @@ try {
                 const cls = isActive
                     ? `px-4 py-2 text-xs font-bold rounded-lg transition ${colorParts(t.color).topActive}`
                     : `px-4 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700`;
-                return `<button onclick="switchDashboardTab('${t.type}')" class="${cls}">
+                return `<button data-hide-key="${hideKeyOf('tab_', t.type)}" data-hide-label="${escapeHtml(t.label)} (tab)" data-hide-group="tabs" data-hide-icon="${escapeHtml(t.icon)}" onclick="switchDashboardTab('${t.type}')" class="${cls}">
                             <i class="fa-solid ${t.icon} text-${t.color}-400"></i> ${t.label}
                         </button>`;
             }).join('');
@@ -4905,13 +4900,14 @@ try {
 
             sideContainer.innerHTML = taskTabs.map(t => {
                 const isActive = currentGenericTabType === t.type;
-                return `<button onclick="switchDashboardTab('${t.type}'); toggleSidebar();" class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${isActive ? activeClass : inactiveClass}">
+                return `<button data-hide-key="${hideKeyOf('tab_', t.type)}" data-hide-label="${escapeHtml(t.label)} (tab)" data-hide-group="tabs" data-hide-icon="${escapeHtml(t.icon)}" onclick="switchDashboardTab('${t.type}'); toggleSidebar();" class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${isActive ? activeClass : inactiveClass}">
                             <span class="w-8 h-8 rounded-lg ${colorParts(t.color).sideIcon} flex items-center justify-center flex-shrink-0 text-sm">
                                 <i class="fa-solid ${t.icon}"></i>
                             </span>
                             <span class="truncate">${t.label}</span>
                         </button>`;
             }).join('');
+            try { applyUiHide(); } catch (e) {}
         }
 
         function switchDashboardTab(tab) {
@@ -4997,7 +4993,7 @@ try {
             const shiftLabel = tabDef ? tabDef.label : type;
 
             grid.innerHTML = list.map(item => `
-                <div class="bg-[#0b1329] border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition shadow-lg relative group">
+                <div data-hide-key="${hideKeyOf('sheet_', item.id)}" data-hide-label="${escapeHtml(shiftLabel)} › ${escapeHtml(item.title)}" data-hide-group="sheets" data-hide-icon="fa-file-excel" class="bg-[#0b1329] border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition shadow-lg relative group">
                     <div>
                         <div class="flex items-start justify-between gap-3 mb-2">
                             <div class="flex items-center gap-2.5">
@@ -5786,7 +5782,7 @@ try {
                 : '';
 
             grid.innerHTML = filteredHubs.map(hub => `
-                <div class="bg-[#131d36] border border-slate-800 rounded-xl p-5 hover:border-sky-800/60 hover:-translate-y-1 hover:shadow-2xl transition-all duration-200 shadow-xl flex flex-col justify-between relative group">
+                <div data-hide-key="${hideKeyOf('hub_', hub.id)}" data-hide-label="${escapeHtml(hub.name)} (hub card)" data-hide-group="hubs" data-hide-icon="fa-warehouse" class="bg-[#131d36] border border-slate-800 rounded-xl p-5 hover:border-sky-800/60 hover:-translate-y-1 hover:shadow-2xl transition-all duration-200 shadow-xl flex flex-col justify-between relative group">
                     <div>
                         <div class="flex items-start justify-between gap-3 mb-4">
                             <div class="flex items-start gap-3">
@@ -5828,20 +5824,20 @@ try {
                             html += `<div class="grid grid-cols-2 gap-2">`;
                             if (hasReport || hasSummary) {
                                 if (hasReport) {
-                                    html += `<button onclick="generateReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full flex-1 bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                                    html += `<button data-hide-key="hubBtnReport" onclick="generateReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full flex-1 bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
                                         <i class="fa-solid fa-file-lines text-sm"></i> Morning & Closing Report
                                     </button>`;
                                 }
                             }
                             if (hasAttendance) {
-                                html += `<button onclick="generateAttendanceReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                                html += `<button data-hide-key="hubBtnAttendance" onclick="generateAttendanceReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-user-check text-sm"></i> D.A. Attendance Report
                                 </button>`;
                             }
-                            html += `<button onclick="generateInventoryReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#c27ba0] hover:bg-[#ad668b] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                            html += `<button data-hide-key="hubBtnInventory" onclick="generateInventoryReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#c27ba0] hover:bg-[#ad668b] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-boxes-stacked text-sm"></i> Inventory Report
                             </button>`;
-                            html += `<button onclick="openAgentPerformanceReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                            html += `<button data-hide-key="hubBtnAgentPerf" onclick="openAgentPerformanceReport('${hub.id}', '${hub.name}')" class="h-[46px] w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-user-chart text-sm"></i> Agent Performance Report
                             </button>`;
                             html += `</div>`;
@@ -6778,40 +6774,89 @@ try {
             showToast('Previous state restored!');
         }
 
-        /* =================== SHOW / HIDE SECTIONS ===================
-           Tick what you want to hide, then switch "Hidden mode" ON/OFF with one tap.
-           Saved per device in localStorage. Elements are tagged with data-hide-key="..." */
+        /* =================== HIDE FROM USERS ===================
+           The owner chooses which features to hide. Hidden items disappear for every
+           NON-owner user (shared through Firestore: ownerSettings/{ownerUid}).
+           The owner always sees everything (hidden items get a dashed amber outline).
+           Elements are tagged with data-hide-key="...". This is a visual hide, not a security rule. */
         const UI_HIDE_LS = 'narsingdi_ui_hide_v2';
         const UI_HIDE_ITEMS = [
-            { group: 'controls', key: 'tabsManage',    icon: 'fa-sliders',        label: 'Add / Edit / Remove Task Tabs buttons' },
-            { group: 'controls', key: 'hubAdd',        icon: 'fa-plus',           label: 'Add New Hub' },
-            { group: 'controls', key: 'hubRemove',     icon: 'fa-trash-can',      label: 'Remove Hub' },
-            { group: 'controls', key: 'dataImport',    icon: 'fa-upload',         label: 'Import Data' },
-            { group: 'controls', key: 'noticeActions', icon: 'fa-bullhorn',       label: 'Dismiss Notice buttons' },
-            { group: 'controls', key: 'sheetActions',  icon: 'fa-pen-to-square',  label: 'Add / Edit / Delete Sheet buttons' },
-            { group: 'sections', key: 'kpiCards',      icon: 'fa-chart-simple',   label: 'Top 4 KPI cards (Dispatch, Delivery, DA, Hold)' },
-            { group: 'sections', key: 'hubCards',      icon: 'fa-cubes',          label: 'Hub Management Cards' },
-            { group: 'sections', key: 'taskTabs',      icon: 'fa-star',           label: 'Daily Task Sheet tabs' },
-            { group: 'sections', key: 'navAnalytics',  icon: 'fa-table-list',     label: 'Analytics menu (Overview, Matrix, Leaderboard)' },
-            { group: 'sections', key: 'hubSummary',    icon: 'fa-chart-pie',      label: 'All Hub Summary (menu)' },
-            { group: 'sections', key: 'dataExport',    icon: 'fa-download',       label: 'Export Data (menu)' }
+            { group: 'cards',    key: 'kpiCards',        icon: 'fa-table-cells-large', label: 'All 4 top cards (Notice, Performance, Ageing, KPI)' },
+            { group: 'cards',    key: 'cardNotice',      icon: 'fa-bell',              label: 'Notice card' },
+            { group: 'cards',    key: 'noticeTicker',    icon: 'fa-bullhorn',          label: 'Notice scrolling bar' },
+            { group: 'cards',    key: 'cardPerformance', icon: 'fa-file-excel',        label: 'Performance Checker (card + menu)' },
+            { group: 'cards',    key: 'cardAgeing',      icon: 'fa-table',             label: 'Ageing Report (card + menu)' },
+            { group: 'cards',    key: 'cardKpi',         icon: 'fa-chart-pie',         label: 'KPI Report card' },
+            { group: 'sections', key: 'hubCards',        icon: 'fa-cubes',             label: 'Hub Management Cards (whole section)' },
+            { group: 'sections', key: 'taskTabs',        icon: 'fa-star',              label: 'Daily Task Sheet tabs (all tabs at once)' },
+            { group: 'hubbtns',  key: 'hubBtnReport',    icon: 'fa-file-lines',        label: 'Morning & Closing Report button' },
+            { group: 'hubbtns',  key: 'hubBtnAttendance',icon: 'fa-user-check',        label: 'D.A. Attendance Report button' },
+            { group: 'hubbtns',  key: 'hubBtnInventory', icon: 'fa-boxes-stacked',     label: 'Inventory Report button' },
+            { group: 'hubbtns',  key: 'hubBtnAgentPerf', icon: 'fa-chart-line',        label: 'Agent Performance Report button' },
+            { group: 'menu',     key: 'navAnalytics',    icon: 'fa-table-list',        label: 'Analytics menu (all 3 items)' },
+            { group: 'menu',     key: 'navOverview',     icon: 'fa-table-list',        label: 'Cluster Hubs Overview' },
+            { group: 'menu',     key: 'navMatrix',       icon: 'fa-chart-simple',      label: 'All-Hub Comparison Matrix' },
+            { group: 'menu',     key: 'navLeaderboard',  icon: 'fa-trophy',            label: 'Performance Leaderboard' },
+            { group: 'menu',     key: 'hubSummary',      icon: 'fa-chart-pie',         label: 'All Hub Summary' },
+            { group: 'menu',     key: 'dataExport',      icon: 'fa-download',          label: 'Export Data (JSON)' },
+            { group: 'controls', key: 'sheetActions',    icon: 'fa-pen-to-square',     label: 'Add / Edit / Delete Sheet buttons' }
         ];
         const UI_HIDE_GROUPS = [
-            ['controls', 'Edit / Add / Remove buttons'],
-            ['sections', 'Sections & data']
+            ['cards', 'Top cards'],
+            ['sections', 'Dashboard sections'],
+            ['tabs', 'Task tabs (new tabs appear here automatically)'],
+            ['hubs', 'Hub cards (new hubs appear here automatically)'],
+            ['sheets', 'Sheets inside tabs (new sheets appear here automatically)'],
+            ['hubbtns', 'Buttons inside Hub cards'],
+            ['menu', 'Navigation menu'],
+            ['controls', 'Sheet buttons'],
+            ['other', 'Other new items']
         ];
-        let uiHide = { active: false, keys: UI_HIDE_ITEMS.filter(i => i.group === 'controls').map(i => i.key) };
+        let uiHide = { active: false, keys: [] };
+
+        // Safe key for a dynamic item, e.g. hideKeyOf('tab_', 'custom_123') -> 'tab_custom_123'
+        function hideKeyOf(prefix, id) {
+            return prefix + String(id == null ? '' : id).replace(/[^A-Za-z0-9_-]/g, '_');
+        }
+
+        // Fixed items + ANY element on the page tagged data-hide-key that is not in the fixed list.
+        // So a new tab / hub / sheet / button shows up in the Hide panel by itself.
+        // Optional tags on the element: data-hide-label, data-hide-group, data-hide-icon.
+        function getHideItems() {
+            const items = UI_HIDE_ITEMS.slice();
+            const seen = new Set(items.map(i => i.key));
+            document.querySelectorAll('[data-hide-key]').forEach(el => {
+                String(el.getAttribute('data-hide-key') || '').split(/\s+/).forEach(k => {
+                    if (!k || seen.has(k)) return;
+                    seen.add(k);
+                    const label = String(el.getAttribute('data-hide-label') || el.getAttribute('title') || el.textContent || k)
+                        .replace(/\s+/g, ' ').trim().slice(0, 70) || k;
+                    items.push({
+                        group: el.getAttribute('data-hide-group') || 'other',
+                        key: k,
+                        icon: el.getAttribute('data-hide-icon') || 'fa-eye-slash',
+                        label,
+                        dynamic: true
+                    });
+                });
+            });
+            return items;
+        }
+
+        // Keep every well-formed key (dynamic keys such as tab_custom_123 cannot be checked at load time).
+        // Old saved data had a global ON/OFF switch; if it was OFF nothing was hidden, so start clean.
+        function normalizeUiHide(o) {
+            const keys = (o && o.active && Array.isArray(o.keys))
+                ? Array.from(new Set(o.keys.filter(k => typeof k === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(k))))
+                : [];
+            return { active: keys.length > 0, keys };
+        }
 
         (function initUiHide() {
             try {
                 const st = JSON.parse(localStorage.getItem(UI_HIDE_LS) || 'null');
-                if (st && Array.isArray(st.keys)) uiHide = { active: !!st.active, keys: st.keys };
+                if (st && Array.isArray(st.keys)) uiHide = normalizeUiHide(st);
             } catch (e) {}
-            const css = UI_HIDE_ITEMS.map(i => `body.hide-${i.key} [data-hide-key~="${i.key}"] { display: none !important; }`).join('\n');
-            const tag = document.createElement('style');
-            tag.id = 'uiHideStyle';
-            tag.textContent = css;
-            document.head.appendChild(tag);
             applyUiHide();
         })();
 
@@ -6820,42 +6865,46 @@ try {
             if (cloudDb) cloudSyncUiHide();
         }
 
+        function isOwnerView() {
+            try { return !!(ownerPermissionReady && myAccess.isOwner); } catch (e) { return false; }
+        }
+
         function applyUiHide() {
-            UI_HIDE_ITEMS.forEach(i => document.body.classList.toggle('hide-' + i.key, uiHide.active && uiHide.keys.includes(i.key)));
-            const on = uiHide.active;
+            const owner = isOwnerView();
+            const keys = uiHide.active ? uiHide.keys : [];
+            // One style rule per hidden key. Because it is a CSS selector, tabs / hubs / sheets that are
+            // rendered later are hidden automatically too. Owner: nothing hidden, just an outline.
+            const css = keys.map(k => owner
+                ? `[data-hide-key~="${k}"] { outline: 1.5px dashed rgba(245,158,11,.65); outline-offset: 2px; }`
+                : `[data-hide-key~="${k}"] { display: none !important; }`).join('\n');
+            let tag = document.getElementById('uiHideStyle');
+            if (!tag) { tag = document.createElement('style'); tag.id = 'uiHideStyle'; document.head.appendChild(tag); }
+            if (tag.textContent !== css) tag.textContent = css;
+
+            const known = getHideItems();
+            const knownKeys = new Set(known.map(i => i.key));
+            const n = keys.filter(k => knownKeys.has(k)).length;     // ignore keys of removed tabs/hubs/sheets
             const set = (id, fn) => { const el = document.getElementById(id); if (el) fn(el); };
-            set('topHideModeIcon', el => el.className = 'fa-solid ' + (on ? 'fa-eye-slash' : 'fa-eye'));
-            set('topHideModeLabel', el => el.textContent = on ? 'Hidden' : 'Hide');
+            set('topHideModeIcon', el => el.className = 'fa-solid ' + (n ? 'fa-eye-slash' : 'fa-eye'));
+            set('topHideModeLabel', el => el.textContent = n ? 'Hide (' + n + ')' : 'Hide');
             set('topBtnHideMode', el => {
-                el.classList.toggle('bg-amber-600', on); el.classList.toggle('text-white', on); el.classList.toggle('border-amber-500', on);
-                el.classList.toggle('bg-slate-800', !on); el.classList.toggle('text-slate-300', !on); el.classList.toggle('border-slate-700', !on);
+                el.classList.toggle('bg-amber-600', !!n); el.classList.toggle('text-white', !!n); el.classList.toggle('border-amber-500', !!n);
+                el.classList.toggle('bg-slate-800', !n); el.classList.toggle('text-slate-300', !n); el.classList.toggle('border-slate-700', !n);
             });
-            set('sideHideModeIcon', el => el.className = 'fa-solid ' + (on ? 'fa-eye-slash' : 'fa-eye'));
+            set('sideHideModeIcon', el => el.className = 'fa-solid ' + (n ? 'fa-eye-slash' : 'fa-eye'));
             set('sideHideModePill', el => {
-                el.textContent = on ? 'ON' : 'OFF';
-                el.className = 'px-2 py-0.5 rounded-full text-[9px] font-black ' + (on ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400');
+                el.textContent = n ? String(n) : 'OFF';
+                el.className = 'px-2 py-0.5 rounded-full text-[9px] font-black ' + (n ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400');
             });
-            set('visMasterIcon', el => el.className = 'fa-solid ' + (on ? 'fa-eye-slash text-amber-400' : 'fa-eye'));
-            set('visMasterText', el => el.textContent = on ? 'Hidden mode is ON (ticked items are hidden)' : 'Hidden mode is OFF (everything visible)');
-            set('visMasterPill', el => {
-                el.textContent = on ? 'ON' : 'OFF';
-                el.className = 'px-2 py-0.5 rounded-full text-[10px] font-black ' + (on ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400');
-            });
+            set('visCount', el => el.textContent = n ? (n + ' of ' + known.length + ' hidden from users') : 'Nothing is hidden - all users see everything');
         }
 
         /* Owner account controls visibility directly. No PIN is required. */
         let uiPinOk = false;
-
         function requirePin() { return false; }
         function closePinModal() { document.getElementById('pinModal').classList.add('hidden'); }
         function submitPin() { closePinModal(); }
 
-        function doToggleHideMode() {
-            uiHide.active = !uiHide.active;
-            saveUiHide();
-            applyUiHide();
-            showToast(uiHide.active ? 'Selected sections are now hidden' : 'Everything is visible again');
-        }
         function getSignedInOwnerEmail() {
             try {
                 return String(
@@ -6873,7 +6922,7 @@ try {
 
         async function ensureOwnerAccess() {
             // Primary owner is always allowed immediately. This also prevents a
-            // temporary Firebase/ownerAccess read delay from blocking Hidden Mode.
+            // temporary Firebase/ownerAccess read delay from blocking the Hide panel.
             if (myAccess.isOwner || isPrimaryOwnerAccount()) {
                 myAccess.isOwner = true;
                 if (currentUser?.uid) dashboardOwnerUid = currentUser.uid;
@@ -6893,53 +6942,62 @@ try {
             return !!myAccess.isOwner;
         }
 
-        async function toggleHideMode() {
-            if (!(await ensureOwnerAccess())) { showToast('Only the owner can change Hidden mode'); return; }
-            doToggleHideMode();
-        }
+        // Old buttons/shortcuts that used to flip a global ON/OFF now simply open the Hide panel.
+        function toggleHideMode() { openVisibilityModal(); }
 
         async function toggleHideKey(key, hide) {
             if (!(await ensureOwnerAccess())) { showToast('Only the owner can change visibility settings'); renderVisibilityList(); return; }
             const has = uiHide.keys.includes(key);
             if (hide && !has) uiHide.keys.push(key);
             if (!hide && has) uiHide.keys = uiHide.keys.filter(k => k !== key);
-            if (hide) uiHide.active = true;      // ticking something hides it right away
+            uiHide.active = uiHide.keys.length > 0;
             saveUiHide();
             applyUiHide();
         }
 
         async function setHidePreset(kind) {
-            if (!(await ensureOwnerAccess())) { showToast('Only the owner can change Hidden mode'); return; }
-            if (kind === 'controls') { uiHide.keys = UI_HIDE_ITEMS.filter(i => i.group === 'controls').map(i => i.key); uiHide.active = true; }
-            else if (kind === 'all') { uiHide.keys = UI_HIDE_ITEMS.map(i => i.key); uiHide.active = true; }
-            else { uiHide.keys = []; uiHide.active = false; }
+            if (!(await ensureOwnerAccess())) { showToast('Only the owner can change visibility settings'); return; }
+            uiHide.keys = (kind === 'all') ? getHideItems().map(i => i.key) : [];
+            uiHide.active = uiHide.keys.length > 0;
             saveUiHide();
             applyUiHide();
             renderVisibilityList();
+            showToast(kind === 'all' ? 'Everything is hidden from users (you still see all)' : 'Everything is visible to all users');
         }
 
         function renderVisibilityList() {
             const box = document.getElementById('visibilityList');
             if (!box) return;
-            box.innerHTML = UI_HIDE_GROUPS.map(([g, title]) => `
+            const q = String(document.getElementById('visSearch')?.value || '').trim().toLowerCase();
+            const all = getHideItems();
+            const html = UI_HIDE_GROUPS.map(([g, title]) => {
+                const items = all.filter(i => i.group === g && (!q || i.label.toLowerCase().includes(q)));
+                if (!items.length) return '';
+                return `
                 <div>
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">${title}</p>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">${escapeHtml(title)}</p>
                     <div class="space-y-1.5">
-                        ${UI_HIDE_ITEMS.filter(i => i.group === g).map(i => `
+                        ${items.map(i => `
                             <label class="flex items-center gap-3 bg-[#0b1329] border border-slate-800 hover:border-slate-600 rounded-xl px-3 py-2.5 cursor-pointer transition">
-                                <span class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 text-xs flex-shrink-0"><i class="fa-solid ${i.icon}"></i></span>
-                                <span class="flex-1 text-xs font-bold text-white">${i.label}</span>
-                                <span class="text-[10px] font-bold text-slate-500">Hide</span>
-                                <input type="checkbox" class="w-4 h-4 accent-amber-500" ${uiHide.keys.includes(i.key) ? 'checked' : ''} onchange="toggleHideKey('${i.key}', this.checked)">
+                                <span class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 text-xs flex-shrink-0"><i class="fa-solid ${escapeHtml(i.icon)}"></i></span>
+                                <span class="flex-1 text-xs font-bold text-white break-words min-w-0">${escapeHtml(i.label)}${i.dynamic ? ' <span class="ml-1 px-1.5 py-0.5 rounded bg-sky-900/50 text-sky-300 text-[8px] font-black uppercase">auto</span>' : ''}</span>
+                                <span class="relative inline-flex items-center flex-shrink-0">
+                                    <input type="checkbox" class="sr-only peer" ${uiHide.keys.includes(i.key) ? 'checked' : ''} onchange="toggleHideKey('${escapeHtml(i.key)}', this.checked)">
+                                    <span class="w-9 h-5 bg-slate-700 rounded-full peer-checked:bg-amber-500 transition-colors"></span>
+                                    <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></span>
+                                </span>
                             </label>`).join('')}
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
+            box.innerHTML = html || '<p class="text-xs text-slate-500 text-center py-6">No matching item.</p>';
+            applyUiHide();
         }
 
         function showVisibilityModal() {
             uiPinOk = true;
+            const sq = document.getElementById('visSearch'); if (sq) sq.value = '';
             renderVisibilityList();
-            applyUiHide();
             document.getElementById('visibilityModal').classList.remove('hidden');
         }
         function openVisibilityModal() {
@@ -8342,8 +8400,8 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
   var g=document.getElementById('hubCardsGrid');if(!g||document.getElementById('nsdBottom'))return;
   // mobile bottom nav: re-uses the existing sidebar buttons (no logic duplicated)
   var nav=document.createElement('nav');nav.id='nsdBottom';nav.setAttribute('aria-label','Quick navigation');
-  [['sideBtnOverview','fa-table-cells','Hubs'],['sideBtnMatrix','fa-chart-simple','Matrix'],['sideBtnLeaderboard','fa-trophy','Leaders']].forEach(function(x){
-   var b=document.createElement('button');b.type='button';b.innerHTML='<i class="fa-solid '+x[1]+'"></i>'+x[2];
+  [['sideBtnOverview','fa-table-cells','Hubs','hubCards'],['sideBtnMatrix','fa-chart-simple','Matrix','navMatrix'],['sideBtnLeaderboard','fa-trophy','Leaders','navLeaderboard']].forEach(function(x){
+   var b=document.createElement('button');b.type='button';b.setAttribute('data-hide-key',x[3]);b.innerHTML='<i class="fa-solid '+x[1]+'"></i>'+x[2];
    b.onclick=function(){var t=document.getElementById(x[0]);if(t)t.click()};nav.appendChild(b)});
   document.body.appendChild(nav)}
 
