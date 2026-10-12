@@ -120,6 +120,18 @@
         .ageing-card.ag-themed .ageing-table { width:auto; min-width:0; table-layout:auto; }
         .ageing-card.ag-themed .ageing-table th, .ageing-card.ag-themed .ageing-table td { padding:5px 14px; }
         .ageing-card.ag-themed .ageing-table .row-label { min-width:0; }
+        /* ===== Ageing: Delivery Summary & Parcel Receive Age (Excel pivot look) ===== */
+        .ag-pv-card { max-width:1500px; margin:0 auto; width:fit-content; min-width:320px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:auto; box-shadow:0 2px 10px rgba(15,23,42,.08); }
+        .ag-pv-table { border-collapse:collapse; font-family:Calibri,Arial,sans-serif; font-size:13px; color:#111827; background:#fff; width:100%; }
+        .ag-pv-table th, .ag-pv-table td { padding:4px 14px; white-space:nowrap; border:0; text-align:right; font-variant-numeric:tabular-nums; }
+        .ag-pv-table thead th { background:#b9def2; font-weight:900; }
+        .ag-pv-table th.l, .ag-pv-table td.l { text-align:left; }
+        .ag-pv-table tbody td.gc { font-weight:800; }
+        .ag-pv-table tr.gt td { background:#b9def2; font-weight:900; }
+        .ag-pv-table .count-link { background:none; border:0; padding:0; cursor:pointer; color:#0563c1; font:inherit; font-weight:700; }
+        .ag-pv-table .count-link:hover { text-decoration:underline; }
+        .ag-pv-total { display:flex; justify-content:space-between; align-items:center; gap:34px; padding:9px 14px; background:#e2f0d9; border-top:2px solid #166534; font-family:Calibri,Arial,sans-serif; font-size:14px; font-weight:900; color:#14532d; }
+        .ag-pv-empty { padding:30px; text-align:center; color:#64748b; font-weight:800; font-size:12px; max-width:520px; line-height:1.6; }
         .ag-presets { max-width:1500px; margin:0 auto 10px; display:flex; gap:7px; flex-wrap:wrap; align-items:center; font-size:10px; font-weight:900; color:#475569; }
         .ag-presets button { border:1px dashed #1f4e78; background:#f0f6fc; color:#1f4e78; border-radius:999px; padding:5px 12px; font-size:10px; font-weight:900; cursor:pointer; }
         .ag-presets button:hover { background:#1f4e78; color:#fff; }
@@ -1516,8 +1528,12 @@ try {
 </div>
 <div class="ageing-modebar hidden" id="ageingModeBar">
 <button class="ageing-mode-btn active" id="ageingModePivotBtn" onclick="ageingSetMode('pivot')" type="button"><i class="fa-solid fa-table-cells mr-1"></i> Pivot Table</button>
+<button class="ageing-mode-btn" id="ageingModeDeliveryBtn" onclick="ageingSetMode('delivery')" type="button"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Delivery Summary</button>
+<button class="ageing-mode-btn" id="ageingModeReceiveBtn" onclick="ageingSetMode('receive')" type="button"><i class="fa-solid fa-calendar-day mr-1"></i> Parcel Receive Age</button>
 <button class="ageing-mode-btn" id="ageingModeCustomBtn" onclick="ageingSetMode('custom')" type="button"><i class="fa-solid fa-table-list mr-1"></i> Custom Report</button>
 </div>
+<div class="hidden" id="ageingDeliveryContent"></div>
+<div class="hidden" id="ageingReceiveContent"></div>
 <div class="hidden" id="ageingCustomContent"></div>
 <div id="ageingReportContent">
 <div class="ageing-card" style="margin-top:18px;">
@@ -7550,11 +7566,17 @@ try {
         }
 
         function ageingSetMode(mode) {
-            ageingMode = mode === 'custom' ? 'custom' : 'pivot';
+            ageingMode = ['pivot', 'delivery', 'receive', 'custom'].includes(mode) ? mode : 'pivot';
             document.getElementById('ageingReportContent')?.classList.toggle('hidden', ageingMode !== 'pivot');
+            document.getElementById('ageingDeliveryContent')?.classList.toggle('hidden', ageingMode !== 'delivery');
+            document.getElementById('ageingReceiveContent')?.classList.toggle('hidden', ageingMode !== 'receive');
             document.getElementById('ageingCustomContent')?.classList.toggle('hidden', ageingMode !== 'custom');
             document.getElementById('ageingModePivotBtn')?.classList.toggle('active', ageingMode === 'pivot');
+            document.getElementById('ageingModeDeliveryBtn')?.classList.toggle('active', ageingMode === 'delivery');
+            document.getElementById('ageingModeReceiveBtn')?.classList.toggle('active', ageingMode === 'receive');
             document.getElementById('ageingModeCustomBtn')?.classList.toggle('active', ageingMode === 'custom');
+            if (ageingMode === 'delivery') renderAgeingDelivery();
+            if (ageingMode === 'receive') renderAgeingReceive();
             if (ageingMode === 'custom') renderAgeingCustom();
         }
 
@@ -7847,6 +7869,209 @@ try {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Report');
             XLSX.writeFile(wb, `Ageing_Custom_Report_${stamp}.xlsx`);
+        }
+
+
+        /* =================== AGEING: DELIVERY SUMMARY & PARCEL RECEIVE AGE =================== */
+        const ageingViewStore = { d: [], r: [] };
+        const ageingViewExport = { d: null, r: null };
+
+        function ageingStatusKey() {
+            const keys = ageingFields.filter(f => !String(f.key).startsWith('__')).map(f => f.key);
+            const nameHints = ['status','orderstatus','deliverystatus','consignmentstatus','currentstatus','finalstatus','parcelstatus','laststatus','statusname','orderstatusname','deliverystatusname'];
+            const words = ['delivered','exchange','paidreturn','partialdelivery','return','returned','hold','pending','cancelled','intransit'];
+            const sample = ageingRows.slice(0, 500);
+            let best = '', bestScore = 0;
+            keys.forEach(k => {
+                let n = 0;
+                sample.forEach(r => { if (words.includes(ageingNormalizeKey(r[k]))) n++; });
+                if (n > 0 && nameHints.includes(ageingNormalizeKey(k))) n += 0.5;
+                if (n > bestScore) { best = k; bestScore = n; }
+            });
+            if (best) return best;
+            return keys.find(k => nameHints.includes(ageingNormalizeKey(k))) || '';
+        }
+
+        function ageingAmountKey() {
+            return ageingFindKey(['CollectedAmount','Collected Amount','Collected_Amount','CollectionAmount','Collection Amount','Collected']);
+        }
+        function ageingToNumber(v) {
+            if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+            const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g, ''));
+            return Number.isFinite(n) ? n : 0;
+        }
+        function ageingFmtMoney(n) {
+            return '৳ ' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
+        }
+
+        function ageingViewCountBtn(kind, title, ids) {
+            if (!ids || !ids.length) return '';
+            ageingViewStore[kind].push({ title, ids });
+            const i = ageingViewStore[kind].length - 1;
+            return `<button type="button" class="count-link" onclick="ageingShowViewList('${kind}', ${i})">${ids.length}</button>`;
+        }
+
+        function ageingShowViewList(kind, i) {
+            const e = (ageingViewStore[kind] || [])[i];
+            const modal = document.getElementById('ageingConsignmentModal');
+            const title = document.getElementById('ageingModalTitle');
+            const body = document.getElementById('ageingModalBody');
+            if (!e || !modal || !title || !body) return;
+            title.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;">
+                <span>${ageingSafe(e.title)}</span>
+                <span style="display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);font-size:10px;font-weight:900;">${e.ids.length} IDs</span>
+            </span>`;
+            body.innerHTML = `<table class="ageing-id-table">
+                <thead><tr><th>#</th><th>ConsignmentId</th></tr></thead>
+                <tbody>${e.ids.map((id, n) => `<tr><td>${n + 1}</td><td>${ageingSafe(id)}</td></tr>`).join('')}</tbody>
+            </table>`;
+            modal.classList.remove('hidden');
+        }
+
+        function ageingViewHeader(titleText, subText) {
+            return `<div class="ag-title" style="border-bottom-color:#1f4e78;"><div class="t">${ageingSafe(titleText)}</div><div class="st">${ageingSafe(subText)}</div></div>`;
+        }
+        function ageingViewToolbar(kind) {
+            return `<div class="ageing-result-meta ageing-no-print">
+                <span>${kind === 'd' ? 'Delivery Summary' : 'Parcel Receive Age'}</span>
+                <span style="display:inline-flex;gap:7px;flex-wrap:wrap;">
+                    <button type="button" class="ageing-mode-btn" onclick="ageingViewCopy('${kind}')"><i class="fa-solid fa-copy mr-1"></i> Copy Table</button>
+                    <button type="button" class="ageing-mode-btn" onclick="ageingViewExcel('${kind}')"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                    <button type="button" class="ageing-mode-btn" onclick="printAgeingReport()"><i class="fa-solid fa-print mr-1"></i> Print / PDF</button>
+                </span>
+            </div>`;
+        }
+
+        function renderAgeingDelivery() {
+            const host = document.getElementById('ageingDeliveryContent');
+            if (!host) return;
+            ageingViewStore.d = [];
+            const sub = `Report date: ${ageingDateText(ageingReportDate || new Date())}  |  ${ageingRows.length} consignments`;
+            const statusKey = ageingStatusKey();
+            if (!statusKey) {
+                ageingViewExport.d = null;
+                host.innerHTML = `<div class="ag-pv-card">${ageingViewHeader('Delivery Summary', sub)}<div class="ag-pv-empty">এই file-এ Status column (Delivered / Exchange / Paid Return / Partial Delivery) পাওয়া যায়নি। Status column সহ raw file import করুন।</div></div>`;
+                return;
+            }
+            const amountKey = ageingAmountKey();
+            const statusMap = new Map();   // status -> Map(ageKey -> ids[])
+            const ageSet = new Set();
+            let hasBlank = false, totalCollected = 0;
+            ageingRows.forEach(r => {
+                const st = String(r[statusKey] ?? '').trim() || '(blank)';
+                const a = ageingAgeOf(r);
+                const ak = a === null ? 'blank' : a;
+                if (a === null) hasBlank = true; else ageSet.add(a);
+                if (!statusMap.has(st)) statusMap.set(st, new Map());
+                const m = statusMap.get(st);
+                if (!m.has(ak)) m.set(ak, []);
+                m.get(ak).push(ageingConsignmentId(r));
+                if (amountKey) totalCollected += ageingToNumber(r[amountKey]);
+            });
+            const ages = [...ageSet].sort((a, b) => a - b);
+            const cols = hasBlank ? [...ages, 'blank'] : ages;
+            const statuses = [...statusMap.keys()].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+            const colLabel = c => c === 'blank' ? '(blank)' : String(c);
+            const colTotals = cols.map(() => 0);
+            let grand = 0;
+            const exportRows = [['Delivery Summary'], [sub.replace(/\s{2,}/g, ' ')], [], ['Row Labels', ...cols.map(colLabel), 'Grand Total']];
+
+            const bodyHtml = statuses.map(st => {
+                const m = statusMap.get(st);
+                let rowTotal = 0;
+                const exLine = [st];
+                const cells = cols.map((c, i) => {
+                    const ids = m.get(c) || [];
+                    rowTotal += ids.length; colTotals[i] += ids.length;
+                    exLine.push(ids.length || '');
+                    return `<td>${ageingViewCountBtn('d', `Delivery Summary — ${st} — Age ${colLabel(c)}`, ids)}</td>`;
+                }).join('');
+                grand += rowTotal;
+                exLine.push(rowTotal);
+                exportRows.push(exLine);
+                return `<tr><td class="l">${ageingSafe(st)}</td>${cells}<td class="gc">${rowTotal}</td></tr>`;
+            }).join('');
+            exportRows.push(['Grand Total', ...colTotals.map(n => n || ''), grand]);
+            if (amountKey) { exportRows.push([]); exportRows.push(['Total Collected Amount', totalCollected]); }
+
+            ageingViewExport.d = { name: 'Delivery Summary', rows: exportRows };
+            const span = Math.max(1, cols.length + 1);
+            host.innerHTML = ageingViewToolbar('d') + `<div class="ag-pv-card">
+                ${ageingViewHeader('Delivery Summary', sub)}
+                <table class="ag-pv-table">
+                    <thead>
+                        <tr><th class="l">Count of ConsignmentId</th><th class="l" colspan="${span}">Column Labels</th></tr>
+                        <tr><th class="l">Row Labels</th>${cols.map(c => `<th>${colLabel(c)}</th>`).join('')}<th>Grand Total</th></tr>
+                    </thead>
+                    <tbody>${bodyHtml}
+                        <tr class="gt"><td class="l">Grand Total</td>${colTotals.map(n => `<td>${n || ''}</td>`).join('')}<td>${grand}</td></tr>
+                    </tbody>
+                </table>
+                <div class="ag-pv-total"><span>Total Collected Amount</span><span>${amountKey ? ageingFmtMoney(totalCollected) : 'CollectedAmount column not found'}</span></div>
+            </div>`;
+        }
+
+        function renderAgeingReceive() {
+            const host = document.getElementById('ageingReceiveContent');
+            if (!host) return;
+            ageingViewStore.r = [];
+            const sub = `Report date: ${ageingDateText(ageingReportDate || new Date())}  |  ${ageingRows.length} consignments`;
+            const byAge = new Map();
+            let blankIds = [];
+            ageingRows.forEach(r => {
+                const a = ageingAgeOf(r);
+                const id = ageingConsignmentId(r);
+                if (a === null) { blankIds.push(id); return; }
+                if (!byAge.has(a)) byAge.set(a, []);
+                byAge.get(a).push(id);
+            });
+            const ages = [...byAge.keys()].sort((a, b) => a - b);
+            const exportRows = [['Parcel Receive Age'], [sub.replace(/\s{2,}/g, ' ')], [], ['Row Labels', 'Count of ConsignmentId']];
+            const bodyHtml = ages.map(a => {
+                const ids = byAge.get(a);
+                exportRows.push([a, ids.length]);
+                return `<tr><td class="l">${a}</td><td>${ageingViewCountBtn('r', `Parcel Receive Age — Age ${a}`, ids)}</td></tr>`;
+            }).join('') + `<tr><td class="l">(blank)</td><td>${ageingViewCountBtn('r', 'Parcel Receive Age — (blank)', blankIds)}</td></tr>`;
+            exportRows.push(['(blank)', blankIds.length || '']);
+            exportRows.push(['Grand Total', ageingRows.length]);
+            ageingViewExport.r = { name: 'Parcel Receive Age', rows: exportRows };
+            host.innerHTML = ageingViewToolbar('r') + `<div class="ag-pv-card">
+                ${ageingViewHeader('Parcel Receive Age', sub)}
+                <table class="ag-pv-table">
+                    <thead><tr><th class="l">Row Labels</th><th>Count of ConsignmentId</th></tr></thead>
+                    <tbody>${bodyHtml}
+                        <tr class="gt"><td class="l">Grand Total</td><td>${ageingRows.length}</td></tr>
+                    </tbody>
+                </table>
+            </div>`;
+        }
+
+        function ageingViewCopy(kind) {
+            const ex = ageingViewExport[kind];
+            if (!ex) return;
+            const text = ex.rows.map(r => r.map(v => String(v ?? '').replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
+            const done = () => { try { showToast('Table copied — paste into Excel'); } catch (e) {} };
+            const fallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); done(); } catch (e) {}
+                document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+        }
+
+        function ageingViewExcel(kind) {
+            const ex = ageingViewExport[kind];
+            if (!ex) return;
+            if (typeof XLSX === 'undefined') { try { showToast('Excel library is not loaded'); } catch (e) {} return; }
+            const ws = XLSX.utils.aoa_to_sheet(ex.rows);
+            const widths = [];
+            ex.rows.forEach(r => r.forEach((v, i) => { widths[i] = Math.max(widths[i] || 8, Math.min(40, String(v ?? '').length + 2)); }));
+            ws['!cols'] = widths.map(w => ({ wch: w }));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, ex.name.slice(0, 31));
+            XLSX.writeFile(wb, `${ex.name.replace(/\s+/g, '_')}_${ageingDateText(ageingReportDate || new Date())}.xlsx`);
         }
 
         function openAgeingReportView() {
