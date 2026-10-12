@@ -997,7 +997,7 @@ try {
 </div>
 <div class="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-[11px] font-semibold text-amber-200 leading-relaxed mb-3">
 <i class="fa-solid fa-user-shield mt-0.5"></i>
-<span>Switch ON anything you want to hide from other users. <b>You (owner) will always see everything.</b> Items hidden from users show a dashed amber outline on your screen.</span>
+<span>Switch ON anything you want to hide from other users. <b>You (owner) will always see everything.</b> Hidden items look normal on your screen (no marker).</span>
 </div>
 <div class="flex items-center justify-between gap-2 mb-3">
 <span class="text-[11px] font-black text-slate-300" id="visCount">Nothing is hidden - all users see everything</span>
@@ -6850,7 +6850,7 @@ try {
             // One style rule per hidden key. Because it is a CSS selector, tabs / hubs / sheets that are
             // rendered later are hidden automatically too. Owner: nothing hidden, just an outline.
             const css = keys.map(k => owner
-                ? `[data-hide-key~="${k}"] { outline: 1.5px dashed rgba(245,158,11,.65); outline-offset: 2px; }`
+                ? ''
                 : `[data-hide-key~="${k}"] { display: none !important; }`).join('\n');
             let tag = document.getElementById('uiHideStyle');
             if (!tag) { tag = document.createElement('style'); tag.id = 'uiHideStyle'; document.head.appendChild(tag); }
