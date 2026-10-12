@@ -121,6 +121,12 @@
         .ageing-card.ag-themed .ageing-table th, .ageing-card.ag-themed .ageing-table td { padding:5px 14px; }
         .ageing-card.ag-themed .ageing-table .row-label { min-width:0; }
         /* ===== Ageing: Delivery Summary & Parcel Receive Age (Excel pivot look) ===== */
+        .ag-pv-table td, .ageing-table td { user-select:none; cursor:cell; }
+        .ag-sel { background:#2563eb !important; color:#fff !important; }
+        .ag-sel .count-link { color:#fff !important; }
+        #ageingSelBar { position:fixed; left:50%; bottom:14px; transform:translateX(-50%); z-index:99999; display:none; align-items:center; gap:16px; background:#0f172a; color:#fff; padding:8px 16px; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.35); font-family:Calibri,Arial,sans-serif; font-size:13px; font-weight:700; flex-wrap:wrap; justify-content:center; max-width:95vw; }
+        #ageingSelBar b { color:#86efac; }
+        #ageingSelBar button { background:#334155; color:#fff; border:0; border-radius:6px; padding:2px 10px; cursor:pointer; font-weight:700; }
         .ag-pv-card { max-width:1500px; margin:0 auto; width:fit-content; min-width:320px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:auto; box-shadow:0 2px 10px rgba(15,23,42,.08); }
         .ag-pv-table { border-collapse:collapse; font-family:Calibri,Arial,sans-serif; font-size:13px; color:#111827; background:#fff; width:100%; }
         .ag-pv-table th, .ag-pv-table td { padding:4px 14px; white-space:nowrap; border:0; text-align:right; font-variant-numeric:tabular-nums; }
@@ -1531,6 +1537,13 @@ try {
 <button class="ageing-mode-btn" id="ageingModeDeliveryBtn" onclick="ageingSetMode('delivery')" type="button"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Delivery Summary</button>
 <button class="ageing-mode-btn" id="ageingModeReceiveBtn" onclick="ageingSetMode('receive')" type="button"><i class="fa-solid fa-calendar-day mr-1"></i> Parcel Receive Age</button>
 <button class="ageing-mode-btn" id="ageingModeCustomBtn" onclick="ageingSetMode('custom')" type="button"><i class="fa-solid fa-table-list mr-1"></i> Custom Report</button>
+<span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;">
+<label for="ageingRefInput" style="font-weight:600;">Age 0 date:</label>
+<input type="date" id="ageingRefInput" onchange="ageingSetRefDate(this.value)" style="border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;">
+<button class="ageing-mode-btn" type="button" onclick="ageingRefAuto()">Auto</button>
+<button class="ageing-mode-btn" type="button" onclick="ageingRefToday()">Today</button>
+<span id="ageingRefNote" style="color:#64748b;"></span>
+</span>
 </div>
 <div class="hidden" id="ageingDeliveryContent"></div>
 <div class="hidden" id="ageingReceiveContent"></div>
@@ -7484,7 +7497,7 @@ try {
         function ageingAgeOf(row) {
             const d = ageingParseDate(ageingSortedAt(row));
             if (!d || !ageingReportDate) return null;
-            return Math.floor((ageingReportDate.getTime() - d.getTime()) / 86400000);
+            return Math.round((ageingReportDate.getTime() - d.getTime()) / 86400000);
         }
         function ageingFieldValue(row, key) {
             if (key === '__age') { const a = ageingAgeOf(row); return a === null ? '' : a; }
@@ -7559,6 +7572,148 @@ try {
             try { localStorage.setItem(AGEING_CFG_KEY, JSON.stringify(ageingCustom)); } catch (e) {}
         }
 
+        let ageingFileName = '';
+        let ageingRefMode = 'auto';
+        function ageingDayStart(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+        function ageingIso(d) {
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+        // Auto reference date: latest SortedAt day in the file (if earlier than today), else today.
+        function ageingAutoRefDate() {
+            const today = ageingDayStart(new Date());
+            let max = null;
+            ageingRows.forEach(r => {
+                const d = ageingParseDate(ageingSortedAt(r));
+                if (!d) return;
+                const ds = ageingDayStart(new Date(d.getTime() + 12*3600000)); // tolerate minute drift
+                if (!max || ds > max) max = ds;
+            });
+            return (max && max < today) ? max : today;
+        }
+        function ageingRebuildMatrix() {
+            ageingMatrix = {};
+            const ageSet = new Set();
+            ageingRows.forEach(row => {
+                const hub = ageingHub(row);
+                const id = ageingConsignmentId(row);
+                const age = ageingAgeOf(row);
+                if (age === null || age < 0 || !id) return;
+                if (!ageingMatrix[hub]) ageingMatrix[hub] = {};
+                if (!ageingMatrix[hub][age]) ageingMatrix[hub][age] = [];
+                ageingMatrix[hub][age].push(id);
+                ageSet.add(age);
+            });
+            ageingAges = Array.from(ageSet).sort((a,b) => a-b);
+        }
+        function ageingUpdateMeta() {
+            const meta = document.getElementById('ageingReportMeta');
+            if (meta) {
+                meta.textContent = `${ageingFileName} | Age 0 date: ${ageingDateText(ageingReportDate)} | ` +
+                    `${ageingRows.length} consignments | Click any count to view Consignment IDs`;
+            }
+        }
+        function ageingUpdateRefUi() {
+            const inp = document.getElementById('ageingRefInput');
+            if (inp && ageingReportDate) inp.value = ageingIso(ageingReportDate);
+            const note = document.getElementById('ageingRefNote');
+            if (note && ageingReportDate) {
+                note.textContent = 'Age 0 = ' + ageingDateText(ageingReportDate) +
+                    (ageingRefMode === 'auto' ? ' (auto: latest SortedAt)' : ' (manual)');
+            }
+        }
+        function ageingApplyRef() {
+            ageingRebuildMatrix();
+            ageingUpdateMeta();
+            ageingUpdateRefUi();
+            renderAgeingReport();
+            ageingSetMode(ageingMode);
+        }
+        function ageingSetRefDate(iso) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+            if (!m) return;
+            ageingRefMode = 'manual';
+            ageingReportDate = new Date(+m[1], +m[2]-1, +m[3]);
+            ageingApplyRef();
+        }
+        function ageingRefAuto() { ageingRefMode = 'auto'; ageingReportDate = ageingAutoRefDate(); ageingApplyRef(); }
+        function ageingRefToday() { ageingRefMode = 'manual'; ageingReportDate = ageingDayStart(new Date()); ageingApplyRef(); }
+
+        // ===== Excel-style multi-cell selection with live Sum (Ageing views) =====
+        let agSel = new Set(), agAnchor = null, agDrag = false, agMoved = false;
+        function agCellOf(t) {
+            const td = t && t.closest ? t.closest('td') : null;
+            if (!td) return null;
+            const tb = td.closest('.ag-pv-table, .ageing-table');
+            if (!tb || !td.closest('#ageingReportView, #ageingReportContent, #ageingDeliveryContent, #ageingReceiveContent, #ageingCustomContent')) return null;
+            return td;
+        }
+        function agCellNum(td) {
+            const t = (td.textContent || '').replace(/[৳,\s]/g, '').replace(/\u00a0/g, '');
+            if (!t || !/^-?\d+(\.\d+)?$/.test(t)) return null;
+            return Number(t);
+        }
+        function agFmt(n) { return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US', {maximumFractionDigits: 2}); }
+        function agClearSel() {
+            agSel.forEach(td => td.classList.remove('ag-sel'));
+            agSel.clear(); agAnchor = null; agUpdateBar();
+        }
+        function agUpdateBar() {
+            let bar = document.getElementById('ageingSelBar');
+            if (!bar) {
+                bar = document.createElement('div'); bar.id = 'ageingSelBar';
+                document.body.appendChild(bar);
+            }
+            agSel.forEach(td => { if (!td.isConnected) agSel.delete(td); });
+            if (!agSel.size) { bar.style.display = 'none'; return; }
+            const nums = [...agSel].map(agCellNum).filter(n => n !== null);
+            const sum = nums.reduce((a, b) => a + b, 0);
+            bar.innerHTML = `<span>Cells: <b>${agSel.size}</b></span><span>Numeric: <b>${nums.length}</b></span>` +
+                `<span>Sum: <b>${agFmt(sum)}</b></span>` +
+                `<span>Average: <b>${nums.length ? agFmt(sum / nums.length) : '-'}</b></span>` +
+                `<button type="button" id="ageingSelClear">Clear</button>`;
+            bar.style.display = 'flex';
+            document.getElementById('ageingSelClear').onclick = agClearSel;
+        }
+        function agSelectRange(a, b) {
+            const tb = a.closest('table');
+            if (!tb || tb !== b.closest('table')) return;
+            const rows = [...tb.rows];
+            const r1 = rows.indexOf(a.parentElement), r2 = rows.indexOf(b.parentElement);
+            const c1 = a.cellIndex, c2 = b.cellIndex;
+            const [ra, rb] = [Math.min(r1, r2), Math.max(r1, r2)], [ca, cb] = [Math.min(c1, c2), Math.max(c1, c2)];
+            agSel.forEach(td => td.classList.remove('ag-sel')); agSel.clear();
+            for (let r = ra; r <= rb; r++) for (let c = ca; c <= cb; c++) {
+                const td = rows[r].cells[c];
+                if (td && td.tagName === 'TD') { td.classList.add('ag-sel'); agSel.add(td); }
+            }
+        }
+        document.addEventListener('mousedown', e => {
+            if (e.button !== 0) return;
+            const td = agCellOf(e.target);
+            if (!td) { if (!e.target.closest || !e.target.closest('#ageingSelBar')) { if (agSel.size) agClearSel(); } return; }
+            agMoved = false;
+            if (e.shiftKey && agAnchor && agAnchor.isConnected) { agSelectRange(agAnchor, td); agUpdateBar(); e.preventDefault(); return; }
+            if (e.ctrlKey || e.metaKey) {
+                if (agSel.has(td)) { agSel.delete(td); td.classList.remove('ag-sel'); } else { agSel.add(td); td.classList.add('ag-sel'); }
+                agAnchor = td; agUpdateBar(); agMoved = true; e.preventDefault(); return;
+            }
+            agDrag = true; agAnchor = td;
+        });
+        document.addEventListener('mouseover', e => {
+            if (!agDrag) return;
+            const td = agCellOf(e.target);
+            if (!td || td === agAnchor && !agMoved) return;
+            agMoved = true;
+            agSelectRange(agAnchor, td); agUpdateBar();
+        });
+        document.addEventListener('mouseup', () => { agDrag = false; });
+        // After a drag / ctrl-click selection, don't also open the Consignment-ID list
+        document.addEventListener('click', e => {
+            if (agMoved && agCellOf(e.target)) { e.stopPropagation(); e.preventDefault(); }
+            agMoved = false;
+        }, true);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && agSel.size) agClearSel(); });
+
         function ageingInitModes() {
             ageingCustomLoad();
             document.getElementById('ageingModeBar')?.classList.remove('hidden');
@@ -7567,6 +7722,7 @@ try {
 
         function ageingSetMode(mode) {
             ageingMode = ['pivot', 'delivery', 'receive', 'custom'].includes(mode) ? mode : 'pivot';
+            agClearSel();
             document.getElementById('ageingReportContent')?.classList.toggle('hidden', ageingMode !== 'pivot');
             document.getElementById('ageingDeliveryContent')?.classList.toggle('hidden', ageingMode !== 'delivery');
             document.getElementById('ageingReceiveContent')?.classList.toggle('hidden', ageingMode !== 'receive');
@@ -8146,39 +8302,16 @@ try {
                     throw new Error('No valid SortedAt dates were found.');
                 }
 
-                // Report date = today's local date. This matches the pivot format:
-                // on 25-Sep-2026, SortedAt 22-Sep-2026 is Age 3.
-                const now = new Date();
-                ageingReportDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-                ageingMatrix = {};
-                const ageSet = new Set();
-
-                datedRows.forEach(({row, date}) => {
-                    const hub = ageingHub(row);
-                    const id = ageingConsignmentId(row);
-                    const age = Math.floor((ageingReportDate.getTime() - date.getTime()) / 86400000);
-
-                    if (age < 0 || !id) return;
-
-                    if (!ageingMatrix[hub]) ageingMatrix[hub] = {};
-                    if (!ageingMatrix[hub][age]) ageingMatrix[hub][age] = [];
-                    ageingMatrix[hub][age].push(id);
-                    ageSet.add(age);
-                });
-
-                ageingAges = Array.from(ageSet).sort((a,b) => a-b);
-
-                const meta = document.getElementById('ageingReportMeta');
-                if (meta) {
-                    meta.textContent =
-                        `${file.name} | Report date: ${ageingDateText(ageingReportDate)} | ` +
-                        `${ageingRows.length} consignments | Click any count to view Consignment IDs`;
-                }
+                ageingFileName = file.name;
+                ageingRefMode = 'auto';
+                ageingReportDate = ageingAutoRefDate();
+                ageingRebuildMatrix();
+                ageingUpdateMeta();
 
                 openAgeingReportView();
                 renderAgeingReport();
                 ageingInitModes();
+                ageingUpdateRefUi();
 
             } catch (err) {
                 console.error('Ageing import error:', err);
