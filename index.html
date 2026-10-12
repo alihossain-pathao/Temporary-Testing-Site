@@ -599,27 +599,6 @@ try {
 <i class="fa-solid fa-plus"></i> Add / Manage Tabs
                     </button>
 </div>
-<div class="space-y-1.5" data-hide-key="navAnalytics">
-<p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Analytics</p>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navOverview" onclick="openHubOverviewModal(); toggleSidebar();">
-<span class="w-8 h-8 rounded-lg bg-sky-950/60 border border-sky-800/40 flex items-center justify-center flex-shrink-0 text-sky-400 text-sm">
-<i class="fa-solid fa-table-list"></i>
-</span>
-<span class="truncate">Cluster Hubs Overview</span>
-</button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navMatrix" id="sideBtnMatrix" onclick="switchDashboardTab('matrix'); toggleSidebar();">
-<span class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center flex-shrink-0 text-cyan-400 text-sm">
-<i class="fa-solid fa-chart-simple"></i>
-</span>
-<span class="truncate">All-Hub Comparison Matrix</span>
-</button>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="navLeaderboard" id="sideBtnLeaderboard" onclick="switchDashboardTab('leaderboard'); toggleSidebar();">
-<span class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center flex-shrink-0 text-amber-400 text-sm">
-<i class="fa-solid fa-trophy"></i>
-</span>
-<span class="truncate">Performance Leaderboard</span>
-</button>
-</div>
 <div class="space-y-1.5">
 <p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Hub Management</p>
 <button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="hubSummary" onclick="openClusterSummaryModal(); toggleSidebar();">
@@ -6793,10 +6772,6 @@ try {
             { group: 'hubbtns',  key: 'hubBtnAttendance',icon: 'fa-user-check',        label: 'D.A. Attendance Report button' },
             { group: 'hubbtns',  key: 'hubBtnInventory', icon: 'fa-boxes-stacked',     label: 'Inventory Report button' },
             { group: 'hubbtns',  key: 'hubBtnAgentPerf', icon: 'fa-chart-line',        label: 'Agent Performance Report button' },
-            { group: 'menu',     key: 'navAnalytics',    icon: 'fa-table-list',        label: 'Analytics menu (all 3 items)' },
-            { group: 'menu',     key: 'navOverview',     icon: 'fa-table-list',        label: 'Cluster Hubs Overview' },
-            { group: 'menu',     key: 'navMatrix',       icon: 'fa-chart-simple',      label: 'All-Hub Comparison Matrix' },
-            { group: 'menu',     key: 'navLeaderboard',  icon: 'fa-trophy',            label: 'Performance Leaderboard' },
             { group: 'menu',     key: 'hubSummary',      icon: 'fa-chart-pie',         label: 'All Hub Summary' },
             { group: 'menu',     key: 'dataExport',      icon: 'fa-download',          label: 'Export Data (JSON)' },
             { group: 'controls', key: 'sheetActions',    icon: 'fa-pen-to-square',     label: 'Add / Edit / Delete Sheet buttons' }
@@ -8397,13 +8372,7 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
   document.body.appendChild(a);a.click();a.remove();toast('Backup downloaded')})}
 
  function init(){
-  var g=document.getElementById('hubCardsGrid');if(!g||document.getElementById('nsdBottom'))return;
-  // mobile bottom nav: re-uses the existing sidebar buttons (no logic duplicated)
-  var nav=document.createElement('nav');nav.id='nsdBottom';nav.setAttribute('aria-label','Quick navigation');
-  [['sideBtnOverview','fa-table-cells','Hubs','hubCards'],['sideBtnMatrix','fa-chart-simple','Matrix','navMatrix'],['sideBtnLeaderboard','fa-trophy','Leaders','navLeaderboard']].forEach(function(x){
-   var b=document.createElement('button');b.type='button';b.setAttribute('data-hide-key',x[3]);b.innerHTML='<i class="fa-solid '+x[1]+'"></i>'+x[2];
-   b.onclick=function(){var t=document.getElementById(x[0]);if(t)t.click()};nav.appendChild(b)});
-  document.body.appendChild(nav)}
+  var g=document.getElementById('hubCardsGrid');if(!g||document.getElementById('nsdBottom'))return;}
 
  function aria(){document.querySelectorAll('button:not([aria-label])').forEach(function(b){
   if(b.textContent.trim())return;var i=b.querySelector('i');var t=b.getAttribute('title');
