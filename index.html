@@ -4576,13 +4576,18 @@ try {
             const daPresent = parseFloat(data['m_presentDA']) || 0;
             const daTotal = parseFloat(data['m_totalDA']) || hub.daTotal || daPresent;
 
+            // Same base the Closing Report uses for its Delivered % (Assign For Delivery),
+            // so the hub card and the report always show the same whole-number ratio.
+            const onTheWay = parseFloat(document.getElementById('onTheWay')?.innerText) || 0;
+
             hub.totalVolume = totalVol;
+            hub.onTheWay = onTheWay;
             hub.delivered = delivered;
             hub.totalHold = totalHold;
             hub.collection = collection;
             hub.daPresent = daPresent;
             hub.daTotal = daTotal;
-            hub.deliveryRate = totalVol > 0 ? ((delivered / totalVol) * 100).toFixed(1) + '%' : '0%';
+            hub.deliveryRate = onTheWay > 0 ? Math.round((delivered / onTheWay) * 100) + '%' : '0%';
 
             recordHubReportHistory(hubId, hub);
             renderDashboard();
@@ -4619,6 +4624,7 @@ try {
                 date: reportDateISO,
                 reportDate: rawReportDate,
                 totalVolume: hub.totalVolume || 0,
+                onTheWay: hub.onTheWay || 0,
                 delivered: hub.delivered || 0,
                 totalHold: hub.totalHold || 0,
                 collection: hub.collection || 0,
@@ -4656,18 +4662,19 @@ try {
 
             const totals = filtered.reduce((acc, e) => {
                 acc.totalVolume += e.totalVolume || 0;
+                acc.onTheWay += (e.onTheWay != null ? e.onTheWay : (e.totalVolume || 0));
                 acc.delivered += e.delivered || 0;
                 acc.totalHold += e.totalHold || 0;
                 acc.collection += e.collection || 0;
                 acc.daPresent += e.daPresent || 0;
                 acc.daTotal += e.daTotal || 0;
                 return acc;
-            }, { totalVolume: 0, delivered: 0, totalHold: 0, collection: 0, daPresent: 0, daTotal: 0 });
+            }, { totalVolume: 0, onTheWay: 0, delivered: 0, totalHold: 0, collection: 0, daPresent: 0, daTotal: 0 });
 
             const reportCount = filtered.length;
-            const avgDeliveryRate = totals.totalVolume === 0
-                ? '0.0'
-                : ((totals.delivered / totals.totalVolume) * 100).toFixed(1);
+            const avgDeliveryRate = totals.onTheWay === 0
+                ? '0'
+                : String(Math.round((totals.delivered / totals.onTheWay) * 100));
             const avgDAPresent = reportCount > 0 ? Math.round(totals.daPresent / reportCount) : 0;
             const avgDATotal = reportCount > 0 ? Math.round(totals.daTotal / reportCount) : 0;
 
@@ -5199,11 +5206,12 @@ try {
 
             if (!matrixBody || !matrixFooter) return;
 
-            let totalVol = 0, totalDel = 0, totalHld = 0, totalColl = 0, totalIss = 0, totalDAPres = 0, totalDATot = 0;
+            let totalVol = 0, totalBase = 0, totalDel = 0, totalHld = 0, totalColl = 0, totalIss = 0, totalDAPres = 0, totalDATot = 0;
 
             matrixBody.innerHTML = getVisibleHubs().map(h => {
                 const numRate = parseFloat(h.deliveryRate) || 0;
                 totalVol += h.totalVolume;
+                totalBase += (h.onTheWay != null ? h.onTheWay : h.totalVolume);
                 totalDel += h.delivered;
                 totalHld += h.totalHold;
                 totalColl += h.collection;
@@ -5239,7 +5247,7 @@ try {
                 `;
             }).join('');
 
-            const avgRate = totalVol > 0 ? ((totalDel / totalVol) * 100).toFixed(1) + '%' : '0%';
+            const avgRate = totalBase > 0 ? Math.round((totalDel / totalBase) * 100) + '%' : '0%';
 
             matrixFooter.innerHTML = `
                 <td class="p-3 uppercase">CLUSTER TOTAL (${getVisibleHubs().length} HUBS)</td>
@@ -5679,7 +5687,7 @@ try {
         }
 
         function renderDashboard() {
-            let totalHubsVol = 0, totalHubsDelivered = 0, totalHubsDAPres = 0, totalHubsDATot = 0, totalHubsColl = 0, totalHubsHold = 0;
+            let totalHubsVol = 0, totalHubsBase = 0, totalHubsDelivered = 0, totalHubsDAPres = 0, totalHubsDATot = 0, totalHubsColl = 0, totalHubsHold = 0;
 
             const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
@@ -5690,6 +5698,7 @@ try {
 
             getVisibleHubs().forEach(h => {
                 totalHubsVol += h.totalVolume;
+                totalHubsBase += (h.onTheWay != null ? h.onTheWay : h.totalVolume);
                 totalHubsDelivered += h.delivered;
                 totalHubsDAPres += h.daPresent;
                 totalHubsDATot += (h.daTotal || h.daPresent);
@@ -5706,9 +5715,9 @@ try {
             if (clusterRateEl) {
                 // No dispatch volume = no delivery rate to calculate.
                 // Show 0.0% instead of carrying a stale/hard-coded percentage.
-                const avgPct = totalHubsVol === 0
-                    ? '0.0'
-                    : ((totalHubsDelivered / totalHubsVol) * 100).toFixed(1);
+                const avgPct = totalHubsBase === 0
+                    ? '0'
+                    : Math.round((totalHubsDelivered / totalHubsBase) * 100);
                 clusterRateEl.innerText = `${avgPct}%`;
             }
 
@@ -8748,179 +8757,6 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 })();
 </script>
 <!-- ===== END NSD ADD-ON ===== -->
-
-<style id="redesignTheme">
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-/* ===== Aurora v2: full layout redesign (CSS only - JS/Firebase/data untouched) ===== */
-html{--ac1:#38bdf8;--ac2:#6366f1;--acs:56,189,248;--ink:#05080f;--card:#0c1322;--card2:#101a2d;--line:rgba(148,163,184,.13);--rail:292px}
-html[data-accent="emerald"]{--ac1:#34d399;--ac2:#0ea5e9;--acs:52,211,153}
-html[data-accent="violet"]{--ac1:#c084fc;--ac2:#6366f1;--acs:192,132,252}
-html[data-accent="sunset"]{--ac1:#fb923c;--ac2:#e11d48;--acs:251,146,60}
-html:not(.nsd-light) body{background:radial-gradient(900px 520px at 12% -10%,rgba(var(--acs),.17),transparent 60%),radial-gradient(760px 460px at 100% 0,rgba(99,102,241,.14),transparent 60%),var(--ink)!important;background-attachment:fixed!important}
-html:not(.nsd-light) h1,html:not(.nsd-light) h2,html:not(.nsd-light) h3{font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif!important}
-html:not(.nsd-light) ::-webkit-scrollbar{width:9px;height:9px}
-html:not(.nsd-light) ::-webkit-scrollbar-thumb{background:rgba(148,163,184,.22);border-radius:9px}
-html:not(.nsd-light) ::selection{background:rgba(var(--acs),.35)}
-
-/* ---- surfaces ---- */
-html:not(.nsd-light) [class~="bg-[#131d36]"]{background:linear-gradient(160deg,var(--card2),var(--card))!important;border:1px solid var(--line)!important;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 44px -24px rgba(0,0,0,.8)!important;border-radius:20px!important}
-html:not(.nsd-light) [class~="bg-[#0b1329]"]{background-color:rgba(3,7,16,.65)!important;border-color:var(--line)!important}
-html:not(.nsd-light) [class~="bg-slate-800"],html:not(.nsd-light) [class~="bg-slate-900"]{background-color:rgba(148,163,184,.09)!important;border-color:var(--line)!important}
-html:not(.nsd-light) [class*="border-slate-"]{border-color:var(--line)!important}
-html:not(.nsd-light) [class~="bg-sky-600"]{background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;color:#04101c!important;border:0!important;box-shadow:0 10px 24px -10px rgba(var(--acs),.8)!important}
-html:not(.nsd-light) [class~="bg-sky-600"] *{color:inherit}
-html:not(.nsd-light) .text-sky-400,html:not(.nsd-light) .text-sky-300{color:var(--ac1)!important}
-html:not(.nsd-light) button{transition:filter .15s,transform .15s,background-color .15s,border-color .15s}
-html:not(.nsd-light) button:active{transform:scale(.97)}
-html:not(.nsd-light) input:not([type=checkbox]):not([type=radio]),html:not(.nsd-light) select,html:not(.nsd-light) textarea{border-radius:12px!important}
-html:not(.nsd-light) input:focus,html:not(.nsd-light) select:focus,html:not(.nsd-light) textarea:focus{outline:none!important;border-color:var(--ac1)!important;box-shadow:0 0 0 3px rgba(var(--acs),.18)!important}
-
-/* ---- HERO header (replaces the plain bar) ---- */
-html:not(.nsd-light) #hubDashboardView>div:first-child{position:relative;overflow:hidden;padding:30px 32px!important;border-radius:28px!important;border:1px solid rgba(var(--acs),.25)!important;background:radial-gradient(520px 220px at 0 0,rgba(var(--acs),.28),transparent 70%),radial-gradient(420px 220px at 100% 100%,rgba(99,102,241,.25),transparent 70%),linear-gradient(160deg,#0e1830,#080e1c)!important;backdrop-filter:blur(16px)}
-html:not(.nsd-light) #hubDashboardView>div:first-child::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:linear-gradient(90deg,#000,transparent 75%);mask-image:linear-gradient(90deg,#000,transparent 75%);pointer-events:none}
-html:not(.nsd-light) #hubDashboardView>div:first-child>*{position:relative;z-index:1}
-html:not(.nsd-light) #hubDashboardView h1{font-size:clamp(22px,2.6vw,34px)!important;font-weight:800!important;letter-spacing:-.03em!important;line-height:1.15;background:linear-gradient(90deg,#fff 35%,var(--ac1));-webkit-background-clip:text;background-clip:text;color:transparent!important}
-html:not(.nsd-light) #hubDashboardView h1 i{-webkit-text-fill-color:#04101c;color:#04101c;background:linear-gradient(135deg,var(--ac1),var(--ac2));padding:11px;border-radius:15px;font-size:18px}
-html:not(.nsd-light) #hubDashboardView>div:first-child p{font-size:13px!important;color:#9fb0c8!important;margin-top:8px!important}
-html:not(.nsd-light) .digital-header-clock{background:rgba(3,7,16,.55)!important;border:1px solid rgba(var(--acs),.35)!important;border-radius:20px!important;padding:12px 20px!important;box-shadow:0 0 40px -14px rgba(var(--acs),.8)}
-html:not(.nsd-light) .digital-clock-time{font-size:26px!important;font-weight:800!important;font-variant-numeric:tabular-nums}
-
-/* ---- section titles ---- */
-html:not(.nsd-light) #viewOverview h2{font-size:18px!important;font-weight:800!important;letter-spacing:-.02em;display:flex;align-items:center;gap:12px!important;margin-bottom:18px!important}
-html:not(.nsd-light) #viewOverview h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
-html:not(.nsd-light) #viewOverview h2 i{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(var(--acs),.14);font-size:14px}
-
-/* ---- HUB CARDS: new format ---- */
-html:not(.nsd-light) #hubCardsGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(360px,1fr))!important;gap:22px!important}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]{border-radius:26px!important;padding:0!important;overflow:hidden;position:relative}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]:hover{transform:translateY(-4px);border-color:rgba(var(--acs),.5)!important;box-shadow:0 30px 60px -26px rgba(var(--acs),.55)!important}
-html:not(.nsd-light) #hubCardsGrid>div>div:first-child{padding:22px 22px 6px}
-html:not(.nsd-light) #hubCardsGrid>div>div:first-child>div:first-child{padding:0 0 4px;margin-bottom:18px!important}
-html:not(.nsd-light) #hubCardsGrid h3{font-size:19px!important;font-weight:800!important;letter-spacing:-.02em}
-html:not(.nsd-light) #hubCardsGrid [class~="w-10"][class~="h-10"]{width:48px!important;height:48px!important;background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;border:0!important;border-radius:16px!important;color:#04101c!important;box-shadow:0 12px 24px -10px rgba(var(--acs),.9)}
-html:not(.nsd-light) #hubCardsGrid [class~="w-10"] i{color:#04101c}
-html:not(.nsd-light) #hubCardsGrid span[class*="uppercase"][class*="text-sky-400"]{display:inline-block;padding:2px 9px;border-radius:999px;background:rgba(var(--acs),.13);margin-bottom:4px}
-/* stat strip -> three separate tiles */
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"]{background:none!important;border:0!important;padding:0!important;gap:10px!important}
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"]>div{padding:14px 6px;border-radius:18px;background:rgba(3,7,16,.55);border:1px solid var(--line)}
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"] span.text-sm{font-size:24px!important;font-weight:800!important;line-height:1.15;display:block;margin-top:4px;font-variant-numeric:tabular-nums}
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"] span.text-\[9px\]{letter-spacing:.12em;font-weight:700}
-/* action area + tinted buttons */
-html:not(.nsd-light) #hubCardsGrid>div>div:last-child{padding:16px 22px 22px;border:0!important;background:linear-gradient(180deg,transparent,rgba(3,7,16,.45))}
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-2"] button{height:50px!important;border-radius:16px!important;font-weight:700!important;box-shadow:none!important;color:#e6edf7!important;border:1px solid transparent!important;justify-content:flex-start!important;padding-left:14px!important;gap:10px!important;font-size:11.5px!important;text-align:left}
-html:not(.nsd-light) #hubCardsGrid button i{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:12px!important;flex:none}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0284c7]"]{background:rgba(14,165,233,.13)!important;border-color:rgba(14,165,233,.35)!important}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0284c7]"] i{background:#0ea5e9;color:#fff}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0d9488]"]{background:rgba(20,184,166,.13)!important;border-color:rgba(20,184,166,.35)!important}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0d9488]"] i{background:#14b8a6;color:#fff}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#c27ba0]"]{background:rgba(236,121,170,.13)!important;border-color:rgba(236,121,170,.35)!important}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#c27ba0]"] i{background:#ec79aa;color:#fff}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#7c3aed]"]{background:rgba(139,92,246,.14)!important;border-color:rgba(139,92,246,.38)!important}
-html:not(.nsd-light) #hubCardsGrid [class~="bg-[#7c3aed]"] i{background:#8b5cf6;color:#fff}
-html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-2"] button:hover{filter:brightness(1.3);transform:translateY(-2px)}
-
-/* ---- search bar / notice ---- */
-html:not(.nsd-light) #nsdBar{background:rgba(12,19,34,.8)!important;border:1px solid var(--line)!important;border-radius:20px!important;padding:12px!important}
-html:not(.nsd-light) #nsdBar input{background:rgba(3,7,16,.7)!important;border-radius:14px!important;padding:11px 16px!important}
-html:not(.nsd-light) #nsdBar button{background:rgba(148,163,184,.1)!important;border-radius:14px!important}
-html:not(.nsd-light) .notice-bar{border-radius:22px!important}
-
-/* ---- tables / modals / toast ---- */
-html:not(.nsd-light) [id^="view"] table thead th{text-transform:uppercase;letter-spacing:.08em;font-size:10px}
-html:not(.nsd-light) [id^="view"] tbody tr:hover>td{background-color:rgba(var(--acs),.06)}
-html:not(.nsd-light) [class~="fixed"][class~="inset-0"][class*="bg-black/"]{background:rgba(3,6,14,.75)!important;backdrop-filter:blur(8px)!important}
-html:not(.nsd-light) [class~="fixed"][class~="inset-0"]>[class~="bg-[#131d36]"]{border-radius:24px!important;box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(var(--acs),.14)!important}
-html:not(.nsd-light) #authGate{background:radial-gradient(700px 420px at 50% 0,rgba(var(--acs),.22),transparent 65%),var(--ink)!important}
-html:not(.nsd-light) .toast-notify{border-radius:14px!important;border-color:rgba(var(--acs),.5)!important;background:rgba(8,14,28,.95)!important}
-
-/* ---- SIDEBAR: permanent left rail on desktop (layout change) ---- */
-html:not(.nsd-light) #sidebarDrawer{background:linear-gradient(180deg,#0a1122,#060a14)!important;border-right:1px solid var(--line)!important;padding:20px 16px!important}
-html:not(.nsd-light) #sidebarDrawer button{border-radius:14px!important}
-@media(min-width:1100px){
- html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #sidebarDrawer{transform:none!important;width:var(--rail)!important;box-shadow:none!important}
- html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #sidebarOverlay{display:none!important}
- html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #hubDashboardView{margin-left:var(--rail)!important;max-width:none!important}
- html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #nsdBottom{display:none!important}
- #hubDashboardView{transition:margin-left .25s ease}
-}
-
-/* ===== DESIGN B "Studio": light, top-bar layout, list-style hub rows ===== */
-html.nsd-light{--ac1:#0284c7;--ac2:#4f46e5;--acs:2,132,199}
-html.nsd-light[data-accent="emerald"]{--ac1:#059669;--ac2:#0d9488;--acs:5,150,105}
-html.nsd-light[data-accent="violet"]{--ac1:#7c3aed;--ac2:#4f46e5;--acs:124,58,237}
-html.nsd-light[data-accent="sunset"]{--ac1:#ea580c;--ac2:#e11d48;--acs:234,88,12}
-html.nsd-light body{background:#f4f2ed!important;color:#1b1f2a;font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif}
-html.nsd-light [class~="bg-[#131d36]"]{background:#fff!important;border:1px solid #e7e3da!important;box-shadow:0 1px 2px rgba(27,31,42,.05),0 12px 30px -18px rgba(27,31,42,.18)!important;border-radius:18px!important}
-html.nsd-light [class~="bg-[#0b1329]"]{background:#f7f5f0!important;border-color:#e7e3da!important}
-html.nsd-light #hubDashboardView{max-width:1280px!important}
-/* top bar */
-html.nsd-light #hubDashboardView>div:first-child{padding:14px 20px!important;border-radius:18px!important;border-top:4px solid var(--ac1)!important}
-html.nsd-light #hubDashboardView h1{font-size:20px!important;font-weight:800!important;letter-spacing:-.02em;color:#10131c!important}
-html.nsd-light #hubDashboardView h1 i{color:#fff!important;background:linear-gradient(135deg,var(--ac1),var(--ac2));padding:9px;border-radius:12px;font-size:15px}
-html.nsd-light #hubDashboardView>div:first-child p{color:#6b7280!important;font-size:12px!important}
-html.nsd-light #hubDashboardView button[onclick="toggleSidebar()"]{background:#10131c!important;border-color:#10131c!important;border-radius:12px!important}
-html.nsd-light #hubDashboardView button[onclick="toggleSidebar()"] i{color:#fff!important}
-html.nsd-light .digital-header-clock{background:#f7f5f0!important;border:1px solid #e7e3da!important;border-radius:14px!important;box-shadow:none!important}
-html.nsd-light .digital-clock-time{color:#10131c!important;font-weight:800!important}
-html.nsd-light .digital-clock-date,html.nsd-light .digital-clock-label{color:#6b7280!important}
-html.nsd-light .notice-bar{background:#fff7e6!important;border:1px solid #f3dca8!important;box-shadow:none!important;border-radius:16px!important}
-html.nsd-light .notice-item{background:#fff!important;border-color:#f0e2bd!important}
-html.nsd-light .notice-item-title{color:#10131c!important}html.nsd-light .notice-item-msg{color:#475569!important}
-html.nsd-light #viewOverview h2{font-size:13px!important;font-weight:800!important;text-transform:uppercase;letter-spacing:.12em;color:#6b7280!important;margin-bottom:12px!important}
-html.nsd-light #nsdBar{background:#fff!important;border:1px solid #e7e3da!important;border-radius:16px!important}
-html.nsd-light #nsdBar input{background:#f7f5f0!important;border-radius:12px!important}
-/* hub cards -> one row per hub */
-html.nsd-light #hubCardsGrid{display:flex!important;flex-direction:column!important;gap:12px!important}
-html.nsd-light #hubCardsGrid>[class~="bg-[#131d36]"]{display:grid!important;grid-template-columns:minmax(210px,1fr) minmax(250px,1fr) minmax(300px,1.15fr);align-items:center;gap:22px;padding:16px 20px!important;border-radius:20px!important;position:relative;border-left:5px solid var(--ac1)!important}
-html.nsd-light #hubCardsGrid>[class~="bg-[#131d36]"]:hover{transform:translateX(3px);box-shadow:0 18px 36px -20px rgba(var(--acs),.45)!important}
-html.nsd-light #hubCardsGrid>div>div:first-child{display:contents}
-html.nsd-light #hubCardsGrid>div>div:first-child>div:first-child{margin:0!important}
-html.nsd-light #hubCardsGrid h3{color:#10131c!important;font-size:17px!important;font-weight:800!important;letter-spacing:-.02em}
-html.nsd-light #hubCardsGrid [class~="w-10"][class~="h-10"]{background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;border:0!important;border-radius:14px!important;width:44px!important;height:44px!important}
-html.nsd-light #hubCardsGrid [class~="w-10"] i{color:#fff!important}
-html.nsd-light #hubCardsGrid span[class*="uppercase"][class*="text-sky-400"]{color:var(--ac1)!important}
-html.nsd-light #hubCardsGrid [class~="grid-cols-3"]{margin:0!important;padding:0!important;background:none!important;border:0!important;gap:8px!important}
-html.nsd-light #hubCardsGrid [class~="grid-cols-3"]>div{background:#f7f5f0;border:1px solid #ebe7de;border-radius:14px;padding:9px 4px}
-html.nsd-light #hubCardsGrid [class~="grid-cols-3"] span.text-sm{font-size:20px!important;font-weight:800!important;display:block;font-variant-numeric:tabular-nums}
-html.nsd-light #hubCardsGrid [class~="grid-cols-3"] span.text-sm.text-white{color:#10131c!important}
-html.nsd-light #hubCardsGrid [class~="grid-cols-3"] span.text-sm.text-sky-400{color:var(--ac1)!important}
-html.nsd-light #hubCardsGrid>div>div:last-child{padding:0!important;border:0!important}
-html.nsd-light #hubCardsGrid [class~="grid-cols-2"] button{height:40px!important;border-radius:12px!important;font-size:11px!important;font-weight:700!important;box-shadow:none!important;border:1px solid transparent!important;justify-content:flex-start!important;padding-left:10px!important;gap:8px!important;text-align:left}
-html.nsd-light #hubCardsGrid [class~="bg-[#0284c7]"]{background:#e0f2fe!important;color:#075985!important;border-color:#bae6fd!important}
-html.nsd-light #hubCardsGrid [class~="bg-[#0d9488]"]{background:#ccfbf1!important;color:#115e59!important;border-color:#99f6e4!important}
-html.nsd-light #hubCardsGrid [class~="bg-[#c27ba0]"]{background:#fce7f3!important;color:#9d174d!important;border-color:#fbcfe8!important}
-html.nsd-light #hubCardsGrid [class~="bg-[#7c3aed]"]{background:#ede9fe!important;color:#5b21b6!important;border-color:#ddd6fe!important}
-html.nsd-light #hubCardsGrid [class~="grid-cols-2"] button:hover{filter:brightness(.96);transform:translateY(-1px)}
-html.nsd-light [class~="bg-sky-600"]{background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;color:#fff!important;border:0!important}
-html.nsd-light [class~="fixed"][class~="inset-0"][class*="bg-black/"]{background:rgba(27,31,42,.45)!important;backdrop-filter:blur(6px)!important}
-html.nsd-light #authGate{background:#f4f2ed!important}
-@media(max-width:1100px){html.nsd-light #hubCardsGrid>[class~="bg-[#131d36]"]{grid-template-columns:1fr;gap:14px}}
-html.nsd-light #rdAccent{background:rgba(255,255,255,.9);border-color:#e7e3da}
-#rdAccent .rdmode{width:auto;height:20px;padding:0 9px;border-radius:999px;border:0;background:rgba(148,163,184,.25);color:#cbd5e1;font-size:10px;font-weight:800;cursor:pointer}
-html.nsd-light #rdAccent .rdmode{background:#10131c;color:#fff}
-
-/* ---- accent switcher ---- */
-#rdAccent{position:fixed;right:14px;bottom:14px;z-index:90;display:flex;gap:6px;padding:7px;border-radius:999px;background:rgba(9,14,27,.82);border:1px solid rgba(148,163,184,.2);backdrop-filter:blur(12px)}
-#rdAccent button{width:20px;height:20px;border-radius:999px;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
-#rdAccent button.on{border-color:#fff;transform:scale(1.15)}
-@media(max-width:767px){#rdAccent{bottom:76px}}
-@media print{#rdAccent{display:none!important}}
-</style>
-<script id="redesignJs">
-(function(){try{var K='rdAccent',L=[['sky','#38bdf8,#6366f1'],['emerald','#34d399,#0ea5e9'],['violet','#c084fc,#6366f1'],['sunset','#fb923c,#e11d48']];
-function ap(a){document.documentElement.dataset.accent=a;[].forEach.call(document.querySelectorAll('#rdAccent button'),function(b){b.classList.toggle('on',b.dataset.a===a)});try{localStorage.setItem(K,a)}catch(e){}}
-var d=document.createElement('div');d.id='rdAccent';d.title='Theme colour';
-L.forEach(function(x){var b=document.createElement('button');b.type='button';b.dataset.a=x[0];b.style.background='linear-gradient(135deg,'+x[1]+')';b.onclick=function(){ap(x[0])};d.appendChild(b)});
-var orig=window.toggleSidebar,R='rdRail';
-function desk(){var v=document.getElementById('hubDashboardView');return window.matchMedia('(min-width:1100px)').matches&&v&&!v.classList.contains('hidden')}
-try{if(localStorage.getItem(R)==='off')document.documentElement.classList.add('rd-rail-off')}catch(e){}
-window.toggleSidebar=function(){if(desk()){var o=document.documentElement.classList.toggle('rd-rail-off');try{localStorage.setItem(R,o?'off':'on')}catch(e){}}else if(orig)orig.apply(this,arguments)};
-var M='rdDesign',mb=document.createElement('button');mb.type='button';mb.className='rdmode';
-function mode(v){var l=v==='studio';document.documentElement.classList.toggle('nsd-light',l);mb.textContent=l?'Studio':'Aurora';try{localStorage.setItem(M,v);localStorage.setItem('nsdTheme',l?'light':'dark')}catch(e){}}
-mb.onclick=function(){mode(document.documentElement.classList.contains('nsd-light')?'aurora':'studio')};
-d.insertBefore(mb,d.firstChild);var dm='studio';try{dm=localStorage.getItem(M)||'studio'}catch(e){}mode(dm);
-document.body.appendChild(d);var s='sky';try{s=localStorage.getItem(K)||'sky'}catch(e){}ap(s)}catch(e){console.warn('[redesign]',e)}})();
-</script>
 
 </body>
 </html>
