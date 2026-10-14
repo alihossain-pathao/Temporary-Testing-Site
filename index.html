@@ -4913,6 +4913,12 @@ try {
             } catch (e) {}
         }
 
+        // Clicking the already-open task tab closes it and returns to the dashboard overview.
+        function toggleTaskTab(type) {
+            if (currentGenericTabType === type) switchDashboardTab('overview');
+            else switchDashboardTab(type);
+        }
+
         function renderTaskTabs() {
             const topContainer = document.getElementById('topTaskTabsContainer');
             const sideContainer = document.getElementById('sideTaskTabsContainer');
@@ -4923,7 +4929,7 @@ try {
                 const cls = isActive
                     ? `px-4 py-2 text-xs font-bold rounded-lg transition ${colorParts(t.color).topActive}`
                     : `px-4 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700`;
-                return `<button data-hide-key="${hideKeyOf('tab_', t.type)}" data-hide-label="${escapeHtml(t.label)} (tab)" data-hide-group="tabs" data-hide-icon="${escapeHtml(t.icon)}" onclick="switchDashboardTab('${t.type}')" class="${cls}">
+                return `<button data-hide-key="${hideKeyOf('tab_', t.type)}" data-hide-label="${escapeHtml(t.label)} (tab)" data-hide-group="tabs" data-hide-icon="${escapeHtml(t.icon)}" onclick="toggleTaskTab('${t.type}')" class="${cls}">
                             <i class="fa-solid ${t.icon} text-${t.color}-400"></i> ${t.label}
                         </button>`;
             }).join('');
