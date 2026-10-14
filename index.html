@@ -777,7 +777,7 @@ try {
 </button>
 <div>
 <h1 class="text-2xl font-black text-white tracking-wide flex items-center gap-3">
-<img alt="Logo" class="app-logo w-10 h-10 rounded-xl shadow-md flex-none" src=""/>
+<i class="fa-solid fa-boxes-packing text-sky-400"></i>
                         Narsingdi Cluster Operations Center
                     </h1>
 <p class="text-xs text-slate-400 mt-1 font-semibold">Real-time Dispatch Tracking, Delivery Performance &amp; Hub Management</p>
@@ -861,8 +861,8 @@ try {
 <!-- NAVIGATION MENU TRIGGER & TASK TABS BAR -->
 <div class="flex flex-wrap items-center justify-between bg-[#131d36] p-2.5 rounded-xl border border-slate-800 gap-3">
 <div class="flex items-center gap-2">
-<button class="px-4 py-2 text-xs font-bold rounded-lg transition bg-sky-600 text-white shadow-sm flex items-center gap-2" onclick="toggleSidebar()">
-<i class="fa-solid fa-bars"></i> Navigation Menu
+<button aria-label="Menu" class="px-3.5 py-2 text-sm font-bold rounded-lg transition bg-sky-600 hover:bg-sky-500 text-white shadow-sm flex items-center justify-center" onclick="toggleSidebar()" title="Menu">
+<i class="fa-solid fa-bars"></i>
                 </button>
 <button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700" data-owner-only="" id="topBtnHideMode" onclick="openVisibilityModal()" title="Choose what to hide from users (you always see everything)">
 <i class="fa-solid fa-eye" id="topHideModeIcon"></i> <span id="topHideModeLabel">Hide</span>
