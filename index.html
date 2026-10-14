@@ -5201,6 +5201,7 @@ try {
         }
 
         function renderConsolidatedMatrix() {
+            normalizeHubRates();
             const matrixBody = document.getElementById('consolidatedMatrixBody');
             const matrixFooter = document.getElementById('consolidatedMatrixFooter');
 
@@ -5262,6 +5263,7 @@ try {
         }
 
         function renderLeaderboard() {
+            normalizeHubRates();
             const grid = document.getElementById('leaderboardGrid');
             if (!grid) return;
 
@@ -5312,6 +5314,7 @@ try {
         let clusterSummaryChartInstance = null;
 
         function renderLeaderboardChart() {
+            normalizeHubRates();
             const canvas = document.getElementById('leaderboardChart');
             if (!canvas || typeof Chart === 'undefined') return;
             const sorted = [...getVisibleHubs()].sort((a, b) => (parseFloat(b.deliveryRate) || 0) - (parseFloat(a.deliveryRate) || 0));
@@ -5686,7 +5689,26 @@ try {
             renderCurrentDayKpiReport();
         }
 
+        // Keeps every hub's Success % identical to the Closing Report:
+        // Delivered / Assign For Delivery, rounded to a whole number.
+        function normalizeHubRates() {
+            try {
+                (hubList || []).forEach(h => {
+                    const f = (typeof hubReportsData !== 'undefined' && hubReportsData[h.id]) || null;
+                    if (!f) return;
+                    const n = k => parseFloat(f[k]) || 0;
+                    const attempt = n('prevHold') + n('recParcel') - n('areaChange');
+                    if (attempt <= 0) return;
+                    const onWay = Math.max(0, attempt - (n('officeHoldReason') + n('capShortage')));
+                    const delivered = n('delivered');
+                    h.onTheWay = onWay;
+                    h.deliveryRate = onWay > 0 ? Math.round((delivered / onWay) * 100) + '%' : '0%';
+                });
+            } catch (e) { console.warn('normalizeHubRates failed', e); }
+        }
+
         function renderDashboard() {
+            normalizeHubRates();
             let totalHubsVol = 0, totalHubsBase = 0, totalHubsDelivered = 0, totalHubsDAPres = 0, totalHubsDATot = 0, totalHubsColl = 0, totalHubsHold = 0;
 
             const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
