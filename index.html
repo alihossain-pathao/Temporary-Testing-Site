@@ -5837,17 +5837,25 @@ try {
                             <span class="text-[10px] font-black text-slate-300 px-2 py-0.5 bg-slate-800 rounded border border-slate-700">${hub.id}</span>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 bg-[#0b1329] p-2.5 rounded-lg border border-slate-800 text-center mb-4">
+                        <div class="grid grid-cols-5 gap-1 bg-[#0b1329] p-2.5 rounded-lg border border-slate-800 text-center mb-4">
                             <div>
-                                <span class="text-[9px] uppercase font-bold text-slate-400 block">Volume</span>
+                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Volume</span>
                                 <span class="text-sm font-black text-white">${hub.totalVolume}</span>
                             </div>
                             <div>
-                                <span class="text-[9px] uppercase font-bold text-slate-400 block">Active DA</span>
+                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Assigned</span>
+                                <span class="text-sm font-black text-amber-400">${hub.onTheWay != null ? hub.onTheWay : 0}</span>
+                            </div>
+                            <div>
+                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Active DA</span>
                                 <span class="text-sm font-black text-sky-400">${hub.daPresent}</span>
                             </div>
                             <div>
-                                <span class="text-[9px] uppercase font-bold text-slate-400 block">Success</span>
+                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Delivered</span>
+                                <span class="text-sm font-black text-white">${hub.delivered || 0}</span>
+                            </div>
+                            <div>
+                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Success</span>
                                 <span class="text-sm font-black text-emerald-400">${hub.deliveryRate}</span>
                             </div>
                         </div>
