@@ -544,6 +544,34 @@
         body.owner-permission-pending #visibilityModal {
             display: none !important;
         }
+
+        /* ===== Report count validation (Morning + Closing) ===== */
+        #hubReportView:not(.rcv-off) .excel-table td.chk-bad { background:#fecaca !important; box-shadow: inset 0 0 0 2px #dc2626; color:#7f1d1d !important; }
+        #hubReportView:not(.rcv-off) .excel-table td.chk-warn { background:#fde68a !important; box-shadow: inset 0 0 0 2px #d97706; color:#78350f !important; }
+        #hubReportView:not(.rcv-off) .excel-table td.chk-rel { outline:2px dashed #f59e0b; outline-offset:-2px; }
+        #hubReportView:not(.rcv-off) .excel-table td.chk-bad input,
+        #hubReportView:not(.rcv-off) .excel-table td.chk-warn input { background:transparent !important; color:inherit !important; }
+        .excel-table td.rcv-flash { animation: rcvFlash 1.4s ease-out 1; }
+        @keyframes rcvFlash { 0%,40% { box-shadow: inset 0 0 0 3px #2563eb, 0 0 0 4px rgba(37,99,235,.35); } 100% { box-shadow: none; } }
+        .rcv-panel { max-width:1500px; margin:0 auto 10px; background:#fff; border:1px solid #94a3b8; border-left:6px solid #94a3b8; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#0f172a; font-family:'Segoe UI',Arial,sans-serif; overflow:hidden; }
+        .rcv-panel.ok { border-left-color:#16a34a; }
+        .rcv-panel.bad { border-left-color:#dc2626; }
+        .rcv-panel.warn { border-left-color:#d97706; }
+        .rcv-head { display:flex; align-items:center; gap:10px; padding:8px 12px; flex-wrap:wrap; }
+        .rcv-title { font-size:12px; font-weight:800; flex:1; min-width:200px; }
+        .rcv-btn { border:1px solid #94a3b8; background:#f8fafc; color:#0f172a; border-radius:6px; padding:4px 9px; font-size:10px; font-weight:800; cursor:pointer; }
+        .rcv-btn:hover { background:#e2e8f0; }
+        .rcv-list { border-top:1px solid #e2e8f0; max-height:260px; overflow:auto; }
+        .rcv-item { display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; border:0; border-bottom:1px solid #f1f5f9; background:#fff; padding:8px 12px; cursor:pointer; font-family:inherit; }
+        .rcv-item:hover { background:#f8fafc; }
+        .rcv-dot { width:9px; height:9px; border-radius:50%; margin-top:4px; flex:0 0 auto; background:#dc2626; }
+        .rcv-item.warn .rcv-dot { background:#d97706; }
+        .rcv-sec { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:#475569; background:#e2e8f0; border-radius:4px; padding:1px 6px; margin-right:6px; }
+        .rcv-it-title { font-size:11px; font-weight:800; }
+        .rcv-it-msg { font-size:11px; color:#334155; margin-top:2px; }
+        .rcv-it-diff { font-size:11px; font-weight:800; color:#b91c1c; }
+        .rcv-item.warn .rcv-it-diff { color:#b45309; }
+        .rcv-it-hint { font-size:10px; color:#64748b; margin-top:2px; }
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
@@ -1151,6 +1179,14 @@ try {
 </div>
 <!-- COMBINED REPORT VIEW -->
 <div class="hidden report-body-bg min-h-screen" id="hubReportView">
+<div class="rcv-panel" id="reportCheckPanel" data-html2canvas-ignore="true">
+<div class="rcv-head">
+<div class="rcv-title" id="reportCheckTitle">Count check: fill in the report - totals are verified automatically.</div>
+<button class="rcv-btn" id="reportCheckToggleList" onclick="rcvToggleList()" type="button" style="display:none">Hide details</button>
+<button class="rcv-btn" id="reportCheckToggleMarks" onclick="rcvToggleMarks()" type="button" style="display:none">Hide highlights</button>
+</div>
+<div class="rcv-list" id="reportCheckList" style="display:none"></div>
+</div>
 <div class="dashboard-wrapper pt-4" id="captureContainer">
 <div class="morning-report-col">
 <div class="report-card" id="morningReportCard">
@@ -4549,6 +4585,7 @@ try {
             calculateMorningFormulas();
             syncPreviousDayRatios({ preserveExisting: true });
             updateAllComparisons();
+            try { runReportValidation(); } catch (e) {}
         }
 
         function formatCurrentTime12Hour(date = new Date()) {
@@ -6437,6 +6474,204 @@ try {
 
         const pVal = id => parseFloat(document.getElementById(id)?.value) || 0;
 
+        /* ===================== REPORT COUNT VALIDATION =====================
+           Cross-checks Morning + Closing numbers. If counts do not add up, the
+           related cells are highlighted and the panel above the report says
+           which section is wrong and by how much. Nothing is changed or blocked -
+           just correct the highlighted cell and the warning disappears live. */
+        let __rcvTimer = null;
+        let __rcvIssues = [];
+        let __rcvListOpen = true;
+
+        function scheduleReportValidation() {
+            clearTimeout(__rcvTimer);
+            __rcvTimer = setTimeout(() => { try { runReportValidation(); } catch (e) { console.warn('Report check failed', e); } }, 900);
+        }
+
+        function rcvNum(id) {
+            const el = document.getElementById(id);
+            if (!el) return 0;
+            const raw = (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.innerText;
+            return parseFloat(String(raw ?? '').replace(/,/g, '')) || 0;
+        }
+
+        function rcvBuildResults() {
+            const issues = [];
+            let evaluated = 0;
+            const MORN = 'Morning Report', CLOS = 'Closing Report';
+
+            // rows must add up to a total
+            const sumCheck = o => {
+                const parts = o.parts.map(([id, label]) => ({ id, label, val: rcvNum(id) }));
+                const sum = parts.reduce((a, p) => a + p.val, 0);
+                const total = rcvNum(o.total[0]);
+                if (sum === 0) return;               // section not filled yet
+                evaluated++;
+                if (sum === total) return;
+                const diff = total - sum;
+                issues.push({
+                    level: o.level || 'bad', section: o.section, title: o.title,
+                    msg: parts.map(p => p.label + ' ' + p.val).join(' + ') + ' = ' + sum + ', but ' + o.total[1] + ' = ' + total,
+                    diff: diff > 0 ? 'Rows are short by ' + diff : 'Rows are over by ' + (-diff),
+                    ids: [...parts.map(p => p.id), o.total[0]], related: o.related || [],
+                    focus: parts[0].id, hint: o.hint || ''
+                });
+            };
+
+            // a smaller number must not exceed a bigger one
+            const limitCheck = o => {
+                const small = o.small.reduce((a, id) => a + rcvNum(id), 0);
+                const big = o.big.reduce((a, id) => a + rcvNum(id), 0);
+                if (small === 0) return;
+                evaluated++;
+                if (small <= big) return;
+                issues.push({
+                    level: o.level || 'bad', section: o.section, title: o.title,
+                    msg: o.smallLabel + ' (' + small + ') is more than ' + o.bigLabel + ' (' + big + ')',
+                    diff: 'Over by ' + (small - big),
+                    ids: [...o.small, ...o.big], related: [], focus: o.small[0], hint: o.hint || ''
+                });
+            };
+
+            /* ---------- MORNING ---------- */
+            sumCheck({ section: MORN, title: 'Received Parcel Ageing',
+                parts: [['m_age1', 'Within 1 Days'], ['m_age2', 'Within 2 Days'], ['m_age3', 'Within 3 Days'], ['m_age4', 'More Than 3 Days']],
+                total: ['m_recParcel', 'Received Parcel'],
+                hint: 'Ageing rows must add up to Received Parcel in the Dispatch Report.' });
+            limitCheck({ section: MORN, title: 'DA Attendance', small: ['m_presentDA'], smallLabel: 'Present DA', big: ['m_totalDA'], bigLabel: 'Total Number of DA' });
+            limitCheck({ section: MORN, title: 'Hub In-Charge', small: ['m_presentHubIC'], smallLabel: 'Present Hub In-Charge', big: ['m_totalHubIC'], bigLabel: 'Total Hub In-Charge' });
+            limitCheck({ section: MORN, title: 'Area Change / Intrasit', small: ['m_areaChange'], smallLabel: 'Area Change', big: ['m_prevHold', 'm_reattemptReq', 'm_recParcel'], bigLabel: 'Previous Hold + Reattempt + Received Parcel',
+                hint: 'Area Change is subtracted from the total, so it cannot be bigger than the parcels received.' });
+            limitCheck({ section: MORN, title: 'Office Hold / Capacity Shortage', small: ['m_officeHold', 'm_capShort'], smallLabel: 'Office Hold + Capacity Shortage', big: ['m_totalParcels'], bigLabel: 'Total Parcels' });
+
+            /* ---------- CLOSING ---------- */
+            sumCheck({ section: CLOS, title: 'Assign For Delivery',
+                parts: [['delivered', 'Delivered'], ['fieldHold', 'Field Hold'], ['fieldReturn', 'Field Return']],
+                total: ['onTheWay', 'Assign For Delivery'],
+                related: ['m_prevHold', 'm_reattemptReq', 'm_recParcel', 'm_areaChange', 'm_officeHold', 'm_capShort'],
+                hint: 'Assign For Delivery comes from the Morning Report (Previous Hold + Reattempt + Received - Area Change - Office Hold - Capacity Shortage). If these 3 rows are right, one of the dashed Morning numbers is wrong.' });
+            sumCheck({ section: CLOS, title: 'Delivery Aging Report',
+                parts: [['age24_qty', '24 Hours'], ['age48_qty', '48 Hours'], ['age72_qty', '72 Hours'], ['age72p_qty', '72 Hours +']],
+                total: ['delivered', 'Delivered'],
+                hint: 'The four ageing buckets must add up to Total Delivered.' });
+            sumCheck({ section: CLOS, title: 'Backlog Report',
+                parts: [['totalSolved', 'Total Solved'], ['totalPending', 'Total Pending'], ['hubNotReceived', 'Hub Not Received']],
+                total: ['totalIssue', 'Total Issue'] });
+            sumCheck({ section: CLOS, title: 'IMS - Return Pending',
+                parts: [['ims_solved_ret', 'Solved'], ['ims_pending_ret', 'Pending']],
+                total: ['ims_issue_ret', 'Total Issue'] });
+            sumCheck({ section: CLOS, title: 'IMS - Reverse Pending',
+                parts: [['ims_solved_rev', 'Solved'], ['ims_pending_rev', 'Pending']],
+                total: ['ims_issue_rev', 'Total Issue'] });
+            limitCheck({ section: CLOS, level: 'warn', title: 'Collection / Night Payment', small: ['nightPayment'], smallLabel: 'Night Payment', big: ['totalCollection'], bigLabel: 'Total Collection' });
+
+            return { issues, evaluated };
+        }
+
+        function runReportValidation() {
+            clearTimeout(__rcvTimer);
+            const view = document.getElementById('hubReportView');
+            if (!view) return;
+
+            view.querySelectorAll('.chk-bad, .chk-warn, .chk-rel').forEach(el => {
+                el.classList.remove('chk-bad', 'chk-warn', 'chk-rel');
+                if (el.dataset.chkTip) { el.removeAttribute('title'); delete el.dataset.chkTip; }
+            });
+
+            const { issues, evaluated } = rcvBuildResults();
+            __rcvIssues = issues;
+
+            const cellOf = id => {
+                const el = document.getElementById(id);
+                if (!el) return null;
+                return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.closest('td') : el;
+            };
+            // primary cells first, then "related" cells (never overwrite a primary mark)
+            issues.forEach(is => {
+                const cls = is.level === 'warn' ? 'chk-warn' : 'chk-bad';
+                is.ids.forEach(id => {
+                    const c = cellOf(id);
+                    if (!c) return;
+                    if (cls === 'chk-warn' && c.classList.contains('chk-bad')) return;
+                    c.classList.remove('chk-rel', 'chk-warn', 'chk-bad');
+                    c.classList.add(cls);
+                    c.dataset.chkTip = '1';
+                    c.title = is.title + ': ' + is.msg + ' (' + is.diff + ')';
+                });
+            });
+            issues.forEach(is => (is.related || []).forEach(id => {
+                const c = cellOf(id);
+                if (c && !c.classList.contains('chk-bad') && !c.classList.contains('chk-warn')) c.classList.add('chk-rel');
+            }));
+
+            rcvRenderPanel(issues, evaluated);
+        }
+
+        function rcvRenderPanel(issues, evaluated) {
+            const panel = document.getElementById('reportCheckPanel');
+            const title = document.getElementById('reportCheckTitle');
+            const list = document.getElementById('reportCheckList');
+            const bList = document.getElementById('reportCheckToggleList');
+            const bMarks = document.getElementById('reportCheckToggleMarks');
+            if (!panel || !title || !list) return;
+
+            panel.classList.remove('ok', 'bad', 'warn');
+            const bad = issues.filter(i => i.level !== 'warn').length;
+            const warn = issues.length - bad;
+
+            if (!evaluated) {
+                title.textContent = 'Count check: fill in the report - totals are verified automatically.';
+                list.style.display = 'none'; list.innerHTML = '';
+                bList.style.display = 'none'; bMarks.style.display = 'none';
+                return;
+            }
+            if (!issues.length) {
+                panel.classList.add('ok');
+                title.innerHTML = '&#10004; All counts match (' + evaluated + ' check' + (evaluated === 1 ? '' : 's') + ' passed)';
+                list.style.display = 'none'; list.innerHTML = '';
+                bList.style.display = 'none'; bMarks.style.display = 'none';
+                return;
+            }
+            panel.classList.add(bad ? 'bad' : 'warn');
+            title.innerHTML = '&#9888; ' + (bad ? bad + ' count mismatch' + (bad === 1 ? '' : 'es') : '') + (bad && warn ? ' + ' : '') + (warn ? warn + ' warning' + (warn === 1 ? '' : 's') : '') +
+                ' found - click an item to jump to the cell, correct it and the warning clears automatically.';
+            bList.style.display = ''; bMarks.style.display = '';
+            bList.textContent = __rcvListOpen ? 'Hide details' : 'Show details';
+            list.style.display = __rcvListOpen ? '' : 'none';
+            list.innerHTML = issues.map((is, i) =>
+                '<button type="button" class="rcv-item ' + (is.level === 'warn' ? 'warn' : '') + '" onclick="rcvJump(' + i + ')">' +
+                '<span class="rcv-dot"></span><span>' +
+                '<div><span class="rcv-sec">' + escapeHtml(is.section) + '</span><span class="rcv-it-title">' + escapeHtml(is.title) + '</span></div>' +
+                '<div class="rcv-it-msg">' + escapeHtml(is.msg) + ' &rarr; <span class="rcv-it-diff">' + escapeHtml(is.diff) + '</span></div>' +
+                (is.hint ? '<div class="rcv-it-hint">' + escapeHtml(is.hint) + '</div>' : '') +
+                '</span></button>').join('');
+        }
+
+        function rcvJump(i) {
+            const is = __rcvIssues[i];
+            if (!is) return;
+            const el = document.getElementById(is.focus);
+            if (!el) return;
+            try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+            const td = el.closest ? el.closest('td') : null;
+            if (td) { td.classList.remove('rcv-flash'); void td.offsetWidth; td.classList.add('rcv-flash'); setTimeout(() => td.classList.remove('rcv-flash'), 1600); }
+            setTimeout(() => { try { el.focus(); if (el.select) el.select(); } catch (e) {} }, 350);
+        }
+
+        function rcvToggleList() {
+            __rcvListOpen = !__rcvListOpen;
+            rcvRenderPanel(__rcvIssues, 1);
+        }
+
+        function rcvToggleMarks() {
+            const view = document.getElementById('hubReportView');
+            const btn = document.getElementById('reportCheckToggleMarks');
+            if (!view || !btn) return;
+            view.classList.toggle('rcv-off');
+            btn.textContent = view.classList.contains('rcv-off') ? 'Show highlights' : 'Hide highlights';
+        }
+        /* =================== END REPORT COUNT VALIDATION =================== */
+
         function syncMorningToClosing() {
             const mPrevHold = pVal('m_prevHold');
             const mReattempt = pVal('m_reattemptReq');
@@ -6514,6 +6749,8 @@ try {
 
             const agentProd = presDA > 0 ? Math.round(delivered / presDA) : 0;
             document.getElementById('agentProductivity').innerText = agentProd;
+
+            try { scheduleReportValidation(); } catch (e) {}
 
             // Previous Day Ratio is auto-filled from the exact previous calendar
             // day when the report date / Hub changes. It remains user-editable,
