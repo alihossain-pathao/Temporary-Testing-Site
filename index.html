@@ -8750,78 +8750,101 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 <!-- ===== END NSD ADD-ON ===== -->
 
 <style id="redesignTheme">
-/* ===== Aurora redesign layer (CSS only - JS/Firebase/data untouched) ===== */
-html{--ac1:#38bdf8;--ac2:#6366f1;--acs:56,189,248;--ink:#060a14;--card:#0d1424;--card2:#111a2e;--line:rgba(148,163,184,.14)}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+/* ===== Aurora v2: full layout redesign (CSS only - JS/Firebase/data untouched) ===== */
+html{--ac1:#38bdf8;--ac2:#6366f1;--acs:56,189,248;--ink:#05080f;--card:#0c1322;--card2:#101a2d;--line:rgba(148,163,184,.13);--rail:292px}
 html[data-accent="emerald"]{--ac1:#34d399;--ac2:#0ea5e9;--acs:52,211,153}
 html[data-accent="violet"]{--ac1:#c084fc;--ac2:#6366f1;--acs:192,132,252}
 html[data-accent="sunset"]{--ac1:#fb923c;--ac2:#e11d48;--acs:251,146,60}
-html:not(.nsd-light) body{background:
- radial-gradient(900px 500px at 8% -8%,rgba(var(--acs),.16),transparent 60%),
- radial-gradient(800px 480px at 100% 0%,rgba(99,102,241,.13),transparent 60%),
- var(--ink)!important;background-attachment:fixed!important;letter-spacing:-.005em}
+html:not(.nsd-light) body{background:radial-gradient(900px 520px at 12% -10%,rgba(var(--acs),.17),transparent 60%),radial-gradient(760px 460px at 100% 0,rgba(99,102,241,.14),transparent 60%),var(--ink)!important;background-attachment:fixed!important}
+html:not(.nsd-light) h1,html:not(.nsd-light) h2,html:not(.nsd-light) h3{font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif!important}
 html:not(.nsd-light) ::-webkit-scrollbar{width:9px;height:9px}
 html:not(.nsd-light) ::-webkit-scrollbar-thumb{background:rgba(148,163,184,.22);border-radius:9px}
-html:not(.nsd-light) ::-webkit-scrollbar-thumb:hover{background:rgba(var(--acs),.5)}
 html:not(.nsd-light) ::selection{background:rgba(var(--acs),.35)}
 
-/* surfaces */
-html:not(.nsd-light) [class~="bg-[#131d36]"]{background:linear-gradient(160deg,var(--card2),var(--card))!important;border:1px solid var(--line)!important;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 18px 40px -22px rgba(0,0,0,.75)!important}
-html:not(.nsd-light) [class~="bg-[#0b1329]"]{background-color:rgba(4,8,18,.7)!important;border-color:var(--line)!important}
-html:not(.nsd-light) [class~="rounded-xl"][class~="bg-[#131d36]"],html:not(.nsd-light) [class~="rounded-2xl"][class~="bg-[#131d36]"]{border-radius:20px!important}
+/* ---- surfaces ---- */
+html:not(.nsd-light) [class~="bg-[#131d36]"]{background:linear-gradient(160deg,var(--card2),var(--card))!important;border:1px solid var(--line)!important;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 44px -24px rgba(0,0,0,.8)!important;border-radius:20px!important}
+html:not(.nsd-light) [class~="bg-[#0b1329]"]{background-color:rgba(3,7,16,.65)!important;border-color:var(--line)!important}
 html:not(.nsd-light) [class~="bg-slate-800"],html:not(.nsd-light) [class~="bg-slate-900"]{background-color:rgba(148,163,184,.09)!important;border-color:var(--line)!important}
 html:not(.nsd-light) [class*="border-slate-"]{border-color:var(--line)!important}
-
-/* sticky top header */
-html:not(.nsd-light) #hubDashboardView>div:first-child{background:rgba(9,14,27,.72)!important;backdrop-filter:blur(18px) saturate(1.3)!important;-webkit-backdrop-filter:blur(18px) saturate(1.3)!important;border-radius:22px!important;position:relative;overflow:hidden}
-html:not(.nsd-light) #hubDashboardView>div:first-child::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--ac1),var(--ac2),transparent);opacity:.8}
-html:not(.nsd-light) #hubDashboardView h1{font-weight:900!important;letter-spacing:-.02em!important;background:linear-gradient(90deg,#fff 30%,var(--ac1));-webkit-background-clip:text;background-clip:text;color:transparent!important}
-html:not(.nsd-light) #hubDashboardView h1 i{-webkit-text-fill-color:var(--ac1);color:var(--ac1)}
-html:not(.nsd-light) .digital-header-clock{background:rgba(var(--acs),.07)!important;border:1px solid rgba(var(--acs),.28)!important;border-radius:16px!important;box-shadow:0 0 30px -12px rgba(var(--acs),.7)}
-html:not(.nsd-light) .digital-clock-time{font-variant-numeric:tabular-nums;letter-spacing:.02em}
-
-/* sidebar */
-html:not(.nsd-light) #sidebarDrawer{background:rgba(8,12,24,.94)!important;backdrop-filter:blur(20px);border-right:1px solid var(--line)!important}
-html:not(.nsd-light) #sidebarDrawer button{border-radius:14px!important;transition:all .18s ease}
-html:not(.nsd-light) #sidebarDrawer button:not([class~="bg-sky-600"]):hover{transform:translateX(3px)}
-
-/* buttons / accent */
-html:not(.nsd-light) [class~="bg-sky-600"],html:not(.nsd-light) #summaryTabDaily{background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;color:#04101c!important;border:0!important;box-shadow:0 10px 24px -10px rgba(var(--acs),.8)!important}
+html:not(.nsd-light) [class~="bg-sky-600"]{background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;color:#04101c!important;border:0!important;box-shadow:0 10px 24px -10px rgba(var(--acs),.8)!important}
 html:not(.nsd-light) [class~="bg-sky-600"] *{color:inherit}
-html:not(.nsd-light) [class*="hover:bg-sky-500"]:hover{filter:brightness(1.12);transform:translateY(-1px)}
 html:not(.nsd-light) .text-sky-400,html:not(.nsd-light) .text-sky-300{color:var(--ac1)!important}
 html:not(.nsd-light) button{transition:filter .15s,transform .15s,background-color .15s,border-color .15s}
 html:not(.nsd-light) button:active{transform:scale(.97)}
 html:not(.nsd-light) input:not([type=checkbox]):not([type=radio]),html:not(.nsd-light) select,html:not(.nsd-light) textarea{border-radius:12px!important}
 html:not(.nsd-light) input:focus,html:not(.nsd-light) select:focus,html:not(.nsd-light) textarea:focus{outline:none!important;border-color:var(--ac1)!important;box-shadow:0 0 0 3px rgba(var(--acs),.18)!important}
 
-/* hub cards */
-html:not(.nsd-light) #hubCardsGrid{gap:16px!important}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]{border-radius:22px!important;padding:22px!important;position:relative;overflow:hidden}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--ac1),var(--ac2));opacity:.55;transition:opacity .2s}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]:hover{border-color:rgba(var(--acs),.45)!important;box-shadow:0 26px 50px -24px rgba(var(--acs),.55)!important}
-html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]:hover::before{opacity:1}
-html:not(.nsd-light) #hubCardsGrid [class~="w-10"][class~="h-10"]{background:linear-gradient(135deg,rgba(var(--acs),.22),rgba(99,102,241,.18))!important;border:1px solid rgba(var(--acs),.35)!important;border-radius:14px!important}
-html:not(.nsd-light) #hubOverviewDashboard h2,html:not(.nsd-light) #viewOverview h2{font-weight:900;letter-spacing:-.01em}
+/* ---- HERO header (replaces the plain bar) ---- */
+html:not(.nsd-light) #hubDashboardView>div:first-child{position:relative;overflow:hidden;padding:30px 32px!important;border-radius:28px!important;border:1px solid rgba(var(--acs),.25)!important;background:radial-gradient(520px 220px at 0 0,rgba(var(--acs),.28),transparent 70%),radial-gradient(420px 220px at 100% 100%,rgba(99,102,241,.25),transparent 70%),linear-gradient(160deg,#0e1830,#080e1c)!important;backdrop-filter:blur(16px)}
+html:not(.nsd-light) #hubDashboardView>div:first-child::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:linear-gradient(90deg,#000,transparent 75%);mask-image:linear-gradient(90deg,#000,transparent 75%);pointer-events:none}
+html:not(.nsd-light) #hubDashboardView>div:first-child>*{position:relative;z-index:1}
+html:not(.nsd-light) #hubDashboardView h1{font-size:clamp(22px,2.6vw,34px)!important;font-weight:800!important;letter-spacing:-.03em!important;line-height:1.15;background:linear-gradient(90deg,#fff 35%,var(--ac1));-webkit-background-clip:text;background-clip:text;color:transparent!important}
+html:not(.nsd-light) #hubDashboardView h1 i{-webkit-text-fill-color:#04101c;color:#04101c;background:linear-gradient(135deg,var(--ac1),var(--ac2));padding:11px;border-radius:15px;font-size:18px}
+html:not(.nsd-light) #hubDashboardView>div:first-child p{font-size:13px!important;color:#9fb0c8!important;margin-top:8px!important}
+html:not(.nsd-light) .digital-header-clock{background:rgba(3,7,16,.55)!important;border:1px solid rgba(var(--acs),.35)!important;border-radius:20px!important;padding:12px 20px!important;box-shadow:0 0 40px -14px rgba(var(--acs),.8)}
+html:not(.nsd-light) .digital-clock-time{font-size:26px!important;font-weight:800!important;font-variant-numeric:tabular-nums}
 
-/* search bar + notice */
-html:not(.nsd-light) #nsdBar{background:rgba(13,20,36,.8)!important;border:1px solid var(--line)!important;border-radius:18px!important;backdrop-filter:blur(10px)}
-html:not(.nsd-light) #nsdBar input{background:rgba(4,8,18,.7)!important;border-radius:12px!important}
-html:not(.nsd-light) #nsdBar button{background:rgba(148,163,184,.1)!important;border-radius:12px!important}
-html:not(.nsd-light) #nsdBar button:hover{border-color:var(--ac1)!important}
-html:not(.nsd-light) .notice-bar{border-radius:20px!important}
+/* ---- section titles ---- */
+html:not(.nsd-light) #viewOverview h2{font-size:18px!important;font-weight:800!important;letter-spacing:-.02em;display:flex;align-items:center;gap:12px!important;margin-bottom:18px!important}
+html:not(.nsd-light) #viewOverview h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+html:not(.nsd-light) #viewOverview h2 i{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(var(--acs),.14);font-size:14px}
 
-/* tables (dashboard tables only, report/export tables untouched) */
-html:not(.nsd-light) #hubOverviewTableModal table thead th,html:not(.nsd-light) [id^="view"] table thead th{text-transform:uppercase;letter-spacing:.08em;font-size:10px}
-html:not(.nsd-light) tbody tr{transition:background-color .15s}
+/* ---- HUB CARDS: new format ---- */
+html:not(.nsd-light) #hubCardsGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(360px,1fr))!important;gap:22px!important}
+html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]{border-radius:26px!important;padding:0!important;overflow:hidden;position:relative}
+html:not(.nsd-light) #hubCardsGrid>[class~="bg-[#131d36]"]:hover{transform:translateY(-4px);border-color:rgba(var(--acs),.5)!important;box-shadow:0 30px 60px -26px rgba(var(--acs),.55)!important}
+html:not(.nsd-light) #hubCardsGrid>div>div:first-child{padding:22px 22px 6px}
+html:not(.nsd-light) #hubCardsGrid>div>div:first-child>div:first-child{padding:0 0 4px;margin-bottom:18px!important}
+html:not(.nsd-light) #hubCardsGrid h3{font-size:19px!important;font-weight:800!important;letter-spacing:-.02em}
+html:not(.nsd-light) #hubCardsGrid [class~="w-10"][class~="h-10"]{width:48px!important;height:48px!important;background:linear-gradient(135deg,var(--ac1),var(--ac2))!important;border:0!important;border-radius:16px!important;color:#04101c!important;box-shadow:0 12px 24px -10px rgba(var(--acs),.9)}
+html:not(.nsd-light) #hubCardsGrid [class~="w-10"] i{color:#04101c}
+html:not(.nsd-light) #hubCardsGrid span[class*="uppercase"][class*="text-sky-400"]{display:inline-block;padding:2px 9px;border-radius:999px;background:rgba(var(--acs),.13);margin-bottom:4px}
+/* stat strip -> three separate tiles */
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"]{background:none!important;border:0!important;padding:0!important;gap:10px!important}
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"]>div{padding:14px 6px;border-radius:18px;background:rgba(3,7,16,.55);border:1px solid var(--line)}
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"] span.text-sm{font-size:24px!important;font-weight:800!important;line-height:1.15;display:block;margin-top:4px;font-variant-numeric:tabular-nums}
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-3"] span.text-\[9px\]{letter-spacing:.12em;font-weight:700}
+/* action area + tinted buttons */
+html:not(.nsd-light) #hubCardsGrid>div>div:last-child{padding:16px 22px 22px;border:0!important;background:linear-gradient(180deg,transparent,rgba(3,7,16,.45))}
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-2"] button{height:50px!important;border-radius:16px!important;font-weight:700!important;box-shadow:none!important;color:#e6edf7!important;border:1px solid transparent!important;justify-content:flex-start!important;padding-left:14px!important;gap:10px!important;font-size:11.5px!important;text-align:left}
+html:not(.nsd-light) #hubCardsGrid button i{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:12px!important;flex:none}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0284c7]"]{background:rgba(14,165,233,.13)!important;border-color:rgba(14,165,233,.35)!important}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0284c7]"] i{background:#0ea5e9;color:#fff}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0d9488]"]{background:rgba(20,184,166,.13)!important;border-color:rgba(20,184,166,.35)!important}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#0d9488]"] i{background:#14b8a6;color:#fff}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#c27ba0]"]{background:rgba(236,121,170,.13)!important;border-color:rgba(236,121,170,.35)!important}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#c27ba0]"] i{background:#ec79aa;color:#fff}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#7c3aed]"]{background:rgba(139,92,246,.14)!important;border-color:rgba(139,92,246,.38)!important}
+html:not(.nsd-light) #hubCardsGrid [class~="bg-[#7c3aed]"] i{background:#8b5cf6;color:#fff}
+html:not(.nsd-light) #hubCardsGrid [class~="grid-cols-2"] button:hover{filter:brightness(1.3);transform:translateY(-2px)}
+
+/* ---- search bar / notice ---- */
+html:not(.nsd-light) #nsdBar{background:rgba(12,19,34,.8)!important;border:1px solid var(--line)!important;border-radius:20px!important;padding:12px!important}
+html:not(.nsd-light) #nsdBar input{background:rgba(3,7,16,.7)!important;border-radius:14px!important;padding:11px 16px!important}
+html:not(.nsd-light) #nsdBar button{background:rgba(148,163,184,.1)!important;border-radius:14px!important}
+html:not(.nsd-light) .notice-bar{border-radius:22px!important}
+
+/* ---- tables / modals / toast ---- */
+html:not(.nsd-light) [id^="view"] table thead th{text-transform:uppercase;letter-spacing:.08em;font-size:10px}
 html:not(.nsd-light) [id^="view"] tbody tr:hover>td{background-color:rgba(var(--acs),.06)}
+html:not(.nsd-light) [class~="fixed"][class~="inset-0"][class*="bg-black/"]{background:rgba(3,6,14,.75)!important;backdrop-filter:blur(8px)!important}
+html:not(.nsd-light) [class~="fixed"][class~="inset-0"]>[class~="bg-[#131d36]"]{border-radius:24px!important;box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(var(--acs),.14)!important}
+html:not(.nsd-light) #authGate{background:radial-gradient(700px 420px at 50% 0,rgba(var(--acs),.22),transparent 65%),var(--ink)!important}
+html:not(.nsd-light) .toast-notify{border-radius:14px!important;border-color:rgba(var(--acs),.5)!important;background:rgba(8,14,28,.95)!important}
 
-/* modals */
-html:not(.nsd-light) [class~="fixed"][class~="inset-0"][class*="bg-black/"]{background:rgba(3,6,14,.72)!important;backdrop-filter:blur(8px)!important}
-html:not(.nsd-light) [class~="fixed"][class~="inset-0"]>[class~="bg-[#131d36]"]{border-radius:22px!important;box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px rgba(var(--acs),.12)!important}
-html:not(.nsd-light) #authGate{background:radial-gradient(700px 420px at 50% 0%,rgba(var(--acs),.2),transparent 65%),var(--ink)!important}
-html:not(.nsd-light) .toast-notify{border-radius:14px!important;border-color:rgba(var(--acs),.5)!important;background:rgba(8,14,28,.95)!important;backdrop-filter:blur(10px)}
+/* ---- SIDEBAR: permanent left rail on desktop (layout change) ---- */
+html:not(.nsd-light) #sidebarDrawer{background:linear-gradient(180deg,#0a1122,#060a14)!important;border-right:1px solid var(--line)!important;padding:20px 16px!important}
+html:not(.nsd-light) #sidebarDrawer button{border-radius:14px!important}
+@media(min-width:1100px){
+ html:has(#hubDashboardView:not(.hidden)) #sidebarDrawer{transform:none!important;width:var(--rail)!important;box-shadow:none!important}
+ html:has(#hubDashboardView:not(.hidden)) #sidebarOverlay{display:none!important}
+ html:has(#hubDashboardView:not(.hidden)) #hubDashboardView{margin-left:var(--rail)!important;max-width:none!important;padding:28px 36px!important}
+ html:has(#hubDashboardView:not(.hidden)) #hubDashboardView button[onclick="toggleSidebar()"]{display:none!important}
+ html:has(#hubDashboardView:not(.hidden)) #nsdBottom{display:none!important}
+}
 
-/* accent switcher */
+/* ---- accent switcher ---- */
 #rdAccent{position:fixed;right:14px;bottom:14px;z-index:90;display:flex;gap:6px;padding:7px;border-radius:999px;background:rgba(9,14,27,.82);border:1px solid rgba(148,163,184,.2);backdrop-filter:blur(12px)}
 #rdAccent button{width:20px;height:20px;border-radius:999px;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
 #rdAccent button.on{border-color:#fff;transform:scale(1.15)}
