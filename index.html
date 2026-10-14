@@ -965,42 +965,6 @@ try {
 <!-- Sheets rendered dynamically -->
 </div>
 </div>
-<!-- TAB 1: ALL-HUB CONSOLIDATED COMPARISON MATRIX -->
-<div class="hidden bg-[#131d36] border border-slate-800 rounded-xl p-5 shadow-xl" id="viewMatrix">
-<div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-<div>
-<h2 class="text-base font-extrabold text-white flex items-center gap-2">
-<i class="fa-solid fa-layer-group text-sky-400"></i> Consolidated All-Hub Operational Matrix
-                    </h2>
-<p class="text-xs text-slate-400 font-medium mt-0.5">Real-time side-by-side comparison of dispatch, delivery rate, collection &amp; holds</p>
-</div>
-<span class="px-2.5 py-1 bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-black rounded-lg">
-<i class="fa-solid fa-bolt"></i> Live Aggregation
-                </span>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs text-slate-300">
-<thead class="bg-[#0b1329] text-slate-400 uppercase font-extrabold text-[10px] tracking-wider border-b border-slate-800">
-<tr>
-<th class="p-3">Hub Name &amp; Code</th>
-<th class="p-3 text-center">Active DA</th>
-<th class="p-3 text-center">Total Volume</th>
-<th class="p-3 text-center">Delivered</th>
-<th class="p-3 text-center">Delivery Rate</th>
-<th class="p-3 text-center">Total Hold</th>
-<th class="p-3 text-center">Collection</th>
-<th class="p-3 text-center">Pending Issues</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-800/80 font-semibold" id="consolidatedMatrixBody">
-</tbody>
-<tfoot class="bg-[#0b1329] border-t-2 border-sky-500 font-extrabold text-white">
-<tr id="consolidatedMatrixFooter">
-</tr>
-</tfoot>
-</table>
-</div>
-</div>
 <!-- TAB 2: HUB PERFORMANCE LEADERBOARD -->
 <div class="hidden bg-[#131d36] border border-slate-800 rounded-xl p-5 shadow-xl" id="viewLeaderboard">
 <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
@@ -1091,41 +1055,6 @@ try {
 <p class="text-[10px] text-slate-500 font-semibold mt-4 leading-relaxed">
 <i class="fa-solid fa-circle-info"></i> Changes save automatically and apply to all other users in real time. Any new tab, hub or sheet you add appears here automatically (marked AUTO) - it is visible to users until you switch it ON. This only hides things on screen; it does not delete any data.
             </p>
-</div>
-</div>
-<!-- CLUSTER HUBS LIVE OPERATIONAL OVERVIEW MODAL (MOVED FROM DASHBOARD TO NAVIGATION MENU) -->
-<div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="hubOverviewTableModal">
-<div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
-<div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
-<h2 class="text-base font-extrabold text-white flex items-center gap-2">
-<i class="fa-solid fa-table-list text-sky-400"></i> Cluster Hubs Live Operational Overview
-                    <span class="text-xs text-slate-400 font-semibold">Updated Real-Time</span>
-</h2>
-<button class="text-slate-400 hover:text-white text-lg" onclick="closeHubOverviewModal()">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
-<div class="relative w-full mb-4">
-<i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-<input class="w-full bg-[#0b1329] text-sm text-slate-200 placeholder-slate-500 rounded-lg pl-10 pr-4 py-2.5 border border-slate-700/60 focus:outline-none focus:border-sky-500 transition" id="searchInput" oninput="filterHubs()" placeholder="Search Hub Name or Hub Code..." type="text"/>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs text-slate-300">
-<thead class="bg-[#0b1329] text-slate-400 uppercase font-extrabold text-[10px] tracking-wider border-b border-slate-800">
-<tr>
-<th class="p-3">Hub Name &amp; Code</th>
-<th class="p-3 text-center">Hub Type</th>
-<th class="p-3 text-center">Total Volume</th>
-<th class="p-3 text-center">DA Present</th>
-<th class="p-3 text-center">Delivery Rate</th>
-<th class="p-3 text-center">Total Hold</th>
-<th class="p-3 text-center">Status</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-800/80" id="clusterOverviewTableBody">
-</tbody>
-</table>
-</div>
 </div>
 </div>
 <!-- CURRENT DAY ALL-HUB KPI REPORT -->
@@ -2307,7 +2236,6 @@ try {
 
         function rerenderAll() {
             renderDashboard();
-            renderConsolidatedMatrix();
             renderLeaderboard();
         }
 
@@ -3244,7 +3172,6 @@ try {
                 finishOwnerPermissionCheck(true);
                 updateProfileUI();
                 renderDashboard();
-                renderConsolidatedMatrix();
                 renderLeaderboard();
                 return;
             }
@@ -5022,23 +4949,20 @@ try {
 
         function switchDashboardTab(tab) {
             const overviewView = document.getElementById('viewOverview');
-            const matrixView = document.getElementById('viewMatrix');
             const leaderboardView = document.getElementById('viewLeaderboard');
             const genericView = document.getElementById('viewTaskGeneric');
 
             const sideBtnOverview = document.getElementById('sideBtnOverview');
-            const sideBtnMatrix = document.getElementById('sideBtnMatrix');
             const sideBtnLeaderboard = document.getElementById('sideBtnLeaderboard');
 
             const activeClass = "bg-sky-600 text-white shadow-lg shadow-sky-950/50";
             const inactiveClass = "text-slate-400 hover:text-white hover:bg-slate-800/70";
 
-            [sideBtnOverview, sideBtnMatrix, sideBtnLeaderboard].forEach(btn => {
+            [sideBtnOverview, sideBtnLeaderboard].forEach(btn => {
                 if(btn) btn.className = `w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${inactiveClass}`;
             });
 
             overviewView.classList.add('hidden');
-            matrixView.classList.add('hidden');
             leaderboardView.classList.add('hidden');
             if (genericView) genericView.classList.add('hidden');
 
@@ -5048,11 +4972,6 @@ try {
                 currentGenericTabType = null;
                 overviewView.classList.remove('hidden');
                 if(sideBtnOverview) sideBtnOverview.className = `w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${activeClass}`;
-            } else if (tab === 'matrix') {
-                currentGenericTabType = null;
-                matrixView.classList.remove('hidden');
-                if(sideBtnMatrix) sideBtnMatrix.className = `w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${activeClass}`;
-                renderConsolidatedMatrix();
             } else if (tab === 'leaderboard') {
                 currentGenericTabType = null;
                 leaderboardView.classList.remove('hidden');
@@ -5293,68 +5212,6 @@ try {
                 renderSheets(type);
                 showToast("Sheet removed successfully!");
             }
-        }
-
-        function renderConsolidatedMatrix() {
-            normalizeHubRates();
-            const matrixBody = document.getElementById('consolidatedMatrixBody');
-            const matrixFooter = document.getElementById('consolidatedMatrixFooter');
-
-            if (!matrixBody || !matrixFooter) return;
-
-            let totalVol = 0, totalBase = 0, totalDel = 0, totalHld = 0, totalColl = 0, totalIss = 0, totalDAPres = 0, totalDATot = 0;
-
-            matrixBody.innerHTML = getVisibleHubs().map(h => {
-                const numRate = parseFloat(h.deliveryRate) || 0;
-                totalVol += h.totalVolume;
-                totalBase += (h.onTheWay != null ? h.onTheWay : h.totalVolume);
-                totalDel += h.delivered;
-                totalHld += h.totalHold;
-                totalColl += h.collection;
-                totalIss += h.issues;
-                totalDAPres += h.daPresent;
-                totalDATot += (h.daTotal || h.daPresent);
-
-                const rateBadgeClass = numRate >= 85 ? 'text-emerald-400 bg-emerald-950/60 border-emerald-800' :
-                                       numRate >= 80 ? 'text-sky-400 bg-sky-950/60 border-sky-800' :
-                                       'text-rose-400 bg-rose-950/60 border-rose-800';
-
-                return `
-                    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                        <td class="p-3 font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-warehouse text-sky-400"></i>
-                            <div>
-                                <div>${h.name}</div>
-                                <span class="text-[9px] text-slate-400 uppercase font-mono">${h.id}</span>
-                            </div>
-                        </td>
-                        <td class="p-3 text-center text-slate-200">${h.daPresent} / ${h.daTotal || h.daPresent} DA</td>
-                        <td class="p-3 text-center font-extrabold text-white">${h.totalVolume}</td>
-                        <td class="p-3 text-center font-bold text-emerald-400">${h.delivered}</td>
-                        <td class="p-3 text-center">
-                            <span class="px-2.5 py-1 rounded border text-[11px] font-black ${rateBadgeClass}">
-                                ${h.deliveryRate}
-                            </span>
-                        </td>
-                        <td class="p-3 text-center font-bold text-amber-400">${h.totalHold}</td>
-                        <td class="p-3 text-center font-bold text-slate-200">৳ ${h.collection.toLocaleString()}</td>
-                        <td class="p-3 text-center font-bold text-rose-400">${h.issues}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            const avgRate = totalBase > 0 ? Math.round((totalDel / totalBase) * 100) + '%' : '0%';
-
-            matrixFooter.innerHTML = `
-                <td class="p-3 uppercase">CLUSTER TOTAL (${getVisibleHubs().length} HUBS)</td>
-                <td class="p-3 text-center">${totalDAPres} / ${totalDATot} DA</td>
-                <td class="p-3 text-center text-lg">${totalVol}</td>
-                <td class="p-3 text-center text-lg text-emerald-400">${totalDel}</td>
-                <td class="p-3 text-center text-lg text-emerald-300 font-black">${avgRate}</td>
-                <td class="p-3 text-center text-amber-400">${totalHld}</td>
-                <td class="p-3 text-center text-amber-300">৳ ${totalColl.toLocaleString()}</td>
-                <td class="p-3 text-center text-rose-400">${totalIss}</td>
-            `;
         }
 
         function renderLeaderboard() {
@@ -5859,31 +5716,6 @@ try {
 
             updateNoNoticesMessage();
 
-            const overviewTable = document.getElementById('clusterOverviewTableBody');
-            if (overviewTable) {
-                overviewTable.innerHTML = filteredHubs.map(h => `
-                    <tr class="hover:bg-slate-800/40 transition">
-                        <td class="p-3 font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-warehouse text-sky-400"></i>
-                            <div>
-                                <div>${h.name}</div>
-                                <div class="text-[10px] text-slate-400">ID: ${h.id}</div>
-                            </div>
-                        </td>
-                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-sky-300">${h.type}</span></td>
-                        <td class="p-3 text-center font-extrabold text-white">${h.totalVolume}</td>
-                        <td class="p-3 text-center font-bold text-sky-400">${h.daPresent} DA</td>
-                        <td class="p-3 text-center font-extrabold text-emerald-400">${h.deliveryRate}</td>
-                        <td class="p-3 text-center font-bold text-amber-400">${h.totalHold}</td>
-                        <td class="p-3 text-center">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${h.status === 'Dispatched' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' : 'bg-amber-950 text-amber-400 border border-amber-800/60'}">
-                                ${h.status}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
             updateHeaderDigitalClock();
         updateLastUpdatedTime();
         setInterval(updateHeaderDigitalClock, 1000);
@@ -5934,23 +5766,23 @@ try {
 
                         <div class="grid grid-cols-5 gap-1 bg-[#0b1329] p-2.5 rounded-lg border border-slate-800 text-center mb-4">
                             <div>
-                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Volume</span>
+                                <span class="text-[8px] uppercase font-black text-slate-300 block leading-tight">Total Parcels</span>
                                 <span class="text-sm font-black text-white">${hub.totalVolume}</span>
                             </div>
                             <div>
-                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Assigned</span>
+                                <span class="text-[8px] uppercase font-black text-slate-300 block leading-tight">Assigned</span>
                                 <span class="text-sm font-black text-amber-400">${hub.onTheWay != null ? hub.onTheWay : 0}</span>
                             </div>
                             <div>
-                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Active DA</span>
+                                <span class="text-[8px] uppercase font-black text-slate-300 block leading-tight">Active DA</span>
                                 <span class="text-sm font-black text-sky-400">${hub.daPresent}</span>
                             </div>
                             <div>
-                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Delivered</span>
+                                <span class="text-[8px] uppercase font-black text-slate-300 block leading-tight">Delivered</span>
                                 <span class="text-sm font-black text-white">${hub.delivered || 0}</span>
                             </div>
                             <div>
-                                <span class="text-[8px] uppercase font-bold text-slate-400 block">Success</span>
+                                <span class="text-[8px] uppercase font-black text-slate-300 block leading-tight">Success</span>
                                 <span class="text-sm font-black text-emerald-400">${hub.deliveryRate}</span>
                             </div>
                         </div>
@@ -6357,7 +6189,6 @@ try {
                 saveAgentSetupsLocal();
                 saveLocalState();
                 filterHubs();
-                renderConsolidatedMatrix();
                 renderLeaderboard();
                 showToast(`Hub ${hubId} removed successfully for all users.`);
             } catch (e) {
@@ -6366,7 +6197,6 @@ try {
                 hubList = previousHubList;
                 saveLocalState();
                 renderDashboard();
-                renderConsolidatedMatrix();
                 renderLeaderboard();
                 showToast(`Hub ${hubId} removal failed. No shared change was confirmed.`);
             }
@@ -6396,7 +6226,6 @@ try {
             const newHub = { id, name, type: 'HUB', totalVolume: 0, daPresent: 0, daTotal: 0, delivered: 0, totalHold: 0, collection: 0, issues: 0, deliveryRate: '0%', status: 'In Progress', reports: selectedReports };
             hubList.push(newHub);
             renderDashboard();
-            renderConsolidatedMatrix();
             renderLeaderboard();
 
             // Write only this Hub document. This prevents one user's Add from
@@ -6406,7 +6235,6 @@ try {
                 hubList = hubList.filter(h => h.id !== id);
                 saveLocalState();
                 renderDashboard();
-                renderConsolidatedMatrix();
                 renderLeaderboard();
                 showToast(`Hub ${name} could not be added to Cloud.`);
                 return;
@@ -6418,14 +6246,6 @@ try {
 
         function filterHubs() {
             renderDashboard();
-        }
-
-        function openHubOverviewModal() {
-            renderDashboard();
-            document.getElementById('hubOverviewTableModal').classList.remove('hidden');
-        }
-        function closeHubOverviewModal() {
-            document.getElementById('hubOverviewTableModal').classList.add('hidden');
         }
 
         function exportDashboardData() {
@@ -6473,7 +6293,6 @@ try {
                         saveTabsAndSheets();
                         renderTaskTabs();
                         renderDashboard();
-                        renderConsolidatedMatrix();
                         renderLeaderboard();
                         cloudSyncHubList();
                         hubList.forEach(h => { cloudSyncHubReport(h.id); cloudSyncInventory(h.id); });
@@ -6482,7 +6301,6 @@ try {
                     } else if (Array.isArray(imported)) {
                         hubList = imported;
                         renderDashboard();
-                        renderConsolidatedMatrix();
                         renderLeaderboard();
                         cloudSyncHubList();
                         showToast("Cluster Data Imported Successfully!");
@@ -7418,7 +7236,6 @@ try {
             safeStep(updateProfileUI);
             safeStep(renderTaskTabs);
             safeStep(renderDashboard);
-            safeStep(renderConsolidatedMatrix);
             safeStep(renderLeaderboard);
             safeStep(renderClusterNotices);
             safeStep(() => setInterval(updateLastUpdatedTime, 1000));
@@ -7436,7 +7253,6 @@ try {
                 applyOwnerOnlyUI();
                 renderTaskTabs();
                 renderDashboard();
-                renderConsolidatedMatrix();
                 renderLeaderboard();
                 renderClusterNotices();
             });
