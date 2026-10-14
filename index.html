@@ -584,6 +584,7 @@
         .rcv-list { max-height:200px; }
         .rcv-item { padding:6px 10px; }
         .rcv-it-hint { display:none; }
+        .rcv-grp { font-size:10px; font-weight:900; letter-spacing:.5px; color:#fff; background:#475569; padding:3px 10px; }
         #hubReportView:not(.rcv-off) .excel-table td.chk-rel { outline:none !important; }
 </style>
 </head>
@@ -6527,9 +6528,19 @@ try {
                     msg: parts.map(p => p.label + ' ' + p.val).join(' + ') + ' = ' + sum + ', but ' + o.total[1] + ' = ' + total,
                     diff: diff > 0 ? 'Rows are short by ' + diff : 'Rows are over by ' + (-diff),
                     short: 'Rows ' + sum + ' vs ' + o.total[1] + ' ' + total,
-                    ids: [...parts.map(p => p.id), o.total[0]], related: o.related || [],
+                    ids: [...parts.map(p => p.id), o.total[0]], related: [],
                     focus: parts[0].id, hint: o.hint || ''
                 });
+                // the total is calculated from the Morning Report -> show that side separately under Morning
+                if (o.related && o.related.length) {
+                    issues.push({
+                        level: 'warn', section: MORN, title: 'Source of ' + o.total[1],
+                        msg: o.total[1] + ' = ' + total + ' is calculated from these Morning numbers',
+                        short: 'Check these Morning numbers (feed ' + o.total[1] + ' ' + total + ')',
+                        diff: diff > 0 ? 'Closing rows short by ' + diff : 'Closing rows over by ' + (-diff),
+                        ids: [...o.related], related: [], focus: o.related[0], hint: ''
+                    });
+                }
             };
 
             // a smaller number must not exceed a bigger one
@@ -6678,7 +6689,7 @@ try {
 
             // problems -> compact popup with only the problem items
             __rcvState = 'bad';
-            const sig = issues.map(i => i.title + '|' + i.short).join('~');
+            const sig = issues.map(i => i.section + '|' + i.title + '|' + i.short).join('~');
             const changed = sig !== __rcvSig;
             __rcvSig = sig;
             clearTimeout(__rcvHideTimer);
@@ -6688,12 +6699,17 @@ try {
             bMarks.style.display = '';
             bMarks.textContent = document.getElementById('hubReportView').classList.contains('rcv-off') ? 'Highlights: OFF' : 'Highlights: ON';
             list.style.display = '';
-            list.innerHTML = issues.map((is, i) =>
+            const itemHtml = (is, i) =>
                 '<button type="button" class="rcv-item ' + (is.level === 'warn' ? 'warn' : '') + '" onclick="rcvJump(' + i + ')">' +
                 '<span class="rcv-dot"></span><span>' +
-                '<div><span class="rcv-sec">' + escapeHtml(is.section) + '</span><span class="rcv-it-title">' + escapeHtml(is.title) + '</span></div>' +
+                '<div><span class="rcv-it-title">' + escapeHtml(is.title) + '</span></div>' +
                 '<div class="rcv-it-msg">' + escapeHtml(is.short || is.msg) + ' &rarr; <span class="rcv-it-diff">' + escapeHtml(is.diff) + '</span></div>' +
-                '</span></button>').join('');
+                '</span></button>';
+            const groups = [['Morning Report', 'MORNING DISPATCH REPORT'], ['Closing Report', 'CLOSING REPORT']];
+            list.innerHTML = groups.map(([sec, label]) => {
+                const rows = issues.map((is, i) => is.section === sec ? itemHtml(is, i) : '').join('');
+                return rows ? '<div class="rcv-grp">' + label + '</div>' + rows : '';
+            }).join('');
 
             if (changed) __rcvDismissedSig = null;
             if (__rcvDismissedSig !== sig) {
