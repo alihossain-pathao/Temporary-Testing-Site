@@ -572,6 +572,19 @@
         .rcv-it-diff { font-size:11px; font-weight:800; color:#b91c1c; }
         .rcv-item.warn .rcv-it-diff { color:#b45309; }
         .rcv-it-hint { font-size:10px; color:#64748b; margin-top:2px; }
+        /* ---- compact popup version ---- */
+        .rcv-panel { position:fixed; top:12px; right:12px; width:330px; max-width:calc(100vw - 24px); margin:0; z-index:99999; display:none; }
+        .rcv-panel.rcv-show { display:block; animation:rcvPop .2s ease-out; }
+        .rcv-panel.rcv-leaving { opacity:0; transform:translateY(-6px); transition:opacity .35s, transform .35s; }
+        @keyframes rcvPop { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
+        .rcv-head { padding:7px 10px; gap:6px; flex-wrap:nowrap; }
+        .rcv-title { min-width:0; font-size:12px; }
+        .rcv-x { border:0; background:transparent; font-size:16px; line-height:1; cursor:pointer; color:#475569; padding:0 2px; }
+        .rcv-x:hover { color:#0f172a; }
+        .rcv-list { max-height:200px; }
+        .rcv-item { padding:6px 10px; }
+        .rcv-it-hint { display:none; }
+        #hubReportView:not(.rcv-off) .excel-table td.chk-rel { outline:none !important; }
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
@@ -1182,8 +1195,8 @@ try {
 <div class="rcv-panel" id="reportCheckPanel" data-html2canvas-ignore="true">
 <div class="rcv-head">
 <div class="rcv-title" id="reportCheckTitle">Count check: fill in the report - totals are verified automatically.</div>
-<button class="rcv-btn" id="reportCheckToggleList" onclick="rcvToggleList()" type="button" style="display:none">Hide details</button>
-<button class="rcv-btn" id="reportCheckToggleMarks" onclick="rcvToggleMarks()" type="button" style="display:none">Hide highlights</button>
+<button class="rcv-btn" id="reportCheckToggleMarks" onclick="rcvToggleMarks()" type="button" style="display:none">Highlights: ON</button>
+<button class="rcv-x" id="reportCheckClose" onclick="rcvClose()" type="button" title="Close">&times;</button>
 </div>
 <div class="rcv-list" id="reportCheckList" style="display:none"></div>
 </div>
@@ -6513,6 +6526,7 @@ try {
                     level: o.level || 'bad', section: o.section, title: o.title,
                     msg: parts.map(p => p.label + ' ' + p.val).join(' + ') + ' = ' + sum + ', but ' + o.total[1] + ' = ' + total,
                     diff: diff > 0 ? 'Rows are short by ' + diff : 'Rows are over by ' + (-diff),
+                    short: 'Rows ' + sum + ' vs ' + o.total[1] + ' ' + total,
                     ids: [...parts.map(p => p.id), o.total[0]], related: o.related || [],
                     focus: parts[0].id, hint: o.hint || ''
                 });
@@ -6529,6 +6543,7 @@ try {
                     level: o.level || 'bad', section: o.section, title: o.title,
                     msg: o.smallLabel + ' (' + small + ') is more than ' + o.bigLabel + ' (' + big + ')',
                     diff: 'Over by ' + (small - big),
+                    short: o.smallLabel + ' ' + small + ' > ' + o.bigLabel + ' ' + big,
                     ids: [...o.small, ...o.big], related: [], focus: o.small[0], hint: o.hint || ''
                 });
             };
@@ -6607,11 +6622,24 @@ try {
             rcvRenderPanel(issues, evaluated);
         }
 
+        let __rcvState = null, __rcvSig = '', __rcvHideTimer = null, __rcvDismissedSig = null;
+
+        function rcvHidePanel(panel) {
+            panel.classList.remove('rcv-show', 'rcv-leaving');
+        }
+
+        function rcvClose() {
+            const panel = document.getElementById('reportCheckPanel');
+            if (!panel) return;
+            clearTimeout(__rcvHideTimer);
+            __rcvDismissedSig = __rcvSig;   // stay closed until the problem list changes
+            rcvHidePanel(panel);
+        }
+
         function rcvRenderPanel(issues, evaluated) {
             const panel = document.getElementById('reportCheckPanel');
             const title = document.getElementById('reportCheckTitle');
             const list = document.getElementById('reportCheckList');
-            const bList = document.getElementById('reportCheckToggleList');
             const bMarks = document.getElementById('reportCheckToggleMarks');
             if (!panel || !title || !list) return;
 
@@ -6619,32 +6647,59 @@ try {
             const bad = issues.filter(i => i.level !== 'warn').length;
             const warn = issues.length - bad;
 
+            // nothing filled in yet -> no popup
             if (!evaluated) {
-                title.textContent = 'Count check: fill in the report - totals are verified automatically.';
-                list.style.display = 'none'; list.innerHTML = '';
-                bList.style.display = 'none'; bMarks.style.display = 'none';
+                __rcvState = null; __rcvSig = '';
+                clearTimeout(__rcvHideTimer);
+                rcvHidePanel(panel);
                 return;
             }
+
+            // all good -> small popup, shown ONCE (only when it turns OK), then fades away
             if (!issues.length) {
-                panel.classList.add('ok');
-                title.innerHTML = '&#10004; All counts match (' + evaluated + ' check' + (evaluated === 1 ? '' : 's') + ' passed)';
-                list.style.display = 'none'; list.innerHTML = '';
-                bList.style.display = 'none'; bMarks.style.display = 'none';
+                __rcvSig = '';
+                __rcvDismissedSig = null;
+                if (__rcvState !== 'ok') {
+                    __rcvState = 'ok';
+                    panel.classList.add('ok');
+                    title.innerHTML = '&#10004; All counts match (' + evaluated + ' check' + (evaluated === 1 ? '' : 's') + ' passed)';
+                    list.style.display = 'none'; list.innerHTML = '';
+                    bMarks.style.display = 'none';
+                    clearTimeout(__rcvHideTimer);
+                    panel.classList.remove('rcv-leaving');
+                    panel.classList.add('rcv-show');
+                    __rcvHideTimer = setTimeout(() => {
+                        panel.classList.add('rcv-leaving');
+                        setTimeout(() => rcvHidePanel(panel), 380);
+                    }, 2500);
+                }
                 return;
             }
+
+            // problems -> compact popup with only the problem items
+            __rcvState = 'bad';
+            const sig = issues.map(i => i.title + '|' + i.short).join('~');
+            const changed = sig !== __rcvSig;
+            __rcvSig = sig;
+            clearTimeout(__rcvHideTimer);
+
             panel.classList.add(bad ? 'bad' : 'warn');
-            title.innerHTML = '&#9888; ' + (bad ? bad + ' count mismatch' + (bad === 1 ? '' : 'es') : '') + (bad && warn ? ' + ' : '') + (warn ? warn + ' warning' + (warn === 1 ? '' : 's') : '') +
-                ' found - click an item to jump to the cell, correct it and the warning clears automatically.';
-            bList.style.display = ''; bMarks.style.display = '';
-            bList.textContent = __rcvListOpen ? 'Hide details' : 'Show details';
-            list.style.display = __rcvListOpen ? '' : 'none';
+            title.innerHTML = '&#9888; ' + (bad ? bad + ' mismatch' + (bad === 1 ? '' : 'es') : '') + (bad && warn ? ' + ' : '') + (warn ? warn + ' warning' + (warn === 1 ? '' : 's') : '');
+            bMarks.style.display = '';
+            bMarks.textContent = document.getElementById('hubReportView').classList.contains('rcv-off') ? 'Highlights: OFF' : 'Highlights: ON';
+            list.style.display = '';
             list.innerHTML = issues.map((is, i) =>
                 '<button type="button" class="rcv-item ' + (is.level === 'warn' ? 'warn' : '') + '" onclick="rcvJump(' + i + ')">' +
                 '<span class="rcv-dot"></span><span>' +
                 '<div><span class="rcv-sec">' + escapeHtml(is.section) + '</span><span class="rcv-it-title">' + escapeHtml(is.title) + '</span></div>' +
-                '<div class="rcv-it-msg">' + escapeHtml(is.msg) + ' &rarr; <span class="rcv-it-diff">' + escapeHtml(is.diff) + '</span></div>' +
-                (is.hint ? '<div class="rcv-it-hint">' + escapeHtml(is.hint) + '</div>' : '') +
+                '<div class="rcv-it-msg">' + escapeHtml(is.short || is.msg) + ' &rarr; <span class="rcv-it-diff">' + escapeHtml(is.diff) + '</span></div>' +
                 '</span></button>').join('');
+
+            if (changed) __rcvDismissedSig = null;
+            if (__rcvDismissedSig !== sig) {
+                panel.classList.remove('rcv-leaving');
+                panel.classList.add('rcv-show');
+            }
         }
 
         function rcvJump(i) {
@@ -6668,7 +6723,7 @@ try {
             const btn = document.getElementById('reportCheckToggleMarks');
             if (!view || !btn) return;
             view.classList.toggle('rcv-off');
-            btn.textContent = view.classList.contains('rcv-off') ? 'Show highlights' : 'Hide highlights';
+            btn.textContent = view.classList.contains('rcv-off') ? 'Highlights: OFF' : 'Highlights: ON';
         }
         /* =================== END REPORT COUNT VALIDATION =================== */
 
