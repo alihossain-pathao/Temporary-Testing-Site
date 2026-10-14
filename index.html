@@ -8837,11 +8837,11 @@ html:not(.nsd-light) .toast-notify{border-radius:14px!important;border-color:rgb
 html:not(.nsd-light) #sidebarDrawer{background:linear-gradient(180deg,#0a1122,#060a14)!important;border-right:1px solid var(--line)!important;padding:20px 16px!important}
 html:not(.nsd-light) #sidebarDrawer button{border-radius:14px!important}
 @media(min-width:1100px){
- html:has(#hubDashboardView:not(.hidden)) #sidebarDrawer{transform:none!important;width:var(--rail)!important;box-shadow:none!important}
- html:has(#hubDashboardView:not(.hidden)) #sidebarOverlay{display:none!important}
- html:has(#hubDashboardView:not(.hidden)) #hubDashboardView{margin-left:var(--rail)!important;max-width:none!important;padding:28px 36px!important}
- html:has(#hubDashboardView:not(.hidden)) #hubDashboardView button[onclick="toggleSidebar()"]{display:none!important}
- html:has(#hubDashboardView:not(.hidden)) #nsdBottom{display:none!important}
+ html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #sidebarDrawer{transform:none!important;width:var(--rail)!important;box-shadow:none!important}
+ html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #sidebarOverlay{display:none!important}
+ html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #hubDashboardView{margin-left:var(--rail)!important;max-width:none!important}
+ html:not(.rd-rail-off):has(#hubDashboardView:not(.hidden)) #nsdBottom{display:none!important}
+ #hubDashboardView{transition:margin-left .25s ease}
 }
 
 /* ---- accent switcher ---- */
@@ -8856,6 +8856,10 @@ html:not(.nsd-light) #sidebarDrawer button{border-radius:14px!important}
 function ap(a){document.documentElement.dataset.accent=a;[].forEach.call(document.querySelectorAll('#rdAccent button'),function(b){b.classList.toggle('on',b.dataset.a===a)});try{localStorage.setItem(K,a)}catch(e){}}
 var d=document.createElement('div');d.id='rdAccent';d.title='Theme colour';
 L.forEach(function(x){var b=document.createElement('button');b.type='button';b.dataset.a=x[0];b.style.background='linear-gradient(135deg,'+x[1]+')';b.onclick=function(){ap(x[0])};d.appendChild(b)});
+var orig=window.toggleSidebar,R='rdRail';
+function desk(){var v=document.getElementById('hubDashboardView');return window.matchMedia('(min-width:1100px)').matches&&v&&!v.classList.contains('hidden')}
+try{if(localStorage.getItem(R)==='off')document.documentElement.classList.add('rd-rail-off')}catch(e){}
+window.toggleSidebar=function(){if(desk()){var o=document.documentElement.classList.toggle('rd-rail-off');try{localStorage.setItem(R,o?'off':'on')}catch(e){}}else if(orig)orig.apply(this,arguments)};
 document.body.appendChild(d);var s='sky';try{s=localStorage.getItem(K)||'sky'}catch(e){}ap(s)}catch(e){console.warn('[redesign]',e)}})();
 </script>
 
