@@ -3500,11 +3500,27 @@ try {
             return `${title} Hub`;
         }
 
+        /* Remember where the user was on the dashboard, so "Back to Dashboard"
+           returns to the same hub card instead of jumping to the top. */
+        let __dashboardScrollY = 0;
+        function rememberDashboardScroll() {
+            const dash = document.getElementById('hubDashboardView');
+            if (dash && !dash.classList.contains('hidden')) __dashboardScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        }
+        function restoreDashboardScroll() {
+            const y = __dashboardScrollY || 0;
+            const go = () => window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+            go();
+            requestAnimationFrame(() => { go(); requestAnimationFrame(go); });
+            setTimeout(go, 80);
+        }
+
         function generateReport(hubId, hubName) {
             if (!hasHubAccess(hubId)) { showToast('You do not have access to this hub'); return; }
             currentActiveHubId = hubId;
             const upperName = formatHubDisplayName(hubName);
 
+            rememberDashboardScroll();
             document.getElementById('morningHeaderTitle').innerText = `${upperName} - MORNING DISPATCH REPORT`;
             document.getElementById('closingHeaderTitle').innerText = `${upperName} - CLOSING REPORT`;
 
@@ -3605,7 +3621,7 @@ try {
             }
             document.getElementById('hubReportView').classList.add('hidden');
             document.getElementById('hubDashboardView').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            restoreDashboardScroll();
         }
 
         /* ===================== D.A. ATTENDANCE REPORT ===================== */
@@ -3615,6 +3631,7 @@ try {
             currentActiveAttendanceHubId = hubId;
             document.getElementById('att_hubNameDisplay').innerText = formatHubDisplayName(hubName);
 
+            rememberDashboardScroll();
             document.getElementById('hubDashboardView').classList.add('hidden');
             document.getElementById('attendanceReportView').classList.remove('hidden');
             document.getElementById('inventoryReportView')?.classList.add('hidden');
@@ -3628,7 +3645,7 @@ try {
             saveCurrentAttendanceData();
             document.getElementById('attendanceReportView').classList.add('hidden');
             document.getElementById('hubDashboardView').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            restoreDashboardScroll();
         }
 
         /* =================== HUB INVENTORY REPORT =================== */
@@ -4221,6 +4238,7 @@ try {
             const inventoryHubName = formatInventoryHubDisplayName(hubName);
             document.getElementById('inventoryHubTitle').innerText=inventoryHubName;
             document.getElementById('inventorySummaryTitle').innerText=`${inventoryHubName} Inventory Report`;
+            rememberDashboardScroll();
             document.getElementById('hubDashboardView').classList.add('hidden');
             document.getElementById('hubReportView').classList.add('hidden');
             document.getElementById('attendanceReportView').classList.add('hidden');
@@ -4237,7 +4255,7 @@ try {
             document.getElementById('inventoryReportView').classList.add('hidden');
             document.getElementById('hubDashboardView').classList.remove('hidden');
             currentActiveInventoryHubId=null;
-            window.scrollTo({top:0,behavior:'smooth'});
+            restoreDashboardScroll();
         }
 
         function addInventoryRow() { currentInventoryRows.push(inventoryBlankRow()); calculateInventoryReport(); renderInventoryRows(); updateInventoryDuplicateColors(); saveCurrentInventoryData(); }
