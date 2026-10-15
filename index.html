@@ -3671,7 +3671,7 @@ const ACCOUNTS = [
                     const data=snap.exists?(snap.data()||{}):{};
                     const existing=Array.isArray(data.notifications)?data.notifications:[];
                     const next=[item,...existing.filter(n=>n&&n.id!==item.id)].slice(0,100);
-                    await legacyRef.set({notifications:next,updatedAt:Date.now()},{merge:true});
+                    await legacyRef.set({notifications:next,clearedAt:data.clearedAt||'',updatedAt:Date.now()});
                 }catch(legacyErr){
                     console.warn('Legacy notification mirror failed:',legacyErr);
                 }
@@ -3764,7 +3764,7 @@ const ACCOUNTS = [
                 const snap=await ref.get();
                 const ex=snap.exists&&Array.isArray(snap.data()?.notifications)?snap.data().notifications:[];
                 const next=ex.filter(n=>n&&String(n.id)!==String(id));
-                if(next.length!==ex.length)await ref.set({notifications:next,updatedAt:Date.now()},{merge:true});
+                if(next.length!==ex.length)await ref.set({notifications:next,clearedAt:(snap.exists&&snap.data()?.clearedAt)||'',updatedAt:Date.now()});
                 dnCollectionItems=dnCollectionItems.filter(n=>String(n.id)!==String(id));
                 dnLegacyItems=dnLegacyItems.filter(n=>String(n.id)!==String(id));
                 rebuildDashboardNotifications();
@@ -3783,7 +3783,7 @@ const ACCOUNTS = [
             // Step 1 (sobar age): "clearedAt" marker lekha — eta live listener diye SOB user-er screen theke
             // ager sob notification sathe sathe hide kore, kono individual delete fail korleo.
             try{
-                await cloudDb.doc('config/dashboardNotifications').set({notifications:[],clearedAt:stamp,updatedAt:Date.now()},{merge:true});
+                await cloudDb.doc('config/dashboardNotifications').set({notifications:[],clearedAt:stamp,updatedAt:Date.now()});
                 dnClearedAt=stamp;dnLegacyItems=[];
                 rebuildDashboardNotifications();
             }catch(e){
@@ -3794,7 +3794,7 @@ const ACCOUNTS = [
             try{
                 const snap=await cloudDb.collection('dashboardNotifications').get();
                 total=snap.docs.length;
-                const res=await Promise.allSettled(snap.docs.map(d=>d.ref.delete()));
+                const res=await Promise.allSettled(snap.docs.map(d=>{const id=d.id||(d.data&&d.data()&&d.data().id);if(!id)return Promise.reject(new Error('doc id missing'));return cloudDb.doc('dashboardNotifications/'+id).delete();}));
                 res.forEach(r=>{if(r.status==='rejected'){failed++;errCode=errCode||(r.reason&&r.reason.code)||String(r.reason&&r.reason.message||r.reason);console.error('Notification delete failed',r.reason);}});
             }catch(e){
                 console.error('Clear all notifications failed',e);errCode=errCode||(e&&e.code)||String(e&&e.message||e);failed=failed||1;
