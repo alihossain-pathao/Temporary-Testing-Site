@@ -2016,7 +2016,7 @@ try {
       <select id="nsdHgRole" class="nsd-input">
         <option value="owner">Owner (sudhu OWNER_EMAIL-er jonno)</option>
         <option value="admin">Admin</option>
-        <option value="user">User</option>
+        <option value="user">Incharge</option>
       </select>
       <label class="nsd-lbl">Password</label>
       <div class="nsd-pwrow"><input id="nsdHgPw" class="nsd-input" type="password" autocomplete="new-password"><button class="nsd-eye" type="button" onclick="NSD_AUTH.togglePw('nsdHgPw',this)">Show</button></div>
@@ -2058,7 +2058,7 @@ try {
 <div id="nsdAdminPanel" class="nsd-overlay" style="display:none;z-index:95" onclick="if(event.target===this)NSD_AUTH.closeAdmin()">
   <div class="nsd-sheet wide">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="font-size:16px;font-weight:900;color:#fff;margin:0">Admin panel &mdash; User access</h2>
+      <h2 style="font-size:16px;font-weight:900;color:#fff;margin:0">Admin panel &mdash; Incharge access</h2>
       <button class="nsd-x" type="button" onclick="NSD_AUTH.closeAdmin()" title="Close">&times;</button>
     </div>
     <div id="nsdSyncState" class="nsd-hint" style="margin-top:4px"></div>
@@ -2070,7 +2070,7 @@ try {
     <div class="nsd-pwrow"><input id="nsdAdPw" class="nsd-input" type="password" autocomplete="new-password"><button class="nsd-eye" type="button" onclick="NSD_AUTH.togglePw('nsdAdPw',this)">Show</button></div>
     <label class="nsd-lbl">Access</label>
     <select id="nsdAdRole" class="nsd-input">
-      <option value="user">User</option>
+      <option value="user">Incharge</option>
       <option value="admin" id="nsdAdRoleAdmin">Admin</option>
     </select>
     <div id="nsdAdMsg" class="nsd-err"></div>
@@ -2429,7 +2429,7 @@ const ACCOUNTS = [
     var src = u && (u.photo || u.thumb);
     return src ? '<img alt="" src="' + esc(src) + '">' : '<span>' + esc((u && u.name ? u.name : '?').trim().charAt(0).toUpperCase() || '?') + '</span>';
   }
-  function badge(role) { return '<span class="nsd-badge ' + role + '">' + role.toUpperCase() + '</span>'; }
+  function badge(role) { return '<span class="nsd-badge ' + role + '">' + (role === 'user' ? 'INCHARGE' : role.toUpperCase()) + '</span>'; }
   function refreshUi() {
     var u = user(), g = $('authGate');
     if (g) { if (u) { g.classList.add('hidden'); g.style.display = 'none'; } else { g.classList.remove('hidden'); g.style.display = 'flex'; } }
@@ -2448,7 +2448,7 @@ const ACCOUNTS = [
     if (reset) { pf = { photo: u.photo, thumb: u.thumb, touched: false }; $('nsdPfName').value = u.name; $('nsdPfMsg').textContent = ''; }
     $('nsdPfAvatar').innerHTML = avatarHtml({ name: $('nsdPfName').value || u.name, photo: pf.photo, thumb: pf.thumb });
     $('nsdPfEmail').textContent = u.email;
-    var r = $('nsdPfRole'); r.className = 'nsd-badge ' + u.role; r.textContent = u.role.toUpperCase();
+    var r = $('nsdPfRole'); r.className = 'nsd-badge ' + u.role; r.textContent = u.role === 'user' ? 'INCHARGE' : u.role.toUpperCase();
   }
   function openProfile() { if (!user()) return; fillProfile(true); $('nsdProfileSheet').style.display = 'flex'; }
   function closeProfile() { var s = $('nsdProfileSheet'); if (s) s.style.display = 'none'; }
