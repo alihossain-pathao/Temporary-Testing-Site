@@ -2511,11 +2511,16 @@ const ACCOUNTS = [
       var del = canTouch(actor, a) && !mine
         ? '<button class="nsd-btn danger sm" type="button" data-rm="' + esc(a.email) + '">Remove</button>'
         : '<span class="nsd-hint" style="margin:0">' + (mine ? 'You' : 'Protected') + '</span>';
+      var rb = '';
+      if (actor.role === 'owner' && a.src === 'db' && a.email !== OWNER && !mine) {
+        var toRole = a.role === 'admin' ? 'user' : 'admin';
+        rb = '<button class="nsd-btn sm" type="button" data-role="' + esc(a.email) + '" data-to="' + toRole + '" title="Role bodlan">' + (toRole === 'admin' ? 'Make Admin' : 'Make Incharge') + '</button>';
+      }
       var line = a.src === 'db' && isAdm(actor) ? '<button class="nsd-btn sm" type="button" data-line="' + esc(a.email) + '" title="File-e paste korar line copy">Line</button>' : '';
       return '<div class="nsd-row"><div class="nsd-av" style="width:34px;height:34px;font-size:13px">' + avatarHtml(v) + '</div>' +
         '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(v.name) + '</div>' +
         '<div style="font-size:10px;font-weight:600;color:#94a3b8;overflow:hidden;text-overflow:ellipsis">' + esc(a.email) + (a.src === 'file' ? ' · file' : '') + '</div></div>' +
-        badge(a.role) + line + del + '</div>';
+        badge(a.role) + rb + line + del + '</div>';
     }).join('') || '<div class="nsd-hint">Kono account nei.</div>';
   }
   function adminDone() {
@@ -2541,6 +2546,21 @@ const ACCOUNTS = [
       '<button class="nsd-btn sm" type="button" style="margin-top:8px" onclick="NSD_AUTH.copyEl(\'nsdAdLine\',this)">Copy line</button>';
     res.style.display = 'block';
     changed();
+  }
+  /* Owner kono DB-account-er role Admin <-> Incharge bodlate pare (file-er ACCOUNTS-er account file theke bodlate hoy) */
+  function adminSetRole(email, role) {
+    var actor = user(), t = accountsMap()[email];
+    role = role === 'admin' ? 'admin' : 'user';
+    if (!actor || actor.role !== 'owner') { toast('Role sudhu Owner bodlate pare'); return; }
+    if (!t || t.email === OWNER || t.src !== 'db') { toast('Ei account-er role ekhane bodlano jabe na'); return; }
+    if (t.role === role) return;
+    var base = normRec(state.accounts[email], email); if (!base) { toast('Account data pawa jay ni'); return; }
+    var label = role === 'admin' ? 'Admin' : 'Incharge';
+    if (!confirm(email + ' ke ' + label + ' korben?')) return;
+    var rec = { email: base.email, name: base.name, role: role, hash: base.hash };
+    state.accounts[email] = rec; saveState();
+    dbSet('/accounts/' + encKey(email), rec);
+    changed(); toast(email + ' ekhon ' + label);
   }
   function adminRemove(email) {
     var actor = user(), t = accountsMap()[email];
@@ -2604,8 +2624,9 @@ const ACCOUNTS = [
     $('nsdPfFile').addEventListener('change', function () { onPhotoPicked(this.files && this.files[0]); this.value = ''; });
     $('nsdPfName').addEventListener('input', function () { fillProfile(false); });
     $('nsdAdList').addEventListener('click', function (e) {
-      var t = e.target.closest('[data-rm],[data-line]'); if (!t) return;
-      if (t.hasAttribute('data-rm')) adminRemove(t.getAttribute('data-rm'));
+      var t = e.target.closest('[data-rm],[data-line],[data-role]'); if (!t) return;
+      if (t.hasAttribute('data-role')) adminSetRole(t.getAttribute('data-role'), t.getAttribute('data-to'));
+      else if (t.hasAttribute('data-rm')) adminRemove(t.getAttribute('data-rm'));
       else { var a = accountsMap()[t.getAttribute('data-line')]; if (a) { var tmp = document.createElement('span'); tmp.id = 'nsdTmpLine'; tmp.textContent = fmtLine(a); tmp.style.display = 'none'; document.body.appendChild(tmp); copyEl('nsdTmpLine', t); tmp.remove(); } }
     });
     window.addEventListener('hashchange', syncHashBox);
