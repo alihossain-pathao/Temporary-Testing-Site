@@ -2886,6 +2886,7 @@ const ACCOUNTS = [
         let dashboardNotificationReadUnsubscribe = null;
         let dnCollectionItems = [];
         let dnLegacyItems = [];
+        let dnClearedAt = '';   // ISO time: owner 'Clear all' korle er ager sob notification sobar jonno hidden
         let presenceUnsubscribe = null;
         let presenceHeartbeat = null;
         let presenceRefreshTimer = null;
@@ -3670,7 +3671,7 @@ const ACCOUNTS = [
                     const data=snap.exists?(snap.data()||{}):{};
                     const existing=Array.isArray(data.notifications)?data.notifications:[];
                     const next=[item,...existing.filter(n=>n&&n.id!==item.id)].slice(0,100);
-                    await legacyRef.set({notifications:next,updatedAt:Date.now()});
+                    await legacyRef.set({notifications:next,updatedAt:Date.now()},{merge:true});
                 }catch(legacyErr){
                     console.warn('Legacy notification mirror failed:',legacyErr);
                 }
@@ -3694,7 +3695,7 @@ const ACCOUNTS = [
         /* Merge collection + legacy lists (rebuilt from source every time, so deletions propagate live to everyone) */
         function rebuildDashboardNotifications(render=true){
             const map=new Map();
-            [...(dnLegacyItems||[]),...(dnCollectionItems||[])].forEach(n=>{if(n&&n.id)map.set(String(n.id),n);});
+            [...(dnLegacyItems||[]),...(dnCollectionItems||[])].forEach(n=>{if(n&&n.id&&!(dnClearedAt&&String(n.createdAt||'')<=dnClearedAt))map.set(String(n.id),n);});
             dashboardNotifications=Array.from(map.values()).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,100);
             if(render)renderDashboardNotificationTab();
         }
@@ -3763,7 +3764,7 @@ const ACCOUNTS = [
                 const snap=await ref.get();
                 const ex=snap.exists&&Array.isArray(snap.data()?.notifications)?snap.data().notifications:[];
                 const next=ex.filter(n=>n&&String(n.id)!==String(id));
-                if(next.length!==ex.length)await ref.set({notifications:next,updatedAt:Date.now()});
+                if(next.length!==ex.length)await ref.set({notifications:next,updatedAt:Date.now()},{merge:true});
                 dnCollectionItems=dnCollectionItems.filter(n=>String(n.id)!==String(id));
                 dnLegacyItems=dnLegacyItems.filter(n=>String(n.id)!==String(id));
                 rebuildDashboardNotifications();
@@ -3777,16 +3778,38 @@ const ACCOUNTS = [
         async function clearAllDashboardNotifications(){
             if(!myAccess.isOwner||!currentUser?.uid||!cloudDb){showToast('Only the owner can clear notifications');return;}
             if(!await smartConfirm({title:'Clear all notifications?',message:'Sob notification sobar kase theke permanently remove hobe. Eta undo kora jabe na.',ok:'Yes, Clear All',icon:'fa-bell-slash'}))return;
+            const stamp=new Date().toISOString();
+            let errCode='';
+            // Step 1 (sobar age): "clearedAt" marker lekha — eta live listener diye SOB user-er screen theke
+            // ager sob notification sathe sathe hide kore, kono individual delete fail korleo.
+            try{
+                await cloudDb.doc('config/dashboardNotifications').set({notifications:[],clearedAt:stamp,updatedAt:Date.now()},{merge:true});
+                dnClearedAt=stamp;dnLegacyItems=[];
+                rebuildDashboardNotifications();
+            }catch(e){
+                console.error('Clear-all marker write failed',e);errCode=e&&e.code?e.code:String(e&&e.message||e);
+            }
+            // Step 2: asol document-gulo delete (alada alada, ek-ta fail korleo baki-gulo delete hobe)
+            let failed=0,total=0;
             try{
                 const snap=await cloudDb.collection('dashboardNotifications').get();
-                await Promise.all(snap.docs.map(d=>d.ref.delete()));
-                await cloudDb.doc('config/dashboardNotifications').set({notifications:[],updatedAt:Date.now()});
+                total=snap.docs.length;
+                const res=await Promise.allSettled(snap.docs.map(d=>d.ref.delete()));
+                res.forEach(r=>{if(r.status==='rejected'){failed++;errCode=errCode||(r.reason&&r.reason.code)||String(r.reason&&r.reason.message||r.reason);console.error('Notification delete failed',r.reason);}});
+            }catch(e){
+                console.error('Clear all notifications failed',e);errCode=errCode||(e&&e.code)||String(e&&e.message||e);failed=failed||1;
+            }
+            if(!errCode){
                 dnCollectionItems=[];dnLegacyItems=[];
                 rebuildDashboardNotifications();
                 showToast('All notifications cleared for everyone');
-            }catch(e){
-                console.error('Clear all notifications failed',e);
-                showToast('Could not clear. Check Firestore rules (delete permission for owner).');
+            }else if(dnClearedAt===stamp){
+                // marker lekha hoyeche, tai sobar screen theke hide hoyeche; kintu kichu document delete hoy ni
+                rebuildDashboardNotifications();
+                showToast('Cleared for everyone, but '+failed+'/'+total+' old docs could not be deleted ('+errCode+'). Check Firestore delete rule.');
+            }else{
+                rebuildDashboardNotifications();
+                showToast('Could not clear ('+errCode+'). Firestore rules-e dashboardNotifications ar config/dashboardNotifications-e write/delete allow korun.');
             }
         }
         async function markDashboardNotificationRead(id){
@@ -3820,6 +3843,7 @@ const ACCOUNTS = [
                 ]);
                 let legacy=[];
                 if(legacySnap.exists&&Array.isArray(legacySnap.data()?.notifications)) legacy=legacySnap.data().notifications;
+                dnClearedAt=String((legacySnap.exists&&legacySnap.data()?.clearedAt)||'');
                 let collection=[];
                 try{
                     const cSnap=await cloudDb.collection('dashboardNotifications').get();
@@ -3849,6 +3873,7 @@ const ACCOUNTS = [
 
             // Legacy aggregate feed is also listened to so older notifications remain visible.
             const legacyUnsub=cloudDb.doc('config/dashboardNotifications').onSnapshot(snap=>{
+                dnClearedAt=String((snap.exists&&snap.data()?.clearedAt)||'');
                 dnLegacyItems=(snap.exists&&Array.isArray(snap.data()?.notifications)?snap.data().notifications:[]).filter(n=>n&&n.id);
                 rebuildDashboardNotifications();
             },err=>console.warn('Legacy notification listener failed',err));
@@ -3864,7 +3889,7 @@ const ACCOUNTS = [
                 renderDashboardNotificationTab();
             },()=>{});
         }
-        function stopDashboardNotificationListener(){if(dashboardNotificationUnsubscribe)dashboardNotificationUnsubscribe();if(dashboardNotificationReadUnsubscribe)dashboardNotificationReadUnsubscribe();dashboardNotificationUnsubscribe=dashboardNotificationReadUnsubscribe=null;dnCollectionItems=[];dnLegacyItems=[];dashboardNotifications=[];dashboardNotificationReadIds=[];document.getElementById('dashboardNotificationPanel')?.classList.add('hidden');renderDashboardNotificationTab();}
+        function stopDashboardNotificationListener(){if(dashboardNotificationUnsubscribe)dashboardNotificationUnsubscribe();if(dashboardNotificationReadUnsubscribe)dashboardNotificationReadUnsubscribe();dashboardNotificationUnsubscribe=dashboardNotificationReadUnsubscribe=null;dnCollectionItems=[];dnLegacyItems=[];dnClearedAt='';dashboardNotifications=[];dashboardNotificationReadIds=[];document.getElementById('dashboardNotificationPanel')?.classList.add('hidden');renderDashboardNotificationTab();}
         function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 
         function setupGoogleAuth() {
