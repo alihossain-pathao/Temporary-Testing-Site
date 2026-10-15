@@ -662,7 +662,7 @@ select.nsd-input{appearance:auto}
 <div style="width:100%;max-width:380px;margin:auto 0">
 <div class="nsd-card">
 <img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg" src="" style="display:block;margin:0 auto 14px;width:56px;height:56px"/>
-<h2 id="authGateTitle" style="text-align:center;margin:0;font-size:18px;font-weight:900;color:#fff">Login korun</h2>
+<h2 id="authGateTitle" style="text-align:center;margin:0;font-size:18px;font-weight:900;color:#fff">Login</h2>
 <p id="authGateStatus" class="nsd-hint" style="text-align:center;margin:8px 0 4px;font-size:11px;line-height:1.5"></p>
 <form id="nsdLoginForm" autocomplete="on" novalidate>
 <label class="nsd-lbl" for="nsdLoginEmail">Gmail</label>
@@ -2110,6 +2110,7 @@ const DB_URL = '';
       Format:  {email:"x@gmail.com", name:"Naam", role:"owner|admin|user", hash:"64-hex"},          */
 const ACCOUNTS = [
   // {email:"ali.hossain@pathao.com", name:"Ali Hossain", role:"owner", hash:"PASTE-HASH-HERE"},
+  {email:"ali.hossain@pathao.com", name:"Ali Hossain", role:"owner", hash:"8e0d3f15faa6fa23cc15ee4f0486f8649d148dc62d66759b6e785f6768ce8be9"},
 ];
 </script>
 
@@ -2359,7 +2360,7 @@ const ACCOUNTS = [
       if (!lockTimer) lockTimer = setInterval(function () { if (lockLeft() <= 0) { clearInterval(lockTimer); lockTimer = null; setErr(''); } updateLoginUi(); }, 500);
     }
     var note = $('authGateStatus');
-    if (note) note.textContent = Object.keys(accountsMap()).length ? 'Gmail ar Password diye Narsingdi Cluster Operations Center-e dhukun.'
+    if (note) note.textContent = Object.keys(accountsMap()).length ? 'Enter your Gmail and Password to access the Narsingdi Cluster Operations Center.'
       : 'Ekhono kono account setup nei. File-er address-er shesh-e #hash likhe Owner-er line banan, tarpor file-er ACCOUNTS-e paste korun.';
   }
   function failAttempt(msg) {
