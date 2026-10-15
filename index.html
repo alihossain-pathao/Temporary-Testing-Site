@@ -825,7 +825,8 @@ try {
 </button>
 <div>
 <h1 class="text-2xl font-black text-white tracking-wide flex items-center gap-3">
-<i class="fa-solid fa-boxes-packing text-sky-400"></i>
+<!-- PROFILE: gol avatar (login thakle dekha jay). Click korle profile sheet khole -->
+<button aria-label="Profile" class="nsd-av" id="nsdAvatarBtn" onclick="NSD_AUTH.openProfile()" style="display:none" title="Profile" type="button"></button>
                         Narsingdi Cluster Operations Center
                     </h1>
 <p class="text-xs text-slate-400 mt-1 font-semibold">Real-time Dispatch Tracking, Delivery Performance &amp; Hub Management</p>
@@ -839,8 +840,6 @@ try {
 <div class="digital-clock-time" id="headerDigitalTime">11:24:00 AM</div>
 <div class="digital-clock-date" id="headerDigitalDate">26 September 2026</div>
 </div>
-<!-- PROFILE: gol avatar button (login thakle dekha jay). Click korle profile sheet khole -->
-<button aria-label="Profile" class="nsd-av" id="nsdAvatarBtn" onclick="NSD_AUTH.openProfile()" style="display:none" title="Profile" type="button"></button>
 <input accept=".json" class="hidden" id="importJsonInput" onchange="importDashboardData(event)" type="file"/>
 <div class="hidden absolute right-4 md:right-8 top-[78px] w-[min(92vw,380px)] bg-[#131d36] border border-slate-700 rounded-2xl shadow-2xl z-[70] overflow-hidden" id="dashboardNotificationPanel">
 <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3">
