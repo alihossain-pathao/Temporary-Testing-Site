@@ -609,32 +609,80 @@ var APP_LOGO_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
 })();
 </script>
+<style id="nsdAuthCss">
+/* login na korle app-er kichu dekha jabe na (gate ta puro page cover kore) */
+body.nsd-locked{overflow:hidden}
+body.nsd-locked>*:not(#authGate):not(#nsdHashBox):not(#toastNotify):not(script):not(style){visibility:hidden!important}
+/* ROLE: User-er jonno admin-only jinis hide — data-adm attribute bosale-i hide hobe */
+body:not(.is-adm) [data-adm],body:not(.is-adm) [data-owner-only]{display:none!important}
+
+.nsd-card{background:#131d36;border:1px solid #1e293b;border-radius:18px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.nsd-lbl{display:block;font-size:11px;font-weight:800;color:#94a3b8;margin:12px 0 5px}
+.nsd-input{width:100%;background:#0b1329;color:#e2e8f0;border:1px solid #334155;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600;box-sizing:border-box}
+.nsd-input:focus{outline:none;border-color:#0ea5e9}
+.nsd-input:disabled{opacity:.5;cursor:not-allowed}
+select.nsd-input{appearance:auto}
+.nsd-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px 14px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:12px;font-weight:900;cursor:pointer;box-sizing:border-box}
+.nsd-btn:hover{border-color:#0ea5e9}
+.nsd-btn:disabled{opacity:.5;cursor:not-allowed}
+.nsd-btn.primary{background:#0284c7;border-color:#0ea5e9;color:#fff}
+.nsd-btn.primary:hover{background:#0ea5e9}
+.nsd-btn.danger{background:#4c0519;border-color:#9f1239;color:#fda4af}
+.nsd-btn.sm{width:auto;padding:6px 10px;font-size:10px;border-radius:9px}
+.nsd-pwrow{position:relative}
+.nsd-pwrow .nsd-input{padding-right:64px}
+.nsd-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:#1e293b;border:1px solid #334155;color:#cbd5e1;font-size:10px;font-weight:900;border-radius:8px;padding:5px 9px;cursor:pointer}
+.nsd-err{min-height:16px;margin-top:10px;font-size:12px;font-weight:800;color:#fb7185}
+.nsd-hint{font-size:10px;font-weight:700;color:#64748b;margin-top:4px}
+.nsd-badge{display:inline-block;font-size:9px;font-weight:900;padding:2px 8px;border-radius:999px;letter-spacing:.06em}
+.nsd-badge.owner{background:#064e3b;color:#6ee7b7}
+.nsd-badge.admin{background:#78350f;color:#fcd34d}
+.nsd-badge.user{background:#1e293b;color:#94a3b8}
+.nsd-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.nsd-overlay{align-items:center}}
+.nsd-sheet{width:100%;max-width:430px;max-height:94vh;overflow-y:auto;background:#131d36;border:1px solid #1e293b;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+@media(min-width:640px){.nsd-sheet{border-radius:22px}}
+.nsd-sheet.wide{max-width:560px}
+.nsd-handle{width:42px;height:4px;border-radius:9px;background:#334155;margin:0 auto 14px}
+.nsd-av{border-radius:50%;overflow:hidden;background:#1e293b;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nsd-av img{width:100%;height:100%;object-fit:cover;display:block}
+#nsdAvatarBtn{width:44px;height:44px;border:2px solid #38bdf8;cursor:pointer;font-size:16px;padding:0}
+#nsdAvatarBtn:hover{border-color:#7dd3fc}
+.nsd-row{display:flex;align-items:center;gap:10px;background:#0b1329;border:1px solid #1e293b;border-radius:12px;padding:8px 10px;margin-top:8px}
+.nsd-code{display:block;word-break:break-all;background:#0b1329;border:1px dashed #334155;border-radius:10px;padding:10px;font:600 11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#7dd3fc;margin-top:6px;user-select:all}
+.nsd-x{background:none;border:0;color:#94a3b8;font-size:18px;cursor:pointer;padding:2px 8px}
+</style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
 <div class="toast-notify" id="toastNotify">
 <span id="toastMsg">Action completed successfully</span>
 </div>
-<!-- LOGIN GATE: dashboard requires Google sign-in -->
-<div class="fixed inset-0 z-[100] bg-[#0b1329] flex items-center justify-center p-5" id="authGate">
-<div class="w-full max-w-sm bg-[#131d36] border border-slate-800 rounded-2xl p-6 shadow-2xl text-center">
-<img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg mb-4" src=""/>
-<h2 class="text-lg font-black text-white" id="authGateTitle">Sign in to continue</h2>
-<p class="text-xs text-slate-400 mt-2 leading-relaxed" id="authGateStatus">Checking sign-in...</p>
-<button class="mt-5 w-full px-4 py-3 text-xs font-black rounded-xl bg-white text-slate-900 hover:bg-slate-200 transition flex items-center justify-center gap-2" id="authGateLoginBtn" onclick="googleSignIn()">
-<i class="fa-brands fa-google"></i> Sign in with Google
-            </button>
-<p class="mt-4 text-[9px] text-slate-600" id="authBuildTag">build 2026-10-01-i</p>
+<!-- LOGIN GATE: Gmail + Password. Login na korle ei screen puro page cover kore thake (app-er kichu dekha jay na) -->
+<div class="fixed inset-0 z-[100] bg-[#0b1329] flex items-start justify-center p-5 overflow-y-auto" id="authGate" style="position:fixed;inset:0;z-index:100;background:#0b1329;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;box-sizing:border-box">
+<div style="width:100%;max-width:380px;margin:auto 0">
+<div class="nsd-card">
+<img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg" src="" style="display:block;margin:0 auto 14px;width:56px;height:56px"/>
+<h2 id="authGateTitle" style="text-align:center;margin:0;font-size:18px;font-weight:900;color:#fff">Login korun</h2>
+<p id="authGateStatus" class="nsd-hint" style="text-align:center;margin:8px 0 4px;font-size:11px;line-height:1.5"></p>
+<form id="nsdLoginForm" autocomplete="on" novalidate>
+<label class="nsd-lbl" for="nsdLoginEmail">Gmail</label>
+<input id="nsdLoginEmail" class="nsd-input" type="text" name="username" inputmode="email" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="name@gmail.com">
+<label class="nsd-lbl" for="nsdLoginPw">Password</label>
+<div class="nsd-pwrow"><input id="nsdLoginPw" class="nsd-input" type="password" name="password" autocomplete="current-password" placeholder="Password"><button class="nsd-eye" id="nsdPwToggle" type="button">Show</button></div>
+<div id="nsdLoginErr" class="nsd-err" role="alert"></div>
+<div id="nsdLoginHint" class="nsd-hint" style="min-height:14px"></div>
+<button id="nsdLoginBtn" class="nsd-btn primary" type="submit" style="margin-top:10px">Login</button>
+</form>
+</div>
 </div>
 </div>
 <script>
-/* Ctrl+R / F5: if this browser was signed in before, show NO login/loading screen while Firebase
-   restores the saved session. The gate appears only if Firebase says nobody is signed in. */
+/* Ctrl+R / F5: ager session thakle login screen flash korbe na. Session na thakle page lock thake.
+   (Asol check ta nsdAuthModule script-e hoy — account ekhono ache kina.) */
 try {
-    if (localStorage.getItem('nsdWasSignedIn') === '1') {
-        var g = document.getElementById('authGate');
-        g.style.display = 'none';
-        g.classList.add('hidden');
-    }
+    var __g = document.getElementById('authGate');
+    if (localStorage.getItem('nsd_session_v1')) { __g.style.display = 'none'; __g.classList.add('hidden'); }
+    else { document.body.classList.add('nsd-locked'); }
 } catch (e) {}
 </script>
 <!-- SIDEBAR OVERLAY & DRAWER -->
@@ -701,11 +749,11 @@ try {
 </button>
 </div>
 <div class="space-y-1.5" data-owner-only="">
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-owner-only="" onclick="openOwnerAccessModal(); toggleSidebar();">
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-adm="" data-owner-only="" onclick="NSD_AUTH.openAdmin(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-sm">
 <i class="fa-solid fa-user-shield"></i>
 </span>
-<span class="truncate">Owner Access</span>
+<span class="truncate">Admin Panel</span>
 </button>
 </div>
 <div class="space-y-1.5">
@@ -758,7 +806,7 @@ try {
 </div>
 </div>
 <button class="w-full px-3 py-2.5 text-xs font-black rounded-xl bg-white text-slate-900 hover:bg-slate-200 transition flex items-center justify-center gap-2" id="sidebarLoginBtn" onclick="googleSignIn(); toggleSidebar();">
-<i class="fa-brands fa-google"></i> Google Login
+<i class="fa-solid fa-right-to-bracket"></i> Login
             </button>
 <button class="hidden w-full px-3 py-2.5 text-xs font-black rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition flex items-center justify-center gap-2 border border-slate-700" id="sidebarLogoutBtn" onclick="googleSignOut(); toggleSidebar();">
 <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -791,6 +839,8 @@ try {
 <div class="digital-clock-time" id="headerDigitalTime">11:24:00 AM</div>
 <div class="digital-clock-date" id="headerDigitalDate">26 September 2026</div>
 </div>
+<!-- PROFILE: gol avatar button (login thakle dekha jay). Click korle profile sheet khole -->
+<button aria-label="Profile" class="nsd-av" id="nsdAvatarBtn" onclick="NSD_AUTH.openProfile()" style="display:none" title="Profile" type="button"></button>
 <input accept=".json" class="hidden" id="importJsonInput" onchange="importDashboardData(event)" type="file"/>
 <div class="hidden absolute right-4 md:right-8 top-[78px] w-[min(92vw,380px)] bg-[#131d36] border border-slate-700 rounded-2xl shadow-2xl z-[70] overflow-hidden" id="dashboardNotificationPanel">
 <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3">
@@ -1942,6 +1992,637 @@ try {
 </div>
 </div>
 </div>
+<!-- =====================================================================
+     NOTUN LOGIN SYSTEM  (Gmail + Password)
+     Ei block ta puran Google login-er jaygay boshano hoyeche.
+     Baki app-er kono kaj ei block chhuye ni — sudhu login/role/profile.
+     ===================================================================== -->
+
+
+<!-- ===== HASH GENERATOR: file-er address-er shesh-e #hash dile khulbe. Kichu save kore na, sudhu line banay ===== -->
+<div id="nsdHashBox" style="display:none;position:fixed;inset:0;z-index:110;background:#0b1329;overflow-y:auto;padding:20px;box-sizing:border-box">
+  <div style="max-width:440px;margin:0 auto">
+    <div class="nsd-card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <h2 style="font-size:16px;font-weight:900;color:#fff;margin:0">Hash generator</h2>
+        <button class="nsd-x" type="button" onclick="NSD_AUTH.closeHash()" title="Close">&times;</button>
+      </div>
+      <p class="nsd-hint" style="margin:6px 0 0">Ei box kichu save kore na — sudhu ACCOUNTS-er jonno ekta line banay. Prothom Owner-er line eikhane theke banan.</p>
+      <label class="nsd-lbl">Gmail</label>
+      <input id="nsdHgEmail" class="nsd-input" type="text" inputmode="email" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="name@gmail.com">
+      <label class="nsd-lbl">Name</label>
+      <input id="nsdHgName" class="nsd-input" type="text" autocomplete="off" placeholder="Poroshe jemon dekhabe">
+      <label class="nsd-lbl">Access</label>
+      <select id="nsdHgRole" class="nsd-input">
+        <option value="owner">Owner (sudhu OWNER_EMAIL-er jonno)</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+      </select>
+      <label class="nsd-lbl">Password</label>
+      <div class="nsd-pwrow"><input id="nsdHgPw" class="nsd-input" type="password" autocomplete="new-password"><button class="nsd-eye" type="button" onclick="NSD_AUTH.togglePw('nsdHgPw',this)">Show</button></div>
+      <button class="nsd-btn primary" type="button" style="margin-top:14px" onclick="NSD_AUTH.makeLine()">Line banao</button>
+      <div id="nsdHgMsg" class="nsd-err"></div>
+      <div id="nsdHgOutWrap" style="display:none">
+        <span class="nsd-code" id="nsdHgOut"></span>
+        <button class="nsd-btn sm" type="button" style="margin-top:8px" onclick="NSD_AUTH.copyEl('nsdHgOut',this)">Copy line</button>
+        <p class="nsd-hint">Ei line ta file-er <b>ACCOUNTS</b> list-er bhitore paste korun, tarpor save kore page refresh korun.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROFILE SHEET (header-er gol avatar e click korle khole) ===== -->
+<div id="nsdProfileSheet" class="nsd-overlay" style="display:none" onclick="if(event.target===this)NSD_AUTH.closeProfile()">
+  <div class="nsd-sheet">
+    <div class="nsd-handle"></div>
+    <div style="text-align:center">
+      <div id="nsdPfAvatar" class="nsd-av" style="width:96px;height:96px;margin:0 auto;font-size:36px;border:3px solid #38bdf8"></div>
+      <div id="nsdPfEmail" style="margin-top:10px;font-size:12px;font-weight:700;color:#94a3b8;word-break:break-all"></div>
+      <span id="nsdPfRole" class="nsd-badge user" style="margin-top:6px"></span>
+    </div>
+    <label class="nsd-lbl">Name</label>
+    <input id="nsdPfName" class="nsd-input" type="text" maxlength="40" autocomplete="off">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="nsd-btn" type="button" onclick="document.getElementById('nsdPfFile').click()">Photo upload</button>
+      <button class="nsd-btn" type="button" onclick="NSD_AUTH.removePhoto()">Remove photo</button>
+    </div>
+    <input id="nsdPfFile" type="file" accept="image/*" style="display:none">
+    <div id="nsdPfMsg" class="nsd-err"></div>
+    <button class="nsd-btn primary" type="button" onclick="NSD_AUTH.saveProfile()">Save</button>
+    <button class="nsd-btn" type="button" data-adm style="margin-top:8px" onclick="NSD_AUTH.openAdmin()">Admin panel</button>
+    <button class="nsd-btn danger" type="button" style="margin-top:8px" onclick="NSD_AUTH.logout(true)">Logout</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL (sudhu Owner / Admin) ===== -->
+<div id="nsdAdminPanel" class="nsd-overlay" style="display:none;z-index:95" onclick="if(event.target===this)NSD_AUTH.closeAdmin()">
+  <div class="nsd-sheet wide">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:16px;font-weight:900;color:#fff;margin:0">Admin panel &mdash; User access</h2>
+      <button class="nsd-x" type="button" onclick="NSD_AUTH.closeAdmin()" title="Close">&times;</button>
+    </div>
+    <div id="nsdSyncState" class="nsd-hint" style="margin-top:4px"></div>
+    <label class="nsd-lbl">Gmail</label>
+    <input id="nsdAdEmail" class="nsd-input" type="text" inputmode="email" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="name@gmail.com">
+    <label class="nsd-lbl">Name</label>
+    <input id="nsdAdName" class="nsd-input" type="text" autocomplete="off">
+    <label class="nsd-lbl">Password</label>
+    <div class="nsd-pwrow"><input id="nsdAdPw" class="nsd-input" type="password" autocomplete="new-password"><button class="nsd-eye" type="button" onclick="NSD_AUTH.togglePw('nsdAdPw',this)">Show</button></div>
+    <label class="nsd-lbl">Access</label>
+    <select id="nsdAdRole" class="nsd-input">
+      <option value="user">User</option>
+      <option value="admin" id="nsdAdRoleAdmin">Admin</option>
+    </select>
+    <div id="nsdAdMsg" class="nsd-err"></div>
+    <button class="nsd-btn primary" type="button" onclick="NSD_AUTH.adminDone()">Done</button>
+    <div id="nsdAdResult" style="display:none;margin-top:12px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px">
+      <span style="font-size:12px;font-weight:900;color:#e2e8f0">Existing accounts</span>
+      <span id="nsdAdCount" class="nsd-hint"></span>
+    </div>
+    <div id="nsdAdList"></div>
+  </div>
+</div>
+
+<script id="nsdAuthConfig">
+/* =====================================================================
+   CONFIG — EKHANE BODLAN  (ei 4 ta jinis-i apnar bodlate hobe)
+   ===================================================================== */
+
+/* 1) Primary Owner-er Gmail. Se sob somoy Admin, keu take remove/edit korte pare na.
+      Owner bodlate chaile ei ek jaygay-i bodlan (ar ACCOUNTS-e tar line rakhun). */
+const OWNER_EMAIL = 'ali.hossain@pathao.com';
+
+/* 2) SALT — password hash-er sathe mishano hoy. Ekbar thik kore rakhun.
+      SAVDHAN: SALT bodlale ager sob hash kaj korbe na, sob line notun kore banate hobe (#hash diye). */
+const SALT = 'nsd-cluster-ops|change-this-salt-once';
+
+/* 3) Firebase Realtime Database URL — accounts / remove list / profile real-time sync-er jonno.
+      Jemon: 'https://YOUR-PROJECT-default-rtdb.firebaseio.com'
+      Khali ('') rakhle sudhu ei device-e (local) kaj korbe.
+      Database Rules-e  nsdAuth  node-e read/write allow thakte hobe (login-er age accounts porte hoy). */
+const DB_URL = '';
+
+/* 4) ACCOUNTS — hash = SHA-256(SALT + email + ":" + password). Password plain text e kothao nei.
+      Notun line banate: file-er address-er shesh-e  #hash  likhe Enter dilei generator khulbe.
+      - Owner-er password bodlate: ei list-er Owner-er line-er hash bodlan.
+      - Kono line delete korle sei user-er login bondho (se login thakle sathe sathe logout).
+      Format:  {email:"x@gmail.com", name:"Naam", role:"owner|admin|user", hash:"64-hex"},          */
+const ACCOUNTS = [
+  // {email:"ali.hossain@pathao.com", name:"Ali Hossain", role:"owner", hash:"PASTE-HASH-HERE"},
+];
+</script>
+
+<script id="nsdAuthModule">
+(function () {
+  'use strict';
+
+  /* ---- chhoto settings (chaile bodlan) ---- */
+  var MAX_TRIES    = 5;     // koyta bhul password-e lock hobe
+  var LOCK_SECONDS = 30;    // lock koto second
+  var MIN_PW       = 6;     // Admin panel-e minimum password length
+  var PHOTO_SIZE   = 256;   // profile photo square size (px)
+  var THUMB_SIZE   = 48;    // "Online now" list-er chhoto photo
+
+  /* ---- browser storage key (shudhu session email, lock, local cache; ROLE kokhono noy) ---- */
+  var LS_SESSION = 'nsd_session_v1';
+  var LS_STATE   = 'nsd_auth_state_v1';
+  var LS_LOCK    = 'nsd_lock_v1';
+  var LS_PEND    = 'nsd_auth_pending_v1';
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(m) { try { showToast(m); } catch (e) { console.log(m); } }
+  function normEmail(s) { return String(s || '').trim().toLowerCase(); }
+  function validEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+  function trimEnd(s) { return String(s).replace(/\s+$/, ''); }
+  var OWNER = normEmail(OWNER_EMAIL);
+
+  /* =================== SHA-256 (nijer code, library lage na) =================== */
+  var K256 = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  function rr(n, x) { return (x >>> n) | (x << (32 - n)); }
+  function utf8Bytes(str) {
+    var s = unescape(encodeURIComponent(String(str))), out = [], i;
+    for (i = 0; i < s.length; i++) out.push(s.charCodeAt(i));
+    return out;
+  }
+  function sha256(str) {
+    var b = utf8Bytes(str), l = b.length, i, o;
+    var H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    b.push(0x80);
+    while (b.length % 64 !== 56) b.push(0);
+    var hi = Math.floor(l / 0x20000000), lo = (l << 3) >>> 0;        // length in bits (64-bit)
+    b.push((hi >>> 24) & 255, (hi >>> 16) & 255, (hi >>> 8) & 255, hi & 255, (lo >>> 24) & 255, (lo >>> 16) & 255, (lo >>> 8) & 255, lo & 255);
+    var w = new Array(64);
+    for (o = 0; o < b.length; o += 64) {
+      for (i = 0; i < 16; i++) w[i] = (b[o + i * 4] << 24) | (b[o + i * 4 + 1] << 16) | (b[o + i * 4 + 2] << 8) | b[o + i * 4 + 3];
+      for (i = 16; i < 64; i++) {
+        var s0 = rr(7, w[i - 15]) ^ rr(18, w[i - 15]) ^ (w[i - 15] >>> 3);
+        var s1 = rr(17, w[i - 2]) ^ rr(19, w[i - 2]) ^ (w[i - 2] >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var a = H[0], bb = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        var S1 = rr(6, e) ^ rr(11, e) ^ rr(25, e), ch = (e & f) ^ (~e & g), t1 = (h + S1 + ch + K256[i] + w[i]) | 0;
+        var S0 = rr(2, a) ^ rr(13, a) ^ rr(22, a), mj = (a & bb) ^ (a & c) ^ (bb & c), t2 = (S0 + mj) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = bb; bb = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + bb) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    return H.map(function (x) { return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
+  }
+  /* password hash formula — generator, Admin panel ar login, tinta-i ei ek function use kore */
+  function makeHash(email, pw) { return sha256(SALT + email + ':' + pw); }
+  function fmtLine(rec) {
+    return '{email:' + JSON.stringify(rec.email) + ', name:' + JSON.stringify(rec.name) + ', role:' + JSON.stringify(rec.role) + ', hash:' + JSON.stringify(rec.hash) + '},';
+  }
+
+  /* =================== Firebase key encode / decode ===================
+     Firebase key-te  . @ # $ [ ] /  cholbe na. Tai protita non-alphanumeric character
+     "-hexcode-" hoye jay  (jemon  "."  ->  "-2e-" ,  "@"  ->  "-40-" ).  Namar somoy abar decode hoy. */
+  function encKey(s) {
+    var out = '', ch;
+    for (ch of String(s)) out += /[A-Za-z0-9]/.test(ch) ? ch : '-' + ch.codePointAt(0).toString(16) + '-';
+    return out;
+  }
+  function decKey(s) {
+    return String(s).replace(/-([0-9a-f]+)-/g, function (_, h) { return String.fromCodePoint(parseInt(h, 16)); });
+  }
+
+  /* =================== STATE (accounts, remove list, profiles) =================== */
+  function emptyState() { return { accounts: {}, removed: {}, profiles: {} }; }
+  function loadState() {
+    try {
+      var s = JSON.parse(localStorage.getItem(LS_STATE));
+      if (s && typeof s === 'object') return { accounts: s.accounts || {}, removed: s.removed || {}, profiles: s.profiles || {} };
+    } catch (e) {}
+    return emptyState();
+  }
+  function saveState() { try { localStorage.setItem(LS_STATE, JSON.stringify(state)); } catch (e) {} }
+  var state = loadState();
+
+  function normRec(a, keyHint) {
+    if (!a || typeof a !== 'object') return null;
+    var email = normEmail(a.email || keyHint);
+    var hash = String(a.hash || '').toLowerCase();
+    if (!validEmail(email) || !/^[0-9a-f]{64}$/.test(hash)) return null;
+    return { email: email, name: String(a.name || '').trim() || email.split('@')[0], role: a.role === 'admin' ? 'admin' : 'user', hash: hash };
+  }
+
+  /* Effective accounts = (DB-te add kora) + (file-er ACCOUNTS; file jitbe) - (remove list).
+     ROLE ekhane-i toiri hoy — config (file + database) theke, kokhono browser session theke noy.
+     Owner sudhu file theke ashe (database theke keu Owner banate pare na). */
+  function accountsMap() {
+    var m = {}, k, r;
+    for (k in state.accounts) { r = normRec(state.accounts[k], k); if (r && r.email !== OWNER) { r.src = 'db'; m[r.email] = r; } }
+    ACCOUNTS.forEach(function (a) {
+      r = normRec(a); if (!r) return;
+      if (r.email === OWNER) r.role = 'owner';
+      else if (String(a.role).toLowerCase() === 'owner') r.role = 'admin';   // sudhu OWNER_EMAIL Owner hote pare, baki 'owner' likhle Admin dhora hoy
+      else r.role = String(a.role).toLowerCase() === 'admin' ? 'admin' : 'user';
+      r.src = 'file'; m[r.email] = r;
+    });
+    for (k in state.removed) { if (k !== OWNER) delete m[k]; }
+    return m;
+  }
+  function profileOf(email) { return state.profiles[email] || {}; }
+  function userView(email) {
+    var a = accountsMap()[email]; if (!a) return null;
+    var p = profileOf(email), nm = p.name && String(p.name).trim();
+    return { uid: 'acct_' + encKey(email), email: email, role: a.role, baseName: a.name, name: nm || a.name, photo: p.photo || '', thumb: p.thumb || '' };
+  }
+  function readSession() { try { var s = JSON.parse(localStorage.getItem(LS_SESSION)); return s && s.e ? normEmail(s.e) : null; } catch (e) { return null; } }
+  function writeSession(email) { try { if (email) localStorage.setItem(LS_SESSION, JSON.stringify({ e: email, t: Date.now() })); else localStorage.removeItem(LS_SESSION); } catch (e) {} }
+  function user() { var e = readSession(); return e ? userView(e) : null; }
+  function isAdm(u) { return !!u && (u.role === 'owner' || u.role === 'admin'); }
+
+  /* kon role kake chhute/assign korte pare */
+  function canAssign(actor, role) { return role === 'user' ? isAdm(actor) : !!actor && actor.role === 'owner'; }
+  function canTouch(actor, target) {
+    if (!actor || !target || target.email === OWNER) return false;
+    if (target.role === 'admin') return actor.role === 'owner';
+    return isAdm(actor);
+  }
+
+  /* =================== REAL-TIME SYNC: Firebase RTDB (REST + EventSource) =================== */
+  var db = { es: null, loaded: false, gaveUp: false, online: false };
+  var tree = {};
+  var pend = (function () { try { return JSON.parse(localStorage.getItem(LS_PEND)) || {}; } catch (e) { return {}; } })();
+  var warnedDb = 0;
+  function dbBase() { return String(DB_URL || '').trim().replace(/\/+$/, ''); }
+  function dbUrl(path) { return dbBase() + '/nsdAuth' + (path || '') + '.json'; }
+  function savePend() { try { localStorage.setItem(LS_PEND, JSON.stringify(pend)); } catch (e) {} }
+
+  function setPath(obj, parts, val) {
+    if (!parts.length) return val;
+    obj = (obj && typeof obj === 'object') ? obj : {};
+    var child = setPath(obj[parts[0]], parts.slice(1), val);
+    if (child === null || child === undefined) delete obj[parts[0]]; else obj[parts[0]] = child;
+    return obj;
+  }
+  function setAt(path, val) {
+    tree = setPath(tree, String(path || '/').split('/').filter(Boolean), val);
+    if (!tree || typeof tree !== 'object') tree = {};
+  }
+  /* tree -> state. Ekhono pathano baki (pending) write gulo upore bosiye dekhano hoy */
+  function applyTree() {
+    var t = JSON.parse(JSON.stringify(tree || {}));
+    Object.keys(pend).forEach(function (p) { t = setPath(t, p.split('/').filter(Boolean), pend[p].v) || {}; });
+    var s = emptyState(), k, v;
+    for (k in (t.accounts || {})) { v = t.accounts[k]; if (v && typeof v === 'object') s.accounts[decKey(k)] = v; }
+    for (k in (t.removed || {})) { if (t.removed[k]) s.removed[decKey(k)] = 1; }
+    for (k in (t.profiles || {})) { v = t.profiles[k]; if (v && typeof v === 'object') s.profiles[decKey(k)] = v; }
+    state = s; saveState(); changed();
+  }
+  function dbFlush() {
+    if (!dbBase()) { pend = {}; savePend(); return Promise.resolve(); }
+    return Promise.all(Object.keys(pend).map(function (p) {
+      var item = pend[p], isDel = item.v === null;
+      return fetch(dbUrl(p), { method: isDel ? 'DELETE' : 'PUT', body: isDel ? undefined : JSON.stringify(item.v) })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); if (pend[p] === item) { delete pend[p]; savePend(); } });
+    })).catch(function (e) {
+      console.warn('[login] database write fail', e);
+      if (Date.now() - warnedDb > 8000) { warnedDb = Date.now(); toast('Database-e save hoy ni — ei device-e kaj korbe, net ele abar chesta korbo'); }
+    });
+  }
+  function dbSet(path, val) { pend[path] = { v: val }; savePend(); return dbFlush(); }
+
+  /* prothom device: database khali thakle ei device-er ager data database-e seed hoy */
+  function seedFromLocal() {
+    var any = false, k;
+    for (k in state.accounts) { pend['/accounts/' + encKey(k)] = { v: state.accounts[k] }; any = true; }
+    for (k in state.removed) { pend['/removed/' + encKey(k)] = { v: true }; any = true; }
+    for (k in state.profiles) { pend['/profiles/' + encKey(k)] = { v: state.profiles[k] }; any = true; }
+    if (any) { savePend(); dbFlush(); }
+  }
+  function onStream(type, ev) {
+    var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (!m) return;
+    var path = m.path || '/';
+    if (type === 'put') setAt(path, m.data);
+    else if (m.data && typeof m.data === 'object') Object.keys(m.data).forEach(function (k) { setAt(path.replace(/\/$/, '') + '/' + k, m.data[k]); });
+    if (!db.loaded) {
+      db.loaded = true;
+      if (!tree || !Object.keys(tree).length) seedFromLocal();
+    }
+    applyTree(); updateLoginUi(); renderSync();
+  }
+  function startStream() {
+    if (!dbBase() || typeof EventSource === 'undefined') { db.gaveUp = true; updateLoginUi(); renderSync(); return; }
+    if (db.es) { try { db.es.close(); } catch (e) {} }
+    var es = new EventSource(dbUrl('')); db.es = es;
+    es.addEventListener('put', function (ev) { onStream('put', ev); });
+    es.addEventListener('patch', function (ev) { onStream('patch', ev); });
+    es.addEventListener('cancel', function () { es.close(); db.online = false; setTimeout(startStream, 5000); renderSync(); });
+    es.addEventListener('auth_revoked', function () { es.close(); db.online = false; setTimeout(startStream, 5000); renderSync(); });
+    es.onopen = function () { db.online = true; dbFlush(); renderSync(); };
+    es.onerror = function () { db.online = false; if (es.readyState === 2) setTimeout(startStream, 5000); renderSync(); };
+    setTimeout(function () { if (!db.loaded) { db.gaveUp = true; updateLoginUi(); } }, 7000);   // 7s-e na ashle cache diye login cholbe
+  }
+  /* login-er thik age taja data ene dekha (remove kora user jate puran cache diye dhukte na pare) */
+  function pullDb(ms) {
+    if (!dbBase()) return Promise.resolve();
+    var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 4000);
+    return fetch(dbUrl(''), ctl ? { signal: ctl.signal } : undefined)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) { tree = (j && typeof j === 'object') ? j : {}; db.loaded = true; applyTree(); })
+      .catch(function () {}).then(function () { clearTimeout(timer); });
+  }
+  function renderSync() {
+    var el = $('nsdSyncState'); if (!el) return;
+    el.textContent = !dbBase() ? 'Local mode — DB_URL khali, sudhu ei device-e kaj korbe.'
+      : (db.online ? 'Real-time sync cholche (Firebase).' : 'Firebase-e connect hochche... (offline hole local cache cholbe)');
+  }
+
+  /* =================== LOGIN / LOCK / SESSION =================== */
+  var applied = null, started = false, busy = false, lockTimer = null;
+  function readLock() { try { var l = JSON.parse(localStorage.getItem(LS_LOCK)); return l && typeof l === 'object' ? l : { n: 0, until: 0 }; } catch (e) { return { n: 0, until: 0 }; } }
+  function writeLock(l) { try { localStorage.setItem(LS_LOCK, JSON.stringify(l)); } catch (e) {} }
+  function lockLeft() { return Math.max(0, Math.ceil((readLock().until - Date.now()) / 1000)); }
+
+  function setErr(msg) { var e = $('nsdLoginErr'); if (e) e.textContent = msg || ''; }
+  function setHint(msg) { var e = $('nsdLoginHint'); if (e) e.textContent = msg || ''; }
+  function updateLoginUi() {
+    var btn = $('nsdLoginBtn'), em = $('nsdLoginEmail'), pw = $('nsdLoginPw'); if (!btn) return;
+    var left = lockLeft(), waiting = !!dbBase() && !db.loaded && !db.gaveUp;
+    var off = left > 0 || busy || waiting;
+    btn.disabled = off; if (em) em.disabled = left > 0; if (pw) pw.disabled = left > 0;
+    btn.textContent = left > 0 ? ('Locked — ' + left + 's') : busy ? 'Checking...' : waiting ? 'Accounts load hochhe...' : 'Login';
+    if (left > 0) {
+      setErr('Onek bar bhul hoyeche. ' + left + ' second por abar try korun.');
+      if (!lockTimer) lockTimer = setInterval(function () { if (lockLeft() <= 0) { clearInterval(lockTimer); lockTimer = null; setErr(''); } updateLoginUi(); }, 500);
+    }
+    var note = $('authGateStatus');
+    if (note) note.textContent = Object.keys(accountsMap()).length ? 'Gmail ar Password diye Narsingdi Cluster Operations Center-e dhukun.'
+      : 'Ekhono kono account setup nei. File-er address-er shesh-e #hash likhe Owner-er line banan, tarpor file-er ACCOUNTS-e paste korun.';
+  }
+  function failAttempt(msg) {
+    var l = readLock(); l.n = (l.n || 0) + 1;
+    if (l.n >= MAX_TRIES) { l.until = Date.now() + LOCK_SECONDS * 1000; l.n = 0; msg = ''; }
+    writeLock(l); setErr(msg);
+    setHint(l.until > Date.now() ? '' : (MAX_TRIES - l.n) + ' bar bhul hole ' + LOCK_SECONDS + ' second lock hobe.');
+    updateLoginUi();
+  }
+  function doLogin() {
+    if (busy || lockLeft() > 0) return;
+    var email = normEmail($('nsdLoginEmail').value), pw = $('nsdLoginPw').value;
+    if (!email || !pw) { setErr('Gmail ar Password dutoi din.'); return; }
+    if (!validEmail(email)) { setErr('Valid Gmail/email din.'); return; }
+    busy = true; setErr(''); updateLoginUi();
+    pullDb(4000).then(function () {
+      busy = false;
+      var a = accountsMap()[email];
+      if (!a) { failAttempt('ei Gmail e access nei'); return; }
+      var ok = makeHash(email, pw) === a.hash;
+      if (!ok) { var t = trimEnd(pw); if (t && t !== pw) ok = makeHash(email, t) === a.hash; }   // shesh-er extra space trim kore abar try
+      if (!ok) { failAttempt('password thik nai'); return; }
+      writeLock({ n: 0, until: 0 }); setHint(''); setErr('');
+      $('nsdLoginPw').value = '';
+      writeSession(email);
+      refreshUi(); sync(); updateLoginUi();
+    });
+  }
+  function logout(askConfirm) {
+    if (askConfirm && !confirm('Apni ki sotti logout korte chan?')) return;
+    closeProfile(); closeAdmin();
+    writeSession(null); refreshUi(); sync();
+    var em = $('nsdLoginEmail'); if (em) setTimeout(function () { em.focus(); }, 50);
+  }
+  function forceLogout(msg) {
+    closeProfile(); closeAdmin();
+    writeSession(null); refreshUi(); sync(); setErr(msg || '');
+  }
+
+  /* main app-ke jānano: login / logout / soft (role-name-photo change) */
+  function notify(kind) {
+    try { if (typeof window.nsdApplySession === 'function') return window.nsdApplySession(kind); } catch (e) { console.error(e); }
+  }
+  var chain = Promise.resolve();
+  function sync() {
+    if (!started) return;
+    var u = user();
+    var sig = u ? [u.email, u.role, u.name, u.thumb].join('|') : '';
+    if (!u && applied) { applied = null; chain = chain.then(function () { return notify('logout'); }); }
+    else if (u && !applied) { applied = { email: u.email, sig: sig }; chain = chain.then(function () { return notify('login'); }); }
+    else if (u && applied && applied.email !== u.email) {
+      applied = { email: u.email, sig: sig };
+      chain = chain.then(function () { return notify('logout'); }).then(function () { return notify('login'); });
+    } else if (u && applied && applied.sig !== sig) { applied.sig = sig; chain = chain.then(function () { return notify('soft'); }); }
+  }
+  /* config / profile bodlale ekhane ashe. Account remove hoye gele sathe sathe logout. */
+  function changed() {
+    var e = readSession();
+    if (e && !userView(e)) { forceLogout('Apnar access remove kora hoyeche.'); return; }
+    refreshUi(); sync(); updateLoginUi();
+    if ($('nsdAdminPanel').style.display !== 'none') renderAdmin();
+  }
+
+  /* =================== UI refresh (gate, header avatar, role class) =================== */
+  function avatarHtml(u) {
+    var src = u && (u.photo || u.thumb);
+    return src ? '<img alt="" src="' + esc(src) + '">' : '<span>' + esc((u && u.name ? u.name : '?').trim().charAt(0).toUpperCase() || '?') + '</span>';
+  }
+  function badge(role) { return '<span class="nsd-badge ' + role + '">' + role.toUpperCase() + '</span>'; }
+  function refreshUi() {
+    var u = user(), g = $('authGate');
+    if (g) { if (u) { g.classList.add('hidden'); g.style.display = 'none'; } else { g.classList.remove('hidden'); g.style.display = 'flex'; } }
+    document.body.classList.toggle('nsd-locked', !u);
+    document.body.classList.toggle('is-adm', isAdm(u));
+    var btn = $('nsdAvatarBtn');
+    if (btn) { btn.style.display = u ? '' : 'none'; btn.className = 'nsd-av'; btn.innerHTML = avatarHtml(u); btn.title = u ? u.name + ' (' + u.role + ')' : ''; }
+    if (!u) { var open = $('nsdProfileSheet'); if (open) open.style.display = 'none'; }
+    else if ($('nsdProfileSheet').style.display !== 'none') fillProfile(false);
+  }
+
+  /* =================== PROFILE (name, photo) =================== */
+  var pf = { photo: null, thumb: null, touched: false };
+  function fillProfile(reset) {
+    var u = user(); if (!u) return;
+    if (reset) { pf = { photo: u.photo, thumb: u.thumb, touched: false }; $('nsdPfName').value = u.name; $('nsdPfMsg').textContent = ''; }
+    $('nsdPfAvatar').innerHTML = avatarHtml({ name: $('nsdPfName').value || u.name, photo: pf.photo, thumb: pf.thumb });
+    $('nsdPfEmail').textContent = u.email;
+    var r = $('nsdPfRole'); r.className = 'nsd-badge ' + u.role; r.textContent = u.role.toUpperCase();
+  }
+  function openProfile() { if (!user()) return; fillProfile(true); $('nsdProfileSheet').style.display = 'flex'; }
+  function closeProfile() { var s = $('nsdProfileSheet'); if (s) s.style.display = 'none'; }
+  /* photo ke square crop kore PHOTO_SIZE x PHOTO_SIZE kore compress (JPEG) */
+  function squareJpeg(img, size, q) {
+    var c = document.createElement('canvas'); c.width = c.height = size;
+    var x = c.getContext('2d'), s = Math.min(img.width, img.height);
+    x.fillStyle = '#fff'; x.fillRect(0, 0, size, size);
+    x.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+    return c.toDataURL('image/jpeg', q);
+  }
+  function onPhotoPicked(file) {
+    if (!file || !/^image\//.test(file.type)) { $('nsdPfMsg').textContent = 'Shudhu image file din.'; return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var q = 0.85, out = squareJpeg(img, PHOTO_SIZE, q);
+        while (out.length > 45000 && q > 0.4) { q -= 0.1; out = squareJpeg(img, PHOTO_SIZE, q); }
+        pf.photo = out; pf.thumb = squareJpeg(img, THUMB_SIZE, 0.7); pf.touched = true;
+        $('nsdPfMsg').textContent = ''; fillProfile(false);
+      };
+      img.onerror = function () { $('nsdPfMsg').textContent = 'Ei image khola gelo na.'; };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function removePhoto() { pf.photo = ''; pf.thumb = ''; pf.touched = true; fillProfile(false); }
+  function saveProfile() {
+    var u = user(); if (!u) return;
+    var name = $('nsdPfName').value.trim().slice(0, 40);
+    if (!name) { $('nsdPfMsg').textContent = 'Name khali rakha jabe na.'; return; }
+    var rec = { name: name, photo: pf.photo || '', thumb: pf.thumb || '', t: Date.now() };   // last save jitbe
+    state.profiles[u.email] = rec; saveState();
+    dbSet('/profiles/' + encKey(u.email), rec);
+    changed(); closeProfile(); toast('Profile save hoyeche');
+  }
+
+  /* =================== ADMIN PANEL =================== */
+  function openAdmin() {
+    var u = user(); if (!isAdm(u)) { toast('Admin access nei'); return; }
+    closeProfile();
+    $('nsdAdEmail').value = ''; $('nsdAdName').value = ''; $('nsdAdPw').value = ''; $('nsdAdMsg').textContent = '';
+    $('nsdAdResult').style.display = 'none'; $('nsdAdRole').value = 'user';
+    $('nsdAdRoleAdmin').disabled = u.role !== 'owner';                        // Admin access sudhu Owner dite pare
+    $('nsdAdRoleAdmin').textContent = u.role === 'owner' ? 'Admin' : 'Admin (sudhu Owner dite pare)';
+    renderSync(); renderAdmin();
+    $('nsdAdminPanel').style.display = 'flex';
+  }
+  function closeAdmin() { var p = $('nsdAdminPanel'); if (p) p.style.display = 'none'; }
+  function renderAdmin() {
+    var actor = user(); if (!isAdm(actor)) { closeAdmin(); return; }
+    var list = Object.values(accountsMap()).sort(function (a, b) {
+      var rank = { owner: 0, admin: 1, user: 2 };
+      return rank[a.role] - rank[b.role] || a.name.localeCompare(b.name);
+    });
+    $('nsdAdCount').textContent = list.length + ' account';
+    $('nsdAdList').innerHTML = list.map(function (a) {
+      var v = userView(a.email), mine = a.email === actor.email;
+      var del = canTouch(actor, a) && !mine
+        ? '<button class="nsd-btn danger sm" type="button" data-rm="' + esc(a.email) + '">Remove</button>'
+        : '<span class="nsd-hint" style="margin:0">' + (mine ? 'You' : 'Protected') + '</span>';
+      var line = a.src === 'db' && isAdm(actor) ? '<button class="nsd-btn sm" type="button" data-line="' + esc(a.email) + '" title="File-e paste korar line copy">Line</button>' : '';
+      return '<div class="nsd-row"><div class="nsd-av" style="width:34px;height:34px;font-size:13px">' + avatarHtml(v) + '</div>' +
+        '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(v.name) + '</div>' +
+        '<div style="font-size:10px;font-weight:600;color:#94a3b8;overflow:hidden;text-overflow:ellipsis">' + esc(a.email) + (a.src === 'file' ? ' · file' : '') + '</div></div>' +
+        badge(a.role) + line + del + '</div>';
+    }).join('') || '<div class="nsd-hint">Kono account nei.</div>';
+  }
+  function adminDone() {
+    var actor = user(), msg = $('nsdAdMsg'); msg.textContent = '';
+    if (!isAdm(actor)) { msg.textContent = 'Admin access nei.'; return; }
+    var email = normEmail($('nsdAdEmail').value), name = $('nsdAdName').value.trim().slice(0, 40);
+    var pw = trimEnd($('nsdAdPw').value), role = $('nsdAdRole').value === 'admin' ? 'admin' : 'user';
+    if (!validEmail(email)) { msg.textContent = 'Valid Gmail din.'; return; }
+    if (email === OWNER) { msg.textContent = 'Primary Owner-er account kew edit korte pare na (password file theke bodlan).'; return; }
+    if (pw.length < MIN_PW) { msg.textContent = 'Password kombe ' + MIN_PW + ' character hote hobe.'; return; }
+    if (!canAssign(actor, role)) { msg.textContent = 'Admin access sudhu Primary Owner dite pare.'; return; }
+    var ex = accountsMap()[email];
+    if (ex && ex.src === 'file') { msg.textContent = 'Ei account file-er ACCOUNTS-e ache — file theke bodlan.'; return; }
+    if (ex && !canTouch(actor, ex)) { msg.textContent = 'Ei account sudhu Primary Owner edit korte pare.'; return; }
+    var rec = { email: email, name: name || email.split('@')[0], role: role, hash: makeHash(email, pw) };
+    state.accounts[email] = rec; delete state.removed[email]; saveState();
+    dbSet('/accounts/' + encKey(email), rec); dbSet('/removed/' + encKey(email), null);
+    $('nsdAdEmail').value = ''; $('nsdAdName').value = ''; $('nsdAdPw').value = '';
+    var res = $('nsdAdResult');
+    res.innerHTML = '<div style="font-size:12px;font-weight:800;color:#6ee7b7">Account toiri hoyeche — ei device-e ekhon-i kaj korbe' + (dbBase() ? ' (ar onno device-e real-time-e).' : '.') + '</div>' +
+      '<div class="nsd-hint">Onno device-er jonno (ba backup-er jonno) file-er ACCOUNTS list-e ei line ta paste korun:</div>' +
+      '<span class="nsd-code" id="nsdAdLine">' + esc(fmtLine(rec)) + '</span>' +
+      '<button class="nsd-btn sm" type="button" style="margin-top:8px" onclick="NSD_AUTH.copyEl(\'nsdAdLine\',this)">Copy line</button>';
+    res.style.display = 'block';
+    changed();
+  }
+  function adminRemove(email) {
+    var actor = user(), t = accountsMap()[email];
+    if (!isAdm(actor) || !canTouch(actor, t) || email === actor.email) { toast('Ei account remove kora jabe na'); return; }
+    if (!confirm(email + ' ke remove korben? Ar login korte parbe na.')) return;
+    delete state.accounts[email]; state.removed[email] = 1; saveState();
+    dbSet('/accounts/' + encKey(email), null); dbSet('/removed/' + encKey(email), true);
+    changed(); toast(email + ' remove kora hoyeche');
+  }
+
+  /* =================== HASH GENERATOR (#hash) =================== */
+  function hashBoxWanted() { return String(location.hash || '').toLowerCase() === '#hash'; }
+  function syncHashBox() {
+    var b = $('nsdHashBox'); if (!b) return;
+    var on = hashBoxWanted(); b.style.display = on ? 'block' : 'none';
+    if (on && !$('nsdHgEmail').value) { $('nsdHgEmail').value = OWNER_EMAIL; $('nsdHgRole').value = 'owner'; }
+  }
+  function closeHash() {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
+    $('nsdHgPw').value = ''; $('nsdHgOutWrap').style.display = 'none'; syncHashBox();
+  }
+  function makeLine() {
+    var msg = $('nsdHgMsg'); msg.textContent = '';
+    var email = normEmail($('nsdHgEmail').value), name = $('nsdHgName').value.trim() || email.split('@')[0];
+    var role = $('nsdHgRole').value, pw = trimEnd($('nsdHgPw').value);
+    if (!validEmail(email)) { msg.textContent = 'Valid Gmail din.'; return; }
+    if (!pw) { msg.textContent = 'Password din.'; return; }
+    if (role === 'owner' && email !== OWNER) { msg.textContent = 'Owner role sudhu OWNER_EMAIL (' + OWNER_EMAIL + ')-er jonno. Onno email hole Admin/User select korun.'; return; }
+    if (email === OWNER) role = 'owner';
+    $('nsdHgOut').textContent = fmtLine({ email: email, name: name, role: role, hash: makeHash(email, pw) });
+    $('nsdHgOutWrap').style.display = 'block';
+  }
+
+  /* =================== chhoto helper =================== */
+  function togglePw(id, btn) { var i = $(id); var show = i.type === 'password'; i.type = show ? 'text' : 'password'; btn.textContent = show ? 'Hide' : 'Show'; }
+  function copyEl(id, btn) {
+    var t = $(id).textContent;
+    function done() { var o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = o; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, done);
+    else { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); done(); }
+  }
+
+  /* =================== wiring =================== */
+  function wire() {
+    $('nsdLoginForm').addEventListener('submit', function (e) { e.preventDefault(); doLogin(); });
+    $('nsdPwToggle').addEventListener('click', function () { togglePw('nsdLoginPw', this); });
+    $('nsdPfFile').addEventListener('change', function () { onPhotoPicked(this.files && this.files[0]); this.value = ''; });
+    $('nsdPfName').addEventListener('input', function () { fillProfile(false); });
+    $('nsdAdList').addEventListener('click', function (e) {
+      var t = e.target.closest('[data-rm],[data-line]'); if (!t) return;
+      if (t.hasAttribute('data-rm')) adminRemove(t.getAttribute('data-rm'));
+      else { var a = accountsMap()[t.getAttribute('data-line')]; if (a) { var tmp = document.createElement('span'); tmp.id = 'nsdTmpLine'; tmp.textContent = fmtLine(a); tmp.style.display = 'none'; document.body.appendChild(tmp); copyEl('nsdTmpLine', t); tmp.remove(); } }
+    });
+    window.addEventListener('hashchange', syncHashBox);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeProfile(); closeAdmin(); } });
+    /* onno tab-e logout / account change hole ekhaneo sathe sathe */
+    window.addEventListener('storage', function (e) {
+      if (e.key === LS_STATE) { state = loadState(); changed(); }
+      else if (e.key === LS_SESSION) { refreshUi(); sync(); }
+    });
+    setInterval(function () { changed(); }, 20000);   // file/config-er por role ba access bodlaleo dhore felbe
+  }
+
+  /* =================== public API =================== */
+  window.NSD_AUTH = {
+    user: user,
+    start: function () { if (started) return; started = true; applied = null; sync(); },   // main app ready hole call hoy
+    refreshUi: refreshUi,
+    logout: logout,
+    focusLogin: function () { var e = $('nsdLoginEmail'); if (e) e.focus(); },
+    openProfile: openProfile, closeProfile: closeProfile, saveProfile: saveProfile, removePhoto: removePhoto,
+    openAdmin: openAdmin, closeAdmin: closeAdmin, adminDone: adminDone,
+    togglePw: togglePw, copyEl: copyEl, makeLine: makeLine, closeHash: closeHash,
+    _t: { sha256: sha256, encKey: encKey, decKey: decKey, accountsMap: accountsMap, makeHash: makeHash }
+  };
+
+  /* load howar sathe sathe: session valid na hole (account remove / file theke line delete) gate dekhabe */
+  wire();
+  syncHashBox();
+  var s0 = readSession();
+  if (s0 && !userView(s0)) { writeSession(null); }
+  refreshUi(); updateLoginUi();
+  startStream();
+})();
+</script>
+<!-- ===================== END NOTUN LOGIN SYSTEM ===================== -->
+
 <script>
         let hubList = [
             { 
@@ -2087,7 +2768,8 @@ try {
         let myAccess = { isOwner: false };
         // Optional: put the owner Google account email here to make ownership explicit.
         // If left empty, the first Google account that signs in claims ownership once.
-        const OWNER_EMAILS = ['ali.hossain@pathao.com'];
+        // OWNER_EMAIL ta nsdAuthConfig script-e ache (login system-er config). Ekhane bodlate hobe na.
+        const OWNER_EMAILS = [OWNER_EMAIL];
         let dashboardOwnerUid = null;
         let dashboardNotifications = [];
         let dashboardNotificationReadIds = [];
@@ -2176,22 +2858,37 @@ try {
             writeSharedOutbox(out);
         }
 
+        /* Firestore data-er jonno Firebase-er ekta auth token lage. Notun login-e Google/Firebase login nei,
+           tai Gmail+Password login-er por background-e "anonymous" sign-in kora hoy.
+           >>> BODLATE HOBE (Firebase Console-e ekbar): Authentication > Sign-in method > Anonymous = ENABLE
+               (ba Firestore Rules open rakhun) — na hole shared data (hub, report...) save hobe na. */
+        let nsdAnonPromise = null;
+        function nsdEnsureFirebaseAuth() {
+            if (!cloudAuth) return Promise.resolve(false);
+            if (nsdAnonPromise) return nsdAnonPromise;
+            nsdAnonPromise = (async () => {
+                try {
+                    // Firebase-ke ager saved session restore korte dao (purono session thakle seta-i cholbe)
+                    await new Promise(res => {
+                        let done = false; const fin = () => { if (!done) { done = true; res(); } };
+                        try { const un = cloudAuth.onAuthStateChanged(() => { try { un(); } catch (e) {} fin(); }); } catch (e) { fin(); }
+                        setTimeout(fin, 5000);
+                    });
+                    if (cloudAuth.currentUser) return true;
+                    await Promise.race([cloudAuth.signInAnonymously(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
+                    return !!cloudAuth.currentUser;
+                } catch (e) {
+                    console.warn('Firebase anonymous sign-in hoy ni (Anonymous provider ba Firestore Rules check korun):', e);
+                    return false;
+                } finally { nsdAnonPromise = null; }
+            })();
+            return nsdAnonPromise;
+        }
+
         async function waitForCloudAuth(timeoutMs = 15000) {
-            if (!cloudAuth) return false;
-            if (cloudAuth.currentUser) {
-                currentUser = cloudAuth.currentUser;
-                return true;
-            }
-            const started = Date.now();
-            while (Date.now() - started < timeoutMs) {
-                if (cloudAuth.currentUser) {
-                    currentUser = cloudAuth.currentUser;
-                    return true;
-                }
-                if (authStateResolved && !cloudAuth.currentUser) return false;
-                await new Promise(r => setTimeout(r, 100));
-            }
-            return !!cloudAuth.currentUser;
+            if (!currentUser) return false;          // login kora nai
+            if (cloudAuth) await nsdEnsureFirebaseAuth();
+            return true;
         }
 
         async function flushSharedOutbox() {
@@ -2575,103 +3272,29 @@ try {
         /* =================== END OWNER ACCESS =================== */
 
         async function refreshGoogleOwnerStatus() {
-            if (!cloudAuth || !currentUser || !cloudDb) { myAccess.isOwner = false; return; }
-            const email = String(currentUser.email || currentUser.providerData?.find(p => p.email)?.email || '').trim().toLowerCase();
-            // The primary owner is authoritative locally. This keeps Owner/Hidden Mode
-            // usable even if the shared ownerAccess document is temporarily unavailable.
-            if (OWNER_EMAILS.map(x => String(x || '').trim().toLowerCase()).includes(email)) {
-                myAccess.isOwner = true;
-                dashboardOwnerUid = currentUser.uid;
-                // Continue below to sync the shared owner list when Firestore is available.
-            }
+            // ROLE config theke ashe (file ACCOUNTS + database), browser storage theke noy. Owner/Admin = purono "owner" access.
+            const u = window.NSD_AUTH ? NSD_AUTH.user() : null;
+            myAccess.isOwner = !!u && (u.role === 'owner' || u.role === 'admin');
+            if (!u || !cloudDb) { try { renderClusterNotices(); } catch (e) {} return; }
             try {
-                const ref = cloudDb.doc('config/ownerAccess');
-                const snap = await ref.get();
+                // ager Hide-settings jei uid-te save ache seta-i rakhi, jate puran data na hariye jay
+                const snap = await cloudDb.doc('config/ownerAccess').get();
                 const data = snap.exists ? (snap.data() || {}) : {};
-                const configuredOwners = Array.isArray(data.ownerEmails) ? data.ownerEmails : [];
-                const allOwners = [...new Set([...OWNER_EMAILS, ...configuredOwners].map(x => String(x || '').trim().toLowerCase()).filter(Boolean))];
-                if (allOwners.includes(email)) {
-                    myAccess.isOwner = true;
-                    dashboardOwnerUid = data.ownerUid || currentUser.uid;
-                    // Keep the shared owner list compatible with older ownerAccess documents.
-                    if (!configuredOwners.includes(email)) {
-                        try { await ref.set({ ...data, ownerEmails: allOwners, updatedAt: Date.now() }); } catch (e) {}
-                    }
-                    renderClusterNotices();
-                    return;
-                }
-                if (data.ownerEmail) {
-                    dashboardOwnerUid = data.ownerUid || null;
-                    myAccess.isOwner = data.ownerUid
-                        ? String(data.ownerUid) === String(currentUser.uid)
-                        : String(data.ownerEmail).toLowerCase() === email;
-                } else {
-                    // First signed-in Google account becomes the dashboard owner.
-                    await ref.set({ ownerEmail: currentUser.email, ownerUid: currentUser.uid, ownerName: currentUser.displayName || '', ownerEmails: allOwners.length ? allOwners : [email], createdAt: Date.now() });
-                    dashboardOwnerUid = currentUser.uid;
-                    myAccess.isOwner = true;
-                }
+                dashboardOwnerUid = data.ownerUid || (myAccess.isOwner ? currentUser?.uid : null);
             } catch (e) {
-                console.warn('Owner status check failed', e);
-                // Do not lock out the configured primary owner because of a temporary
-                // Firestore read/write error. Delegated owners still require the shared doc.
-                myAccess.isOwner = OWNER_EMAILS.map(x => String(x || '').trim().toLowerCase()).includes(email);
-                if (myAccess.isOwner) dashboardOwnerUid = currentUser.uid;
+                if (myAccess.isOwner && !dashboardOwnerUid) dashboardOwnerUid = currentUser?.uid || null;
             }
-            // Owner status can resolve after the notice snapshot; re-render with the
-            // correct dismissal filter once it is known.
-            renderClusterNotices();
+            try { renderClusterNotices(); } catch (e) {}
         }
 
         function updateProfileUI() {
-            const name = document.getElementById('profileName');
-            const avatar = document.getElementById('profileAvatar');
-            const loginBtn = document.getElementById('sidebarLoginBtn');
+            // Gate dekhano/lukano, header avatar, role class (is-adm) — sob NSD_AUTH.refreshUi() kore.
             const logoutBtn = document.getElementById('sidebarLogoutBtn');
-            const gate = document.getElementById('authGate');
-            // NOTE: profileName/profileAvatar may not exist in the page. The login gate below
-            // must work either way, so never return early here.
-            if (currentUser || cloudUserCap) {
-                if (!currentUser) { if (name) name.textContent = 'Signed in'; gate?.classList.add('hidden'); applyOwnerOnlyUI(); return; }
-                if (name) name.textContent = currentUser.displayName || 'Google User';
-                if (avatar) avatar.src = currentUser.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-                loginBtn?.classList.add('hidden');
-                logoutBtn?.classList.remove('hidden');
-                gate?.classList.add('hidden');
-            } else {
-                if (name) name.textContent = 'Not signed in';
-                if (avatar) avatar.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-                loginBtn?.classList.remove('hidden');
-                logoutBtn?.classList.add('hidden');
-
-                // LOGIN REQUIRED: the dashboard is never shown without sign-in.
-                // While Firebase restores a saved session (Ctrl+R/F5) the gate shows
-                // "Checking sign-in..."; the button appears once we know nobody is signed in.
-                const gStatus = document.getElementById('authGateStatus');
-                const gBtn = document.getElementById('authGateLoginBtn');
-                let hadSession = false;
-                try { hadSession = localStorage.getItem('nsdWasSignedIn') === '1'; } catch (e) {}
-                const gTitle = document.getElementById('authGateTitle');
-                if (hadSession && !authStateResolved && !authCheckSlow) {
-                    // Saved session is being restored: keep the gate closed (no flash).
-                    if (gate) { gate.classList.add('hidden'); gate.style.display = 'none'; }
-                } else if (authStateResolved || authCheckSlow) {
-                    if (gate) { gate.classList.remove('hidden'); gate.style.display = ''; }
-                    if (gTitle) gTitle.textContent = 'Sign in to continue';
-                    if (gStatus) gStatus.textContent = !cloudAuth
-                        ? 'Sign-in service could not load. Check your internet connection and refresh the page.'
-                        : (authStateResolved
-                            ? 'Please sign in with your Google account to enter the Narsingdi Cluster Operations Center.'
-                            : 'Sign-in check is taking long. Click the button below to sign in.')
-                          + (!authStateResolved && lastJsError ? ' (' + lastJsError + ')' : '');
-                    gBtn?.classList.remove('hidden');
-                } else {
-                    if (gate) { gate.classList.remove('hidden'); gate.style.display = ''; }
-                    if (gTitle) gTitle.textContent = 'Sign in to continue';
-                    if (gStatus) gStatus.textContent = 'Checking sign-in... (you can already click the button below)';
-                    gBtn?.classList.remove('hidden');
-                }
-            }
+            const loginBtn = document.getElementById('sidebarLoginBtn');
+            let signedIn = false;
+            try { signedIn = !!(window.NSD_AUTH && NSD_AUTH.user()); NSD_AUTH.refreshUi(); } catch (e) { console.error(e); }
+            loginBtn?.classList.add('hidden');                    // login sudhu gate-e hoy
+            logoutBtn?.classList.toggle('hidden', !signedIn);
             applyOwnerOnlyUI();
         }
 
@@ -2845,64 +3468,10 @@ try {
             if (el) el.textContent = msg;
         }
 
-        async function googleSignIn() {
-            if (!cloudAuth) {
-                const m = 'Firebase sign-in could not load in this browser. Open the link in Chrome/Safari (not an in-app browser), check internet, then refresh.';
-                setGateMessage(m); showToast(m);
-                return;
-            }
-            setGateMessage('Opening Google sign-in...');
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
-                await cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                await cloudAuth.signInWithPopup(provider);
-                currentUser = cloudAuth.currentUser || currentUser;
-                authStateResolved = true;
-                try { updateProfileUI(); } catch (_) {}
-            } catch (e) {
-                console.error('Google sign-in error:', e);
-
-                // Popup blockers commonly cause auth/popup-blocked. Use redirect as a safe fallback.
-                if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment')) {
-                    try {
-                        const provider = new firebase.auth.GoogleAuthProvider();
-                        provider.setCustomParameters({ prompt: 'select_account' });
-                        await cloudAuth.signInWithRedirect(provider);
-                        return;
-                    } catch (redirectError) {
-                        console.error('Google redirect sign-in error:', redirectError);
-                        showToast(googleAuthErrorMessage(redirectError));
-                        return;
-                    }
-                }
-
-                setGateMessage(googleAuthErrorMessage(e));
-                showToast(googleAuthErrorMessage(e));
-            }
-        }
-
-        async function handleGoogleRedirectResult() {
-            if (!cloudAuth) return;
-            try {
-                await cloudAuth.getRedirectResult();
-            } catch (e) {
-                console.error('Google redirect result error:', e);
-                showToast(googleAuthErrorMessage(e));
-            }
-        }
-
-        async function googleSignOut() {
-            try {
-                try { localStorage.removeItem('nsdWasSignedIn'); } catch (e) {}
-                clearHubSnapshotCache();
-                await removeMyPresence();
-                stopPresence();
-                await cloudAuth?.signOut();
-            } catch (e) {
-                console.error(e);
-            }
-        }
+        /* Purono Google login ar nai. Ei naam-gulo ager code-er jonno rakha holo (shim) — asol kaj NSD_AUTH (nsdAuthModule) kore. */
+        async function googleSignIn() { try { NSD_AUTH.focusLogin(); } catch (e) {} }
+        async function handleGoogleRedirectResult() { /* ar dorkar nai */ }
+        async function googleSignOut() { try { NSD_AUTH.logout(true); } catch (e) { console.error(e); } }   // confirm dialog dekhabe
 
         function getDashboardNotificationUnread() {
             const read = new Set(Array.isArray(dashboardNotificationReadIds) ? dashboardNotificationReadIds : []);
@@ -3094,48 +3663,57 @@ try {
         function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 
         function setupGoogleAuth() {
-            if (!cloudAuth) { authStateResolved = true; finishOwnerPermissionCheck(true); updateProfileUI(); return; }
+            // Purono onAuthStateChanged-er jaygay: NSD_AUTH session theke login/logout/role-change ei function-e ashe.
+            authStateResolved = true;
+            try { NSD_AUTH.start(); } catch (e) { console.error('Login module start hoy ni', e); }
+            try { updateProfileUI(); } catch (e) {}
+        }
 
-            cloudAuth.onAuthStateChanged(async user => {
-                currentUser = user || null;
-                authStateResolved = true;
-                // Open (or close) the login gate IMMEDIATELY. It must never wait for the
-                // slower owner / notification lookups below, which can hang or fail.
-                try {
-                    if (currentUser) localStorage.setItem('nsdWasSignedIn', '1');
-                    else { localStorage.removeItem('nsdWasSignedIn'); clearHubSnapshotCache(); hubList = []; }
-                } catch (e) {}
-                try { updateProfileUI(); } catch (e) { console.error(e); }
-                if (currentUser) {
-                    setTimeout(() => { flushSharedOutbox().catch(() => {}); }, 0);
-                }
-
-                // Start the online-user listener immediately after Firebase restores
-                // the session. Owner lookup must not block presence or the dashboard.
-                if (currentUser) {
-                    // Hubs/tasks/notices load right away, independent of the owner lookup.
-                    startSharedListeners().catch(e => console.error('Shared listeners failed', e));
-                    try { startPresence(); } catch (e) { console.error('Presence failed', e); }
-                    try { await refreshGoogleOwnerStatus(); } catch (e) { console.error('Owner check failed', e); }
-                    finishOwnerPermissionCheck(true);
-                    try { await loadNoticePersonalState(); } catch (e) { console.error(e); }
-                    try { await loadDashboardNotificationState(); } catch (e) { console.error(e); }
-                    try { startDashboardNotificationListener(); } catch (e) { console.error(e); }
-                } else {
-                    myAccess.isOwner = false;
-                    sharedListenersUid = null;
-                    finishOwnerPermissionCheck(true);
-                    stopPresence();
-                    stopDashboardNotificationListener();
-                }
-
-                updateProfileUI();
-                applyOwnerOnlyUI();
-                renderVisibilityList();
-                applyUiHide();
-                renderTaskTabs();
+        /* kind = 'login' (notun login / page-reload-e session restore) | 'logout' | 'soft' (role, name, photo bodlalo) */
+        async function nsdApplySession(kind) {
+            const u = window.NSD_AUTH ? NSD_AUTH.user() : null;
+            if (!u || kind === 'logout') {
+                try { localStorage.removeItem('nsdWasSignedIn'); } catch (e) {}
+                try { clearHubSnapshotCache(); } catch (e) {}
+                try { await removeMyPresence(); } catch (e) {}      // currentUser ekhono set, tai presence mochha jay
+                try { stopPresence(); } catch (e) {}
+                currentUser = null; authStateResolved = true; hubList = [];
+                myAccess.isOwner = false; sharedListenersUid = null;
+                try { if (cloudAuth && cloudAuth.currentUser) await cloudAuth.signOut(); } catch (e) {}
+                finishOwnerPermissionCheck(true);
+                try { stopDashboardNotificationListener(); } catch (e) {}
+                try { updateProfileUI(); } catch (e) {}
+                applyOwnerOnlyUI(); renderVisibilityList(); applyUiHide(); renderTaskTabs();
                 try { renderDashboard(); } catch (e) {}
-            });
+                return;
+            }
+            // uid: email theke toiri, sob device-e ek-i thake (presence / notification read-state er jonno)
+            currentUser = { uid: u.uid, email: u.email, displayName: u.name, photoURL: u.thumb || '', providerData: [] };
+            authStateResolved = true;
+            myAccess.isOwner = (u.role === 'owner' || u.role === 'admin');
+            try { localStorage.setItem('nsdWasSignedIn', '1'); } catch (e) {}
+            try { updateProfileUI(); } catch (e) { console.error(e); }
+
+            if (kind === 'soft') {
+                try { await refreshGoogleOwnerStatus(); } catch (e) {}
+                finishOwnerPermissionCheck(true);
+                try { updatePresence(); } catch (e) {}
+                updateProfileUI(); applyOwnerOnlyUI(); renderVisibilityList(); applyUiHide();
+                try { renderDashboard(); } catch (e) {}
+                return;
+            }
+
+            await nsdEnsureFirebaseAuth();
+            setTimeout(() => { flushSharedOutbox().catch(() => {}); }, 0);
+            startSharedListeners().catch(e => console.error('Shared listeners failed', e));
+            try { startPresence(); } catch (e) { console.error('Presence failed', e); }
+            try { await refreshGoogleOwnerStatus(); } catch (e) { console.error('Owner check failed', e); }
+            finishOwnerPermissionCheck(true);
+            try { await loadNoticePersonalState(); } catch (e) { console.error(e); }
+            try { await loadDashboardNotificationState(); } catch (e) { console.error(e); }
+            try { startDashboardNotificationListener(); } catch (e) { console.error(e); }
+            updateProfileUI(); applyOwnerOnlyUI(); renderVisibilityList(); applyUiHide(); renderTaskTabs();
+            try { renderDashboard(); } catch (e) {}
         }
 
         async function initCloudSync() {
@@ -3168,7 +3746,8 @@ try {
                 loadLocalState({ useHubList: true });
                 hubCloudStateReady = true;
                 authStateResolved = true;
-                myAccess.isOwner = false;
+                try { setupGoogleAuth(); } catch (e) {}      // Firebase na thakleo Gmail+Password login ar role kaj korbe
+                myAccess.isOwner = !!(window.NSD_AUTH && NSD_AUTH.user() && NSD_AUTH.user().role !== 'user');
                 finishOwnerPermissionCheck(true);
                 updateProfileUI();
                 renderDashboard();
@@ -5740,8 +6319,8 @@ try {
             } else if (cloudDb && cloudDb.__firebase && !hubCloudStateReady) {
                 if (currentUser) hubMsg = '';          // loading: show nothing
                 else if (!authStateResolved) hubMsg = ''; // restoring saved login: show nothing
-                else hubMsg = 'Sign in with Google to load the hubs. '
-                    + '<button type="button" onclick="googleSignIn()" class="ml-2 px-3 py-1 rounded-lg bg-white text-slate-900 font-black text-[11px]"><i class="fa-brands fa-google mr-1"></i>Sign in with Google</button>';
+                else hubMsg = 'Login korun hub load korte. '
+                    + '<button type="button" onclick="googleSignIn()" class="ml-2 px-3 py-1 rounded-lg bg-white text-slate-900 font-black text-[11px]"><i class="fa-solid fa-right-to-bracket mr-1"></i>Login</button>';
             }
             hubBanner.innerHTML = hubMsg
                 ? `<div class="mb-3 px-4 py-3 rounded-xl border text-xs font-bold ${hubMsgColor}">${hubMsg}</div>`
