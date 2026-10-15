@@ -2390,7 +2390,7 @@ const ACCOUNTS = [
     });
   }
   function logout(askConfirm) {
-    if (askConfirm && !confirm('Apni ki sotti logout korte chan?')) return;
+    if (askConfirm) { ask({ title: 'Log out?', icon: 'fa-right-from-bracket', ok: 'Log out', html: '<div class="nsd-hint" style="font-size:12px">You will need your Gmail and Password to sign in again.</div>' }, function () { logout(false); }); return; }
     closeProfile(); closeAdmin();
     writeSession(null); refreshUi(); sync();
     var em = $('nsdLoginEmail'); if (em) setTimeout(function () { em.focus(); }, 50);
@@ -2487,6 +2487,40 @@ const ACCOUNTS = [
     changed(); closeProfile(); toast('Profile save hoyeche');
   }
 
+  /* =================== SMART CONFIRM POPUP (browser confirm()-er jaygay) =================== */
+  function ask(o, onOk) {
+    var old = $('nsdAskBox'); if (old) old.remove();
+    var danger = o.tone === 'danger';
+    var ov = document.createElement('div'); ov.id = 'nsdAskBox'; ov.className = 'nsd-overlay';
+    ov.style.cssText = 'z-index:120;align-items:center;padding:16px;box-sizing:border-box';
+    ov.innerHTML =
+      '<div class="nsd-sheet" role="dialog" aria-modal="true" style="max-width:360px;border-radius:22px;text-align:center;padding:24px 20px 18px">' +
+        '<div style="width:52px;height:52px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;' +
+          (danger ? 'background:#4c0519;color:#fda4af' : 'background:#0c4a6e;color:#7dd3fc') + '"><i class="fa-solid ' + (o.icon || 'fa-circle-question') + '"></i></div>' +
+        '<div style="font-size:16px;font-weight:900;color:#fff">' + esc(o.title) + '</div>' +
+        '<div style="margin-top:10px">' + (o.html || '') + '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px">' +
+          '<button type="button" class="nsd-btn" data-ask="no">Cancel</button>' +
+          '<button type="button" class="nsd-btn ' + (danger ? 'danger' : 'primary') + '" data-ask="yes">' + esc(o.ok || 'Confirm') + '</button>' +
+        '</div>' +
+      '</div>';
+    function close() { document.removeEventListener('keydown', onKey, true); ov.remove(); }
+    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) { close(); return; }
+      var b = e.target.closest('[data-ask]'); if (!b) return;
+      close(); if (b.getAttribute('data-ask') === 'yes') onOk();
+    });
+    document.addEventListener('keydown', onKey, true);
+    document.body.appendChild(ov);
+    var yes = ov.querySelector('[data-ask="yes"]'); if (yes) yes.focus();
+  }
+  function personHtml(email, extra) {
+    var v = userView(email) || { name: email.split('@')[0], email: email };
+    return '<div style="font-size:13px;font-weight:800;color:#e2e8f0">' + esc(v.name) + '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:#94a3b8;word-break:break-all">' + esc(email) + '</div>' + (extra || '');
+  }
+
   /* =================== ADMIN PANEL =================== */
   function openAdmin() {
     var u = user(); if (!isAdm(u)) { toast('Admin access nei'); return; }
@@ -2555,20 +2589,31 @@ const ACCOUNTS = [
     if (!t || t.email === OWNER || t.src !== 'db') { toast('Ei account-er role ekhane bodlano jabe na'); return; }
     if (t.role === role) return;
     var base = normRec(state.accounts[email], email); if (!base) { toast('Account data pawa jay ni'); return; }
-    var label = role === 'admin' ? 'Admin' : 'Incharge';
-    if (!confirm(email + ' ke ' + label + ' korben?')) return;
-    var rec = { email: base.email, name: base.name, role: role, hash: base.hash };
-    state.accounts[email] = rec; saveState();
-    dbSet('/accounts/' + encKey(email), rec);
-    changed(); toast(email + ' ekhon ' + label);
+    var label = role === 'admin' ? 'Admin' : 'Incharge', from = t.role;
+    ask({
+      title: 'Change role?', icon: 'fa-user-shield', ok: 'Make ' + label,
+      html: personHtml(email, '<div style="margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px">' + badge(from) +
+        '<i class="fa-solid fa-arrow-right" style="color:#64748b;font-size:11px"></i>' + badge(role) + '</div>' +
+        '<div class="nsd-hint" style="margin-top:10px">' + (role === 'admin' ? 'Can manage accounts and see admin controls.' : 'Will lose admin controls immediately.') + '</div>')
+    }, function () {
+      var cur = normRec(state.accounts[email], email) || base;
+      var rec = { email: cur.email, name: cur.name, role: role, hash: cur.hash };
+      state.accounts[email] = rec; saveState();
+      dbSet('/accounts/' + encKey(email), rec);
+      changed(); toast(email + ' is now ' + label);
+    });
   }
   function adminRemove(email) {
     var actor = user(), t = accountsMap()[email];
     if (!isAdm(actor) || !canTouch(actor, t) || email === actor.email) { toast('Ei account remove kora jabe na'); return; }
-    if (!confirm(email + ' ke remove korben? Ar login korte parbe na.')) return;
-    delete state.accounts[email]; state.removed[email] = 1; saveState();
-    dbSet('/accounts/' + encKey(email), null); dbSet('/removed/' + encKey(email), true);
-    changed(); toast(email + ' remove kora hoyeche');
+    ask({
+      title: 'Remove account?', icon: 'fa-user-xmark', tone: 'danger', ok: 'Remove',
+      html: personHtml(email, '<div class="nsd-hint" style="margin-top:10px">This person will be logged out and will not be able to sign in again.</div>')
+    }, function () {
+      delete state.accounts[email]; state.removed[email] = 1; saveState();
+      dbSet('/accounts/' + encKey(email), null); dbSet('/removed/' + encKey(email), true);
+      changed(); toast(email + ' removed');
+    });
   }
 
   /* =================== HASH GENERATOR (#hash) =================== */
