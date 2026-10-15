@@ -164,6 +164,8 @@
             box-shadow:0 28px 90px rgba(0,0,0,.45);
             animation:ageingModalIn .18s ease-out;
         }
+        /* .hidden must win over display:flex above (otherwise modal shows after login) */
+        .ageing-modal-backdrop.hidden { display:none !important; }
         @keyframes ageingModalIn {
             from { opacity:0; transform:translateY(8px) scale(.985); }
             to { opacity:1; transform:translateY(0) scale(1); }
@@ -3696,10 +3698,65 @@ const ACCOUNTS = [
             dashboardNotifications=Array.from(map.values()).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,100);
             if(render)renderDashboardNotificationTab();
         }
+        /* =================== SMART CONFIRM (browser confirm()-er jaygay) ===================
+           smartConfirm({title, message, ok, cancel, tone:'danger'|'primary', icon}) -> Promise<boolean> */
+        function smartConfirm(o){
+            o=o||{};
+            return new Promise(function(resolve){
+                if(!document.getElementById('smartConfirmCss')){
+                    const st=document.createElement('style');st.id='smartConfirmCss';
+                    st.textContent=
+                    '.sc-back{position:fixed;inset:0;z-index:2147483000;background:rgba(2,8,23,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;animation:scFade .15s ease-out}'+
+                    '.sc-box{width:min(380px,100%);background:linear-gradient(180deg,#0f1b2e,#0a1424);border:1px solid rgba(148,163,184,.25);border-radius:22px;padding:26px 22px 20px;text-align:center;box-shadow:0 28px 90px rgba(0,0,0,.6);animation:scPop .2s cubic-bezier(.2,.9,.3,1.2);font-family:inherit}'+
+                    '.sc-ico{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}'+
+                    '.sc-ico.danger{background:rgba(244,63,94,.15);color:#fda4af;box-shadow:0 0 0 6px rgba(244,63,94,.08)}'+
+                    '.sc-ico.primary{background:rgba(56,189,248,.15);color:#7dd3fc;box-shadow:0 0 0 6px rgba(56,189,248,.08)}'+
+                    '.sc-title{font-size:17px;font-weight:900;color:#fff}'+
+                    '.sc-msg{margin-top:8px;font-size:13px;font-weight:600;line-height:1.5;color:#94a3b8}'+
+                    '.sc-actions{display:flex;gap:10px;margin-top:22px}'+
+                    '.sc-btn{flex:1;border:0;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;cursor:pointer;transition:transform .12s,filter .12s;font-family:inherit}'+
+                    '.sc-btn:hover{filter:brightness(1.12)}.sc-btn:active{transform:scale(.97)}'+
+                    '.sc-btn:focus-visible{outline:2px solid #7dd3fc;outline-offset:2px}'+
+                    '.sc-cancel{background:rgba(148,163,184,.15);color:#e2e8f0}'+
+                    '.sc-ok.danger{background:linear-gradient(135deg,#e11d48,#be123c);color:#fff}'+
+                    '.sc-ok.primary{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff}'+
+                    '@keyframes scFade{from{opacity:0}to{opacity:1}}'+
+                    '@keyframes scPop{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}';
+                    document.head.appendChild(st);
+                }
+                const tone=o.tone==='primary'?'primary':'danger';
+                const esc=function(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+                const ov=document.createElement('div');ov.className='sc-back';
+                ov.innerHTML=
+                    '<div class="sc-box" role="alertdialog" aria-modal="true">'+
+                      '<div class="sc-ico '+tone+'"><i class="fa-solid '+esc(o.icon||(tone==='danger'?'fa-triangle-exclamation':'fa-circle-question'))+'"></i></div>'+
+                      '<div class="sc-title">'+esc(o.title||'Are you sure?')+'</div>'+
+                      (o.message?'<div class="sc-msg">'+esc(o.message)+'</div>':'')+
+                      '<div class="sc-actions">'+
+                        '<button type="button" class="sc-btn sc-cancel" data-sc="no">'+esc(o.cancel||'Cancel')+'</button>'+
+                        '<button type="button" class="sc-btn sc-ok '+tone+'" data-sc="yes">'+esc(o.ok||'Confirm')+'</button>'+
+                      '</div>'+
+                    '</div>';
+                function done(v){document.removeEventListener('keydown',onKey,true);ov.remove();resolve(v);}
+                function onKey(e){
+                    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();done(false);}
+                    else if(e.key==='Enter'&&document.activeElement&&document.activeElement.getAttribute('data-sc')==='no'){/* let Cancel button handle it */}
+                }
+                ov.addEventListener('click',function(e){
+                    if(e.target===ov){done(false);return;}
+                    const b=e.target.closest('[data-sc]');
+                    if(b)done(b.getAttribute('data-sc')==='yes');
+                });
+                document.addEventListener('keydown',onKey,true);
+                document.body.appendChild(ov);
+                const cancelBtn=ov.querySelector('[data-sc="no"]');
+                if(cancelBtn)cancelBtn.focus();   // safe default: Enter dile Cancel, accidental delete hobe na
+            });
+        }
         /* OWNER ONLY: permanently remove ONE notification for every user */
         async function deleteDashboardNotification(id){
             if(!myAccess.isOwner||!currentUser?.uid||!cloudDb){showToast('Only the owner can delete notifications');return;}
-            if(!confirm('Ei notification ta sobar kase theke remove hobe. Continue?'))return;
+            if(!await smartConfirm({title:'Delete this notification?',message:'Eta sobar kase theke remove hoye jabe. Eta undo kora jabe na.',ok:'Yes, Delete',icon:'fa-trash-can'}))return;
             try{
                 await cloudDb.doc('dashboardNotifications/'+id).delete();
                 const ref=cloudDb.doc('config/dashboardNotifications');
@@ -3719,7 +3776,7 @@ const ACCOUNTS = [
         /* OWNER ONLY: permanently remove ALL notifications for every user */
         async function clearAllDashboardNotifications(){
             if(!myAccess.isOwner||!currentUser?.uid||!cloudDb){showToast('Only the owner can clear notifications');return;}
-            if(!confirm('Sob notification sobar kase theke permanently remove hobe. Continue?'))return;
+            if(!await smartConfirm({title:'Clear all notifications?',message:'Sob notification sobar kase theke permanently remove hobe. Eta undo kora jabe na.',ok:'Yes, Clear All',icon:'fa-bell-slash'}))return;
             try{
                 const snap=await cloudDb.collection('dashboardNotifications').get();
                 await Promise.all(snap.docs.map(d=>d.ref.delete()));
@@ -5873,8 +5930,8 @@ const ACCOUNTS = [
             }
         }
 
-        function removeTaskTab(type) {
-            if (!confirm('Remove this tab? Its saved sheets will be kept but hidden unless you re-add a tab with the same setup.')) return;
+        async function removeTaskTab(type) {
+            if (!await smartConfirm({title:'Remove this tab?',message:'Its saved sheets will be kept but hidden unless you re-add a tab with the same setup.',ok:'Remove Tab',icon:'fa-folder-minus'})) return;
             taskTabs = taskTabs.filter(t => t.type !== type);
             saveTabsAndSheets();
             renderManageTabsList();
