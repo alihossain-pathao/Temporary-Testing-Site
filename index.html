@@ -2550,11 +2550,10 @@ const ACCOUNTS = [
         var toRole = a.role === 'admin' ? 'user' : 'admin';
         rb = '<button class="nsd-btn sm" type="button" data-role="' + esc(a.email) + '" data-to="' + toRole + '" title="Role bodlan">' + (toRole === 'admin' ? 'Make Admin' : 'Make Incharge') + '</button>';
       }
-      var line = a.src === 'db' && isAdm(actor) ? '<button class="nsd-btn sm" type="button" data-line="' + esc(a.email) + '" title="File-e paste korar line copy">Line</button>' : '';
       return '<div class="nsd-row"><div class="nsd-av" style="width:34px;height:34px;font-size:13px">' + avatarHtml(v) + '</div>' +
         '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(v.name) + '</div>' +
         '<div style="font-size:10px;font-weight:600;color:#94a3b8;overflow:hidden;text-overflow:ellipsis">' + esc(a.email) + (a.src === 'file' ? ' · file' : '') + '</div></div>' +
-        badge(a.role) + rb + line + del + '</div>';
+        badge(a.role) + rb + del + '</div>';
     }).join('') || '<div class="nsd-hint">Kono account nei.</div>';
   }
   function adminDone() {
@@ -2574,10 +2573,7 @@ const ACCOUNTS = [
     dbSet('/accounts/' + encKey(email), rec); dbSet('/removed/' + encKey(email), null);
     $('nsdAdEmail').value = ''; $('nsdAdName').value = ''; $('nsdAdPw').value = '';
     var res = $('nsdAdResult');
-    res.innerHTML = '<div style="font-size:12px;font-weight:800;color:#6ee7b7">Account toiri hoyeche — ei device-e ekhon-i kaj korbe' + (dbBase() ? ' (ar onno device-e real-time-e).' : '.') + '</div>' +
-      '<div class="nsd-hint">Onno device-er jonno (ba backup-er jonno) file-er ACCOUNTS list-e ei line ta paste korun:</div>' +
-      '<span class="nsd-code" id="nsdAdLine">' + esc(fmtLine(rec)) + '</span>' +
-      '<button class="nsd-btn sm" type="button" style="margin-top:8px" onclick="NSD_AUTH.copyEl(\'nsdAdLine\',this)">Copy line</button>';
+    res.innerHTML = '<div style="font-size:12px;font-weight:800;color:#6ee7b7">Account created' + (dbBase() ? ' — it will work on every device in real time.' : ' — it will work on this device only.') + '</div>';
     res.style.display = 'block';
     changed();
   }
@@ -2669,10 +2665,9 @@ const ACCOUNTS = [
     $('nsdPfFile').addEventListener('change', function () { onPhotoPicked(this.files && this.files[0]); this.value = ''; });
     $('nsdPfName').addEventListener('input', function () { fillProfile(false); });
     $('nsdAdList').addEventListener('click', function (e) {
-      var t = e.target.closest('[data-rm],[data-line],[data-role]'); if (!t) return;
+      var t = e.target.closest('[data-rm],[data-role]'); if (!t) return;
       if (t.hasAttribute('data-role')) adminSetRole(t.getAttribute('data-role'), t.getAttribute('data-to'));
-      else if (t.hasAttribute('data-rm')) adminRemove(t.getAttribute('data-rm'));
-      else { var a = accountsMap()[t.getAttribute('data-line')]; if (a) { var tmp = document.createElement('span'); tmp.id = 'nsdTmpLine'; tmp.textContent = fmtLine(a); tmp.style.display = 'none'; document.body.appendChild(tmp); copyEl('nsdTmpLine', t); tmp.remove(); } }
+      else adminRemove(t.getAttribute('data-rm'));
     });
     window.addEventListener('hashchange', syncHashBox);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeProfile(); closeAdmin(); } });
