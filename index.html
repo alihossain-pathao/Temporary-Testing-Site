@@ -2024,8 +2024,8 @@ try {
       <div id="nsdHgMsg" class="nsd-err"></div>
       <div id="nsdHgOutWrap" style="display:none">
         <span class="nsd-code" id="nsdHgOut"></span>
-        <button class="nsd-btn sm" type="button" style="margin-top:8px" onclick="NSD_AUTH.copyEl('nsdHgOut',this)">Copy line</button>
-        <p class="nsd-hint">Ei line ta file-er <b>ACCOUNTS</b> list-er bhitore paste korun, tarpor save kore page refresh korun.</p>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="nsd-btn sm" type="button" onclick="NSD_AUTH.copyEl('nsdHgOut',this)">Copy line</button><button class="nsd-btn primary sm" type="button" onclick="NSD_AUTH.saveOwner()">Done (ekhoni setup koro)</button></div>
+        <p class="nsd-hint"><b>Done</b> chaple Owner ekhoni setup hoye jabe (paste lagbe na). Ba line ta file-er <b>ACCOUNTS</b>-e paste korte paren.</p>
       </div>
     </div>
   </div>
@@ -2191,11 +2191,11 @@ const ACCOUNTS = [
   }
 
   /* =================== STATE (accounts, remove list, profiles) =================== */
-  function emptyState() { return { accounts: {}, removed: {}, profiles: {} }; }
+  function emptyState() { return { accounts: {}, removed: {}, profiles: {}, owner: null }; }
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem(LS_STATE));
-      if (s && typeof s === 'object') return { accounts: s.accounts || {}, removed: s.removed || {}, profiles: s.profiles || {} };
+      if (s && typeof s === 'object') return { accounts: s.accounts || {}, removed: s.removed || {}, profiles: s.profiles || {}, owner: s.owner || null };
     } catch (e) {}
     return emptyState();
   }
@@ -2223,6 +2223,8 @@ const ACCOUNTS = [
       else r.role = String(a.role).toLowerCase() === 'admin' ? 'admin' : 'user';
       r.src = 'file'; m[r.email] = r;
     });
+    /* Prothom setup: file-e Owner-er line na thakle hash-box-er "Done" diye ekbar-i Owner set kora jay */
+    if (!m[OWNER] && state.owner) { r = normRec(state.owner); if (r && r.email === OWNER) { r.role = 'owner'; r.src = 'setup'; m[OWNER] = r; } }
     for (k in state.removed) { if (k !== OWNER) delete m[k]; }
     return m;
   }
@@ -2273,6 +2275,7 @@ const ACCOUNTS = [
     for (k in (t.accounts || {})) { v = t.accounts[k]; if (v && typeof v === 'object') s.accounts[decKey(k)] = v; }
     for (k in (t.removed || {})) { if (t.removed[k]) s.removed[decKey(k)] = 1; }
     for (k in (t.profiles || {})) { v = t.profiles[k]; if (v && typeof v === 'object') s.profiles[decKey(k)] = v; }
+    if (t.owner && typeof t.owner === 'object') s.owner = t.owner;
     state = s; saveState(); changed();
   }
   function dbFlush() {
@@ -2294,6 +2297,7 @@ const ACCOUNTS = [
     for (k in state.accounts) { pend['/accounts/' + encKey(k)] = { v: state.accounts[k] }; any = true; }
     for (k in state.removed) { pend['/removed/' + encKey(k)] = { v: true }; any = true; }
     for (k in state.profiles) { pend['/profiles/' + encKey(k)] = { v: state.profiles[k] }; any = true; }
+    if (state.owner) { pend['/owner'] = { v: state.owner }; any = true; }
     if (any) { savePend(); dbFlush(); }
   }
   function onStream(type, ev) {
@@ -2557,6 +2561,19 @@ const ACCOUNTS = [
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
     $('nsdHgPw').value = ''; $('nsdHgOutWrap').style.display = 'none'; syncHashBox();
   }
+  var lastRec = null;
+  /* "Done": Owner-er line file-e paste na kore-i ekbar-e setup. Sudhu tokhon-i kaj kore jokhon Owner ekhono set nai.
+     Owner set hoye gele password bodlate hole file-er ACCOUNTS line bodlan. */
+  function saveOwner() {
+    var msg = $('nsdHgMsg'); msg.textContent = '';
+    if (!lastRec) { msg.textContent = 'Age "Line banao" chapun.'; return; }
+    if (lastRec.role !== 'owner') { msg.textContent = 'Done sudhu Owner setup-er jonno. Admin/User add korte Admin panel use korun.'; return; }
+    if (accountsMap()[OWNER]) { msg.textContent = 'Owner ager-i set ache. Password bodlate file-er ACCOUNTS line bodlan.'; return; }
+    state.owner = lastRec; saveState(); dbSet('/owner', lastRec);
+    $('nsdHgPw').value = ''; $('nsdHgOutWrap').style.display = 'none'; lastRec = null;
+    changed(); toast('Owner setup hoyeche — ekhon login korun');
+    closeHash();
+  }
   function makeLine() {
     var msg = $('nsdHgMsg'); msg.textContent = '';
     var email = normEmail($('nsdHgEmail').value), name = $('nsdHgName').value.trim() || email.split('@')[0];
@@ -2565,7 +2582,8 @@ const ACCOUNTS = [
     if (!pw) { msg.textContent = 'Password din.'; return; }
     if (role === 'owner' && email !== OWNER) { msg.textContent = 'Owner role sudhu OWNER_EMAIL (' + OWNER_EMAIL + ')-er jonno. Onno email hole Admin/User select korun.'; return; }
     if (email === OWNER) role = 'owner';
-    $('nsdHgOut').textContent = fmtLine({ email: email, name: name, role: role, hash: makeHash(email, pw) });
+    lastRec = { email: email, name: name, role: role, hash: makeHash(email, pw) };
+    $('nsdHgOut').textContent = fmtLine(lastRec);
     $('nsdHgOutWrap').style.display = 'block';
   }
 
@@ -2608,7 +2626,7 @@ const ACCOUNTS = [
     focusLogin: function () { var e = $('nsdLoginEmail'); if (e) e.focus(); },
     openProfile: openProfile, closeProfile: closeProfile, saveProfile: saveProfile, removePhoto: removePhoto,
     openAdmin: openAdmin, closeAdmin: closeAdmin, adminDone: adminDone,
-    togglePw: togglePw, copyEl: copyEl, makeLine: makeLine, closeHash: closeHash,
+    togglePw: togglePw, copyEl: copyEl, makeLine: makeLine, saveOwner: saveOwner, closeHash: closeHash,
     _t: { sha256: sha256, encKey: encKey, decKey: decKey, accountsMap: accountsMap, makeHash: makeHash }
   };
 
