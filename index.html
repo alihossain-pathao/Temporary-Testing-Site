@@ -10260,7 +10260,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     }
     return null;
   }
-  function fieldsFor(hub,iso){
+  function rawFields(hub,iso){
     var cur=null,hist=null;
     try{cur=hubReportsData[hub.id]}catch(e){}
     if(cur&&toISO(cur.m_reportDate)===iso)return cur;
@@ -10269,18 +10269,26 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       var e2=hist[iso]||Object.keys(hist).map(function(k){return hist[k]}).filter(function(x){return x&&x.date===iso})[0];
       var rd=e2&&e2.reportData;
       if(rd&&Object.keys(rd).length){
-        /* Previous Day e ajker data jeno na ashe: snapshot-er nijer date onno din hole, ba ajker live data-r hubuhu copy hole eta ager diner asol report noy -- empty rakhi */
         var sd=toISO(rd.m_reportDate);
-        if(sd&&sd!==iso)return null;
-        if(cur){
-          var same=true;
-          Object.keys(Object.assign({},cur,rd)).forEach(function(k){if(k!=='m_reportDate'&&String(cur[k]==null?'':cur[k])!==String(rd[k]==null?'':rd[k]))same=false});
-          if(same)return null;
-        }
+        if(sd&&sd!==iso)return null;   /* snapshot-er nijer date onno din hole eta oi diner report noy */
         return rd;
       }
     }
     return null;
+  }
+  /* Report-er asol number gulo (hub input) -- Previous Day te ajker hubuhu copy ashle dhorar jonno */
+  var KEYF=['m_prevHold','m_reattemptReq','m_recParcel','m_areaChange','m_officeHold','m_capShort','delivered','fieldHold','fieldReturn','officeReturn','totalCollection','nightPayment','m_vanInTime','m_dispatchTime','m_totalDA','m_presentDA'];
+  function sameData(a,b){
+    for(var i=0;i<KEYF.length;i++){
+      if(String(a[KEYF[i]]==null?'':a[KEYF[i]]).trim()!==String(b[KEYF[i]]==null?'':b[KEYF[i]]).trim())return false;
+    }
+    return true;
+  }
+  function fieldsFor(hub,iso){
+    var r=rawFields(hub,iso),t=isoOf(new Date());
+    /* Previous Day e ajker data jeno kokhono na ashe: ager diner data jodi ajker data-r sathe mile jay, tahole eta ager diner asol report noy -- empty rakhi */
+    if(r&&iso!==t){var td=rawFields(hub,t);if(td&&sameData(r,td))return null}
+    return r;
   }
   function attFor(hub,iso){
     var a=null;try{a=attendanceReportsData[hub.id]}catch(e){}
