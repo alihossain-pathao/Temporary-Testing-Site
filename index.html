@@ -9827,6 +9827,8 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 #ncr table{border:0;border-collapse:collapse;table-layout:fixed;background:#fff;font-family:Arial,sans-serif;margin:0;max-width:none}
 #ncr td{padding:0 3px;overflow:hidden;box-sizing:border-box;line-height:1.25;background-clip:padding-box}
 #ncr td:focus{outline:1px solid #1a73e8;outline-offset:-1px}
+#ncr td.ncr-nm{user-select:none;-webkit-user-select:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#ncr td.ncr-flash{outline:2px solid #FFF2CC!important;outline-offset:-2px;filter:brightness(1.35)}
 </style><style>#ncr.ncr-dark{--c-card:#131d36;--c-ink:#e8f0f3;--c-sub:#9bb0b9;--c-line:#1e2a4a;--c-accent:#7fc4dc;--c-panel:#0f1830;--c-shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3)}</style>
 <script>
 function openDailyOpsReport(){var o=document.getElementById('dailyOpsOverlay');if(!o)return;o.style.display='block';o.scrollTop=0;document.body.style.overflow='hidden';}
@@ -10040,10 +10042,68 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   var RECALC=[recalc0,recalc1,recalc2,recalc3,function(h){age(h,50,54,55,false)},function(h){age(h,61,65,66,false)}];
   var tables={},current=null,lastBtn=null,N=cards.length;
+  /* ===== Hub name-e double click / double tap -> oi row-er baki sob cell copy (hub name bad) =====
+     Tab diye alada kore copy hoy, tai Excel / Google Sheet-e paste korle column-e column-e boshe jay. */
+  var toastEl=null,toastT=null;
+  function note(msg,ok){
+    if(!toastEl){
+      toastEl=document.createElement('div');
+      toastEl.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:100001;max-width:92vw;padding:9px 16px;border-radius:999px;font:600 13px Inter,Arial,sans-serif;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;transition:opacity .2s;opacity:0;text-align:center';
+      modal.appendChild(toastEl);
+    }
+    toastEl.textContent=msg;toastEl.style.background=ok?'#1b7a34':'#8a5a00';toastEl.style.opacity='1';
+    clearTimeout(toastT);toastT=setTimeout(function(){toastEl.style.opacity='0'},1600);
+  }
+  function copyText(txt){
+    function legacy(){
+      var ok=false,ta=document.createElement('textarea'),prev=document.activeElement;
+      ta.value=txt;ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none';
+      modal.appendChild(ta);ta.select();
+      try{ok=document.execCommand('copy')}catch(e){}
+      ta.remove();if(prev&&prev.focus&&prev!==document.body)try{prev.focus()}catch(e){}
+      return ok;
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
+      return navigator.clipboard.writeText(txt).then(function(){return true},function(){return legacy()});
+    }
+    return Promise.resolve(legacy());
+  }
+  function bodyStart(t){
+    var rows=t.rows,k;
+    for(k=1;k<rows.length;k++){var c0=rows[k].cells[0],tx=c0?c0.textContent.trim():'';if(c0&&/^(Narsingdi(?!\s+Cluster).*|Total)$/.test(tx))return k}
+    return rows.length;
+  }
+  function rowText(tr){
+    var out=[],c,k;
+    for(c=1;c<tr.cells.length;c++){
+      var td=tr.cells[c];
+      out.push(td.textContent.replace(/\s+/g,' ').trim());
+      for(k=1;k<td.colSpan;k++)out.push('');   /* merged cell-e column alignment thik thake */
+    }
+    while(out.length&&out[out.length-1]==='')out.pop();
+    return out.join('\t');
+  }
+  function rowCopy(t){
+    var start=bodyStart(t),lastTd=null,lastAt=0,r;
+    for(r=start;r<t.rows.length;r++){var a=t.rows[r].cells[0];if(a)a.classList.add('ncr-nm')}
+    t.addEventListener('click',function(e){
+      var td=e.target.closest&&e.target.closest('td');
+      if(!td||!td.classList.contains('ncr-nm'))return;
+      var now=Date.now();
+      if(lastTd!==td||now-lastAt>400){lastTd=td;lastAt=now;return}
+      lastTd=null;
+      var tr=td.parentNode,txt=rowText(tr),name=td.textContent.trim();
+      if(!txt){note(name+' row-e ekhono kono data nei',false);return}
+      Array.prototype.forEach.call(tr.cells,function(x){x.classList.add('ncr-flash')});
+      setTimeout(function(){Array.prototype.forEach.call(tr.cells,function(x){x.classList.remove('ncr-flash')})},650);
+      copyText(txt).then(function(ok){note(ok?'Copied: '+name+' row':'Copy hoy ni, abar try korun',ok)});
+    });
+  }
   function getTable(i){
     if(!tables[i]){
       var t=root.querySelector('#ncr-t'+i).content.firstElementChild.cloneNode(true);
-      t.querySelectorAll('td').forEach(function(td){td.contentEditable=/^A\d+$/.test(td.dataset.a||'')?'false':'true';td.spellcheck=false;});lockHead(t);if(i===2)statusDD(t);
+      t.querySelectorAll('td').forEach(function(td){td.contentEditable=/^A\d+$/.test(td.dataset.a||'')?'false':'true';td.spellcheck=false;});lockHead(t);if(i===2)statusDD(t);rowCopy(t);
       var h=mk(t),rc=function(){RECALC[i](h)};
       t.addEventListener('input',rc);
       t.addEventListener('keydown',function(e){
