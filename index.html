@@ -551,11 +551,8 @@
         }
 
         /* ===== Report count validation (Morning + Closing) ===== */
-        #hubReportView:not(.rcv-off) .excel-table td.chk-bad { background:#fecaca !important; box-shadow: inset 0 0 0 2px #dc2626; color:#7f1d1d !important; }
-        #hubReportView:not(.rcv-off) .excel-table td.chk-warn { background:#fde68a !important; box-shadow: inset 0 0 0 2px #d97706; color:#78350f !important; }
-        #hubReportView:not(.rcv-off) .excel-table td.chk-rel { outline:2px dashed #f59e0b; outline-offset:-2px; }
-        #hubReportView:not(.rcv-off) .excel-table td.chk-bad input,
-        #hubReportView:not(.rcv-off) .excel-table td.chk-warn input { background:transparent !important; color:inherit !important; }
+        /* Cell highlight (lal/komola) bondho kora hoyeche -- sudhu popup panel thakbe */
+        #reportCheckToggleMarks { display:none !important; }
         .excel-table td.rcv-flash { animation: rcvFlash 1.4s ease-out 1; }
         @keyframes rcvFlash { 0%,40% { box-shadow: inset 0 0 0 3px #2563eb, 0 0 0 4px rgba(37,99,235,.35); } 100% { box-shadow: none; } }
         .rcv-panel { max-width:1500px; margin:0 auto 10px; background:#fff; border:1px solid #94a3b8; border-left:6px solid #94a3b8; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#0f172a; font-family:'Segoe UI',Arial,sans-serif; overflow:hidden; }
@@ -590,7 +587,6 @@
         .rcv-item { padding:6px 10px; }
         .rcv-it-hint { display:none; }
         .rcv-grp { font-size:10px; font-weight:900; letter-spacing:.5px; color:#fff; background:#475569; padding:3px 10px; }
-        #hubReportView:not(.rcv-off) .excel-table td.chk-rel { outline:none !important; }
 </style>
 <script>
 /* ===== APP LOGO =====
