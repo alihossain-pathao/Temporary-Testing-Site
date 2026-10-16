@@ -498,6 +498,11 @@
         #sidebarOverlay { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(0,0,0,.6); }
         #sidebarOverlay:not(.hidden) { animation: nsdSbFade .18s ease-out; }
         @keyframes nsdSbFade { from { opacity: 0; } to { opacity: 1; } }
+        /* Logout button jeno screen er niche kete na jay: menu list scroll hobe, niche er Logout block fixed thakbe */
+        #sidebarDrawer { overflow: hidden; }
+        #sidebarDrawer > div:first-child { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+        #sidebarDrawer > div:first-child > nav { flex: 1 1 auto; min-height: 0; max-height: none !important; }
+        #sidebarDrawer > div:last-child { flex: none; }
         #sidebarDrawer { transition: transform .2s cubic-bezier(.2,.8,.2,1); will-change: transform; backface-visibility: hidden; contain: layout style; }
 
         @media (max-width: 1200px) {
@@ -809,7 +814,7 @@ try {
 <button class="w-full px-3 py-2.5 text-xs font-black rounded-xl bg-white text-slate-900 hover:bg-slate-200 transition flex items-center justify-center gap-2" id="sidebarLoginBtn" onclick="googleSignIn(); toggleSidebar();">
 <i class="fa-solid fa-right-to-bracket"></i> Login
             </button>
-<button class="hidden w-full px-3 py-2.5 text-xs font-black rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition flex items-center justify-center gap-2 border border-slate-700" id="sidebarLogoutBtn" onclick="googleSignOut(); toggleSidebar();">
+<button class="w-full px-3 py-2.5 text-xs font-black rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition flex items-center justify-center gap-2 border border-slate-700" id="sidebarLogoutBtn" onclick="googleSignOut(); toggleSidebar();">
 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
 <span class="text-[10px] text-slate-600 font-bold uppercase tracking-wider block text-center">Narsingdi Cluster Ops v2.0</span>
@@ -826,8 +831,7 @@ try {
 </button>
 <div>
 <h1 class="text-2xl font-black text-white tracking-wide flex items-center gap-3">
-<!-- PROFILE: gol avatar (login thakle dekha jay). Click korle profile sheet khole -->
-<button aria-label="Menu" class="nsd-av" id="nsdAvatarBtn" onclick="NSD_AUTH.toggleMenu(event)" style="display:none" title="Menu" type="button"></button>
+<!-- Ager gol Ali logo (Admin Panel/Logout dropdown) shoriye deya hoyeche: Admin Panel ar Logout ekhon Navigation Menu (sidebar) e -->
                         Narsingdi Cluster Operations Center
                     </h1>
 <p class="text-xs text-slate-400 mt-1 font-semibold">Real-time Dispatch Tracking, Delivery Performance &amp; Hub Management</p>
@@ -2451,6 +2455,7 @@ const ACCOUNTS = [
     var btn = $('nsdAvatarBtn');
     /* Header-er profile button-e sob somoy ei permanent logo dekhay (user-er photo noy). Click korle profile sheet khole. */
     if (btn) { btn.style.display = u ? '' : 'none'; btn.className = 'nsd-av'; btn.innerHTML = '<img alt="Profile" src="' + HEADER_LOGO + '">'; btn.title = u ? u.name + ' (' + u.role + ')' : ''; }
+    var slb = $('sidebarLogoutBtn'); if (slb) slb.classList.toggle('hidden', !u);   /* Navigation Menu er Logout: login thakle-i dekhay */
     if (!u) { var open = $('nsdProfileSheet'); if (open) open.style.display = 'none'; }
     else if ($('nsdProfileSheet').style.display !== 'none') fillProfile(false);
   }
