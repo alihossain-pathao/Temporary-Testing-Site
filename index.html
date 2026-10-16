@@ -10455,6 +10455,24 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       restoreManual(selISO);
       paintBtn();
       SYNC();
+      dbgInfo();
+    }
+    /* TEMP diagnostic: Previous Day te data kothay theke ashche seta header-er niche dekhay (somossha mitle ei function ar dbg div muche felben) */
+    var dbg=document.createElement('div');
+    dbg.style.cssText='font-size:11px;opacity:.85;margin-top:4px;font-weight:500;word-break:break-all';
+    root.querySelector('.ncr-ttl').appendChild(dbg);
+    function dbgInfo(){
+      try{
+        if(selISO===todayISO()){dbg.textContent='';return}
+        var hub=hubForRow('Narsingdi'),cur=null,hist=null;
+        if(!hub){dbg.textContent='[debug] Narsingdi hub paoa jay ni';return}
+        try{cur=hubReportsData[hub.id]}catch(e){}
+        try{hist=hubReportHistory[hub.id]}catch(e){}
+        var ks=hist?Object.keys(hist).sort().join(', '):'(history nai)';
+        var e=hist&&hist[selISO],ed=e&&e.reportData?e.reportData.m_reportDate:'-';
+        var f=fieldsFor(hub,selISO),src=!f?'EMPTY':(f===cur?'LIVE form':'HISTORY');
+        dbg.textContent='[debug] showing='+src+' | live form date='+(cur?cur.m_reportDate:'-')+' | history dates: '+ks+' | history['+selISO+'] snapshot date='+ed;
+      }catch(e){dbg.textContent='[debug] '+e.message}
     }
     pbtn.addEventListener('click',function(){
       applyDate(selISO===todayISO()?prevISO(todayISO()):todayISO());
