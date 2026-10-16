@@ -10165,6 +10165,16 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     }catch(e){}
     return out;
   }
+  /* Closing Summary: hub-er total Delivered ke % diye Partial / Exchange / Paid Return e bhag kora.
+     PCT = [Partial %, Exchange %, Paid Return/DRTO %]  (ei % bodlate chaile ekhane change korun) */
+  var PCT={narsingdi:[1,1,5],pachdona:[1,1,7],shibpur:[1,1,6],palash:[1,1,5],monohardi:[1,1,6]};
+  function pctKey(name){var k=nk(name);if(/monohar/.test(k))return 'monohardi';if(/pan?chdona/.test(k))return 'pachdona';if(/shi[bv]pur/.test(k))return 'shibpur';if(/p[ao]lash/.test(k))return 'palash';return 'narsingdi'}
+  function splitDel(name,del){
+    var q=PCT[pctKey(name)]||[0,0,0];
+    var p=Math.round(del*q[0]/100),e=Math.round(del*q[1]/100),pr=Math.round(del*q[2]/100);
+    if(p+e>del){e=Math.max(0,del-p)}
+    return {c:del-p-e,p:p,e:e,pr:pr};  /* Delivered + Partial + Exchange = hub-er total delivery (ekdom ek) */
+  }
   function FILL(i,h){
     var rg=CFG[i];if(!rg)return;
     var kp=(i===1)?kpiPrev():null;
@@ -10177,7 +10187,8 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
         set('F',f?(f.m_vanInTime||''):null);set('G',f?(f.m_dispatchTime||''):null);
         set('I',d?d.assign:null);set('K',d?d.oh:null);set('M',d?d.cs:null);set('O',d?d.or:null);
       }else if(i===1){
-        set('B',d?d.assign:null);set('C',d?d.del:null);set('F',d?d.fh:null);set('G',d?d.fr:null);
+        var sp=d?splitDel(h.raw('A'+r),d.del):null;
+        set('B',d?d.assign:null);set('C',sp?sp.c:null);set('D',sp?sp.p:null);set('E',sp?sp.e:null);set('H',sp?sp.pr:null);set('F',d?d.fh:null);set('G',d?d.fr:null);
         set('K',kp&&hub&&kp.byId[hub.id]?kp.byId[hub.id]:null);
         set('M',d?d.oh+d.cs+d.fh:null);set('O',d?d.or+d.fr:null);set('Q',d?d.oh+d.cs:null);
         set('S',f?(f.ims_hub_closing_time||''):null);
