@@ -9920,7 +9920,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       <button class="ncr-btn ncr-x" aria-label="Close">&#10005;</button>
     </div>
     <div class="ncr-body"></div>
-    <div class="ncr-hint2"><span>Esc diye close korun</span><span>&#8249; &#8250; diye section bodlan</span></div>
+    <div class="ncr-hint2"><span>Esc diye close korun</span><span>&#8249; &#8250; ba &#8592; &#8594; key diye section bodlan (cell-e type korar somoy Alt + &#8592; &#8594;)</span></div>
   </div>
 </div>
 </div>
@@ -10168,8 +10168,10 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   document.addEventListener('keydown',function(e){
     if(current===null)return;
     if(e.key==='Escape')closeSec();
-    else if(e.altKey&&e.key==='ArrowLeft')show(current-1);
-    else if(e.altKey&&e.key==='ArrowRight')show(current+1);
+    else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+      var t=e.target,tg=t&&t.tagName,typing=!!(t&&(t.isContentEditable||tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'));
+      if(e.altKey||(!typing&&!stMenu&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey)){e.preventDefault();show(current+(e.key==='ArrowLeft'?-1:1));}
+    }
   });
   
   /* ===== Hub input -> Daily Ops auto-fill ===== */
