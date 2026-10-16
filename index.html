@@ -10152,7 +10152,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     panel.style.width=Math.min(window.innerWidth-28,Math.max(360,Math.ceil(t.offsetWidth*s)+26))+'px';
   }
   function show(i){
-    i=(i+N)%N;current=i;lastBtn=cards[i];
+    i=(i+N)%N;current=i;window.__ncrLast=i;lastBtn=cards[i];
     mt.textContent=cards[i].dataset.title;
     sub.textContent='Narsingdi Cluster \u00b7 '+today;
     var __t=getTable(i);if(HS[i]){FILL(i,HS[i]);RECALC[i](HS[i]);}body.replaceChildren(__t);
@@ -10164,6 +10164,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   xb.addEventListener('click',closeSec);
   pv.addEventListener('click',function(){show(current-1)});
   nx.addEventListener('click',function(){show(current+1)});
+  window.__ncrShow=show;
   modal.addEventListener('mousedown',function(e){if(e.target===modal)closeSec()});
   document.addEventListener('keydown',function(e){
     if(current===null)return;
@@ -10326,5 +10327,205 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
 })();
 </script></div>
 </div>
+<script id="nsdBackNav">
+/* =====================================================================
+   BACK / FORWARD  (laptop trackpad swipe, mouse back-forward button, mobile back gesture)
+   Dashboard-er prottek tab, report page, popup ar overlay browser history-te jogi hoy.
+     Back    = ekdhap pichone (khola popup/page bondho hoy, tab ager tab-e fire jay)
+     Forward = abar ager jaygay (jeta Back diye bondho hoyechilo seta khule jay)
+   Notun page ba popup add korle sudhu niche LAYERS list-e ekta line jog korun.
+   ===================================================================== */
+(function () {
+  'use strict';
+  var KEY = '__nsdNav';
+  function $(id) { return document.getElementById(id); }
+  function fn(name) {
+    try { var p = name.split('.'), o = window; for (var i = 0; i < p.length; i++) o = o[p[i]]; return typeof o === 'function' ? o : null; }
+    catch (e) { return null; }
+  }
+  function call(name, args) { var f = fn(name); if (f) { try { return f.apply(null, args || []); } catch (e) { console.error(e); } } }
+  function lastArgs(name) { var f = fn(name); return f && f.__navArgs; }
+
+  /* function-gulo wrap kore last argument (hubId, hubName...) mone rakhi, jate Forward-e abar khola jay */
+  ['generateReport', 'generateAttendanceReport', 'generateInventoryReport', 'openHubSummaryModal', 'openAgentPerformanceReport']
+    .forEach(function (name) {
+      var f = window[name];
+      if (typeof f !== 'function' || f.__navRec) return;
+      var w = function () { w.__navArgs = [].slice.call(arguments); return f.apply(this, arguments); };
+      w.__navRec = 1; window[name] = w;
+    });
+  function reopenRec(name) { return function () { var a = lastArgs(name); if (a) call(name, a); }; }
+
+  /* ---- layer = ekta page / popup / overlay ---- */
+  function hid(elId, closeName, reopen, extra) {       // 'hidden' class diye lukano
+    var o = { id: elId, node: function () { return $(elId); },
+      isOpen: function () { var e = $(elId); return !!e && !e.classList.contains('hidden'); },
+      close: function () { call(closeName); },
+      hide: function () { var e = $(elId); if (e) e.classList.add('hidden'); },
+      reopen: reopen || null };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function dsp(elId, closeName, reopen) {              // style.display diye lukano
+    return { id: elId, node: function () { return $(elId); },
+      isOpen: function () { var e = $(elId); return !!e && !!e.style.display && e.style.display !== 'none'; },
+      close: function () { call(closeName); },
+      hide: function () { var e = $(elId); if (e) e.style.display = 'none'; },
+      reopen: reopen || null };
+  }
+  var LAYERS = [
+    /* full page report-gulo */
+    hid('hubReportView', 'closeReportView', reopenRec('generateReport')),
+    hid('attendanceReportView', 'closeAttendanceReportView', reopenRec('generateAttendanceReport')),
+    hid('inventoryReportView', 'closeInventoryReportView', reopenRec('generateInventoryReport')),
+    hid('ageingReportView', 'closeAgeingReportView', function () { call('openAgeingReportView'); }),
+    hid('excelImportReportView', 'closeExcelImportReportView', function () { call('openExcelImportReportView'); }),
+    /* popup / modal */
+    hid('hubSummaryModal', 'closeHubSummaryModal', reopenRec('openHubSummaryModal')),
+    hid('clusterSummaryModal', 'closeClusterSummaryModal', function () { call('openClusterSummaryModal'); }),
+    hid('currentDayKpiReportModal', 'closeCurrentDayKpiReport', function () { call('openCurrentDayKpiReport'); }),
+    hid('agentPerformancePageModal', 'closeAgentPerformanceReport', reopenRec('openAgentPerformanceReport')),
+    hid('ageingConsignmentModal', 'closeAgeingConsignmentModal'),
+    hid('inventoryClearConfirm', 'closeInventoryClearConfirm'),
+    hid('addSheetModal', 'closeAddSheetModal'),
+    hid('manageTabsModal', 'closeManageTabsModal'),
+    hid('addHubModal', 'closeAddHubModal'),
+    hid('removeHubModal', 'closeRemoveHubModal'),
+    hid('visibilityModal', 'closeVisibilityModal'),
+    hid('ownerAccessModal', 'closeOwnerAccessModal'),
+    hid('pinModal', 'closePinModal'),
+    hid('dashboardNotificationModal', 'closeDashboardNotificationModal'),
+    hid('sidebarOverlay', 'toggleSidebar', null, { hide: function () { call('toggleSidebar'); } }),
+    /* profile / admin (login system) */
+    dsp('nsdProfileSheet', 'NSD_AUTH.closeProfile'),
+    dsp('nsdAdminPanel', 'NSD_AUTH.closeAdmin'),
+    /* Daily Ops Report + tar bhitorer section popup */
+    dsp('dailyOpsOverlay', 'closeDailyOpsReport', function () { call('openDailyOpsReport'); }),
+    { id: 'ncrSection',
+      node: function () { return document.querySelector('#ncr .ncr-modal'); },
+      isOpen: function () { var e = document.querySelector('#ncr .ncr-modal'); return !!e && e.classList.contains('open'); },
+      close: function () { var b = document.querySelector('#ncr .ncr-x'); if (b) b.click(); },
+      hide: function () { var e = document.querySelector('#ncr .ncr-modal'); if (e) e.classList.remove('open'); },
+      reopen: function () { if (window.__ncrShow) window.__ncrShow(window.__ncrLast || 0); } }
+  ];
+  var BY = {}; LAYERS.forEach(function (l) { BY[l.id] = l; });
+  function isOpen(l) { try { return l.isOpen(); } catch (e) { return false; } }
+
+  /* ---- state ---- */
+  var stack = [];          // ekhon kon kon layer khola (khola-r kromanushare)
+  var fwd = [];            // Back diye bondho hoyechilo -> Forward-e abar khulbe
+  var curD = 0;            // history-te amader depth
+  var curTab = 'overview';
+  var ignorePop = 0, silentTab = false, pending = false, dead = false;
+  var ign = {};            // page load-er shomoy jegulo already khola chilo (track korbo na)
+
+  function validTab(t) {
+    if (t === 'overview' || t === 'leaderboard') return true;
+    try { return taskTabs.some(function (x) { return x.type === t; }); } catch (e) { return false; }
+  }
+  function st(d) { var s = { d: d, tab: curTab }; s[KEY] = 1; return s; }
+  function safe(f) { try { return f(); } catch (e) { dead = true; console.warn('BackNav off:', e); } }
+
+  /* ---- layer open/close holo -> history sync ---- */
+  function reconcile() {
+    pending = false;
+    if (dead) return;
+    Object.keys(ign).forEach(function (id) { if (!isOpen(BY[id])) delete ign[id]; });
+    var open = LAYERS.filter(function (l) { return !ign[l.id] && isOpen(l); }).map(function (l) { return l.id; });
+    var closed = stack.filter(function (id) { return open.indexOf(id) < 0; });
+    var opened = open.filter(function (id) { return stack.indexOf(id) < 0; });
+    if (!closed.length && !opened.length) return;
+    closed.slice().reverse().forEach(function (id) { stack.splice(stack.indexOf(id), 1); fwd.push(id); });
+    opened.forEach(function (id) { stack.push(id); });
+    if (opened.length) fwd.length = 0;               // notun action = Forward history muche jay
+    var n = stack.length;
+    if (n > curD) {
+      safe(function () { for (var k = curD + 1; k <= n; k++) history.pushState(st(k), ''); });
+      curD = n;
+    } else if (n < curD) {
+      ignorePop++;
+      safe(function () { history.go(n - curD); });
+    }
+  }
+  function schedule() { if (!pending) { pending = true; setTimeout(reconcile, 0); } }
+
+  /* ---- browser Back / Forward ---- */
+  function fix() {
+    curD = stack.length;
+    var s = history.state;
+    if (!s || s[KEY] !== 1 || s.d !== curD || s.tab !== curTab) safe(function () { history.replaceState(st(curD), ''); });
+  }
+  function closeLayer(l) {
+    try { l.close(); } catch (e) { console.error(e); }
+    if (isOpen(l)) { try { l.hide(); } catch (e) {} }
+  }
+  function setTab(t) {
+    if (!validTab(t)) t = 'overview';
+    var f = window.__navOrigSwitch;
+    if (!f) return;
+    silentTab = true;
+    try { f(t); } catch (e) { console.error(e); }
+    silentTab = false;
+    curTab = t;
+  }
+  window.addEventListener('popstate', function (e) {
+    if (dead) return;
+    if (ignorePop > 0) { ignorePop--; fix(); return; }   // amader nijer history.go() er pore
+    var s = e.state && e.state[KEY] === 1 ? e.state : { d: 0, tab: null };
+    while (stack.length > s.d) {                          // Back: upor theke bondho
+      var id = stack[stack.length - 1], l = BY[id];
+      stack.pop(); fwd.push(id);
+      if (l) closeLayer(l);
+    }
+    while (stack.length < s.d && fwd.length) {            // Forward: abar khola
+      var fid = fwd.pop(), fl = BY[fid];
+      if (!fl || !fl.reopen) { fwd.length = 0; break; }
+      try { fl.reopen(); } catch (er) { console.error(er); }
+      if (isOpen(fl)) stack.push(fid); else { fwd.length = 0; break; }
+    }
+    if (s.tab && s.tab !== curTab) setTab(s.tab);
+    fix();
+  });
+
+  /* ---- tab bodlale history-te jog ---- */
+  function hookTabs() {
+    var orig = window.switchDashboardTab;
+    if (typeof orig !== 'function' || orig.__navHook) return;
+    window.__navOrigSwitch = orig;
+    var w = function (tab) {
+      var r = orig.apply(this, arguments);
+      if (!silentTab && tab !== curTab && validTab(tab)) {
+        curTab = tab;
+        if (stack.length) safe(function () { history.replaceState(st(curD), ''); });
+        else { safe(function () { history.pushState(st(curD), ''); }); fwd.length = 0; }
+      }
+      return r;
+    };
+    w.__navHook = 1; window.switchDashboardTab = w;
+  }
+
+  /* ---- init ---- */
+  function init() {
+    try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+    try {
+      if (typeof currentGenericTabType !== 'undefined' && currentGenericTabType) curTab = currentGenericTabType;
+      else { var lb = $('viewLeaderboard'); if (lb && !lb.classList.contains('hidden')) curTab = 'leaderboard'; }
+    } catch (e) {}
+    hookTabs();
+    LAYERS.forEach(function (l) { if (isOpen(l)) ign[l.id] = 1; });
+    safe(function () { history.replaceState(st(0), ''); });
+    var mo = new MutationObserver(schedule);
+    function watch() {
+      LAYERS.forEach(function (l) {
+        var n = l.node();
+        if (n && !n.__navW) { n.__navW = 1; mo.observe(n, { attributes: true, attributeFilter: ['class', 'style'] }); }
+      });
+    }
+    watch();
+    new MutationObserver(function () { watch(); schedule(); }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
 </body>
 </html>
