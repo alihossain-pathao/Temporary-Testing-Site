@@ -10267,7 +10267,18 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     try{hist=hubReportHistory[hub.id]}catch(e){}
     if(hist){
       var e2=hist[iso]||Object.keys(hist).map(function(k){return hist[k]}).filter(function(x){return x&&x.date===iso})[0];
-      if(e2&&e2.reportData)return e2.reportData;
+      var rd=e2&&e2.reportData;
+      if(rd&&Object.keys(rd).length){
+        /* Previous Day e ajker data jeno na ashe: snapshot-er nijer date onno din hole, ba ajker live data-r hubuhu copy hole eta ager diner asol report noy -- empty rakhi */
+        var sd=toISO(rd.m_reportDate);
+        if(sd&&sd!==iso)return null;
+        if(cur){
+          var same=true;
+          Object.keys(Object.assign({},cur,rd)).forEach(function(k){if(k!=='m_reportDate'&&String(cur[k]==null?'':cur[k])!==String(rd[k]==null?'':rd[k]))same=false});
+          if(same)return null;
+        }
+        return rd;
+      }
     }
     return null;
   }
