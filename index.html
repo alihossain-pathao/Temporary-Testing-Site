@@ -10214,6 +10214,9 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     if(p+e+pr>del){pr=Math.max(0,del-p-e)}
     return {c:del-p-e-pr,p:p,e:e,pr:pr};  /* Delivered + Partial + Exchange + Paid Return = hub-er total delivery (ekdom ek) */
   }
+  /* Agent Cap / Hub Health: W/Off average (Absent theke alada kore) -- ei number bodlate chaile ekhane change korun */
+  var WOFF={narsingdi:4,monohardi:2,palash:2,pachdona:4,shibpur:3};
+  function woff(name){var v=WOFF[pctKey(name)];return v==null?null:v}
   function closeTime(v){
     v=String(v==null?'':v).trim();if(!v)return '';
     try{if(typeof normalizeTime12==='function'){var n=normalizeTime12(v);if(n&&n!=='-')return n}}catch(e){}
@@ -10243,9 +10246,9 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
         if(a){
           set('B',num(a.totalDA));
           set('C',Math.max(num(a.totalDA)-num(a.weekend)-num(a.absent)-num(a.onTraining),0));
-          set('D',num(a.weekend));set('H',num(a.onTraining));
+          set('D',num(a.weekend)>0?num(a.weekend):woff(h.raw('A'+r)));set('H',num(a.onTraining));
         }else if(f){
-          set('B',num(f.m_totalDA));set('C',num(f.m_presentDA));set('D',null);set('H',num(f.m_onTrainingDA));
+          set('B',num(f.m_totalDA));set('C',num(f.m_presentDA));set('D',woff(h.raw('A'+r)));set('H',num(f.m_onTrainingDA));
         }else{set('B',null);set('C',null);set('D',null);set('H',null)}
         set('F',d?d.tot:null);
       }else if(i===4){
