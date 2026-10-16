@@ -10017,7 +10017,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     var r,t={};
     for(r=39;r<=43;r++){
       var C=h.n('C'+r),F=h.n('F'+r);
-      h.set('E'+r,(h.has('B'+r)||h.has('C'+r))?fmtN(h.n('B'+r)-C-h.n('D'+r)):'');
+      h.set('E'+r,(h.has('B'+r)||h.has('C'+r))?fmtN(Math.max(0,h.n('B'+r)-C-h.n('D'+r)-h.n('H'+r))):'');
       h.set('G'+r,(h.has('F'+r)&&C>0)?fmtN(Math.round(F/C)):'');
     }
     ['B','C','D','E','F','H','I','J','K','L'].forEach(function(c){t[c]=sumCol(h,c,39,43,44)});
@@ -10216,7 +10216,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   /* Agent Cap / Hub Health: W/Off average (Absent theke alada kore) -- ei number bodlate chaile ekhane change korun */
   var WOFF={narsingdi:4,monohardi:2,palash:2,pachdona:4,shibpur:3};
-  function woff(name){var v=WOFF[pctKey(name)];return v==null?null:v}
+  function woff(name,avail){var v=WOFF[pctKey(name)];if(v==null)return null;return Math.max(0,Math.min(v,avail))}
   function closeTime(v){
     v=String(v==null?'':v).trim();if(!v)return '';
     try{if(typeof normalizeTime12==='function'){var n=normalizeTime12(v);if(n&&n!=='-')return n}}catch(e){}
@@ -10246,9 +10246,9 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
         if(a){
           set('B',num(a.totalDA));
           set('C',Math.max(num(a.totalDA)-num(a.weekend)-num(a.absent)-num(a.onTraining),0));
-          set('D',num(a.weekend)>0?num(a.weekend):woff(h.raw('A'+r)));set('H',num(a.onTraining));
+          set('D',num(a.weekend)>0?num(a.weekend):woff(h.raw('A'+r),num(a.absent)));set('H',num(a.onTraining));
         }else if(f){
-          set('B',num(f.m_totalDA));set('C',num(f.m_presentDA));set('D',woff(h.raw('A'+r)));set('H',num(f.m_onTrainingDA));
+          set('B',num(f.m_totalDA));set('C',num(f.m_presentDA));set('D',woff(h.raw('A'+r),Math.max(0,num(f.m_totalDA)-num(f.m_presentDA)-num(f.m_onTrainingDA))));set('H',num(f.m_onTrainingDA));
         }else{set('B',null);set('C',null);set('D',null);set('H',null)}
         set('F',d?d.tot:null);
       }else if(i===4){
