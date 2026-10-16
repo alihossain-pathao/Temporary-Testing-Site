@@ -10004,7 +10004,9 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   function recalc2(h){
     var r,t={};
     for(r=28;r<=32;r++){
-      var B=h.n('B'+r),C=h.n('C'+r),G=h.n('G'+r);
+      var B=h.n('B'+r),C=h.n('C'+r);
+      h.set('G'+r,(h.has('B'+r)||h.has('C'+r))?fmtN(Math.max(0,B-C)):'');  /* baki taka = Total Panel Amount - Same day Submitted */
+      var G=h.n('G'+r);
       h.set('D'+r,h.has('C'+r)?pct(C,B):'');
       h.set('H'+r,h.has('G'+r)?pct(G,B):'');
     }
