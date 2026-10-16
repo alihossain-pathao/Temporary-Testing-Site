@@ -10044,7 +10044,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   function getTable(i){
     if(!tables[i]){
       var t=root.querySelector('#ncr-t'+i).content.firstElementChild.cloneNode(true);
-      t.querySelectorAll('td').forEach(function(td){td.contentEditable=/^A\d+$/.test(td.dataset.a||'')?'false':'true';td.spellcheck=false;});
+      t.querySelectorAll('td').forEach(function(td){td.contentEditable=/^A\d+$/.test(td.dataset.a||'')?'false':'true';td.spellcheck=false;});lockHead(t);
       var h=mk(t),rc=function(){RECALC[i](h)};
       t.addEventListener('input',rc);
       t.addEventListener('keydown',function(e){
@@ -10063,6 +10063,17 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       FILL(i,h);rc();tables[i]=t;HS[i]=h;
     }
     return tables[i];
+  }
+  /* Title + header row-gola lock (edit/change kora jabe na) */
+  function lockHead(t){
+    var rows=Array.prototype.slice.call(t.rows),i,hd=rows.length;
+    for(i=1;i<rows.length;i++){
+      var c0=rows[i].cells[0],tx=c0?c0.textContent.trim():'';
+      if(c0&&/^(Narsingdi(?!\s+Cluster).*|Total)$/.test(tx)){hd=i;break}
+    }
+    for(i=0;i<hd;i++)Array.prototype.forEach.call(rows[i].cells,function(td){
+      td.contentEditable='false';td.dataset.hd='1';td.style.cursor='default';td.style.userSelect='none';td.style.webkitUserSelect='none';
+    });
   }
   /* Freeze panes: title + header rows upore, Hub Name column bam-e (scroll korleo thakbe) */
   function freeze(t){
