@@ -144,6 +144,22 @@
         .ag-presets { max-width:1500px; margin:0 auto 10px; display:flex; gap:7px; flex-wrap:wrap; align-items:center; font-size:10px; font-weight:900; color:#475569; }
         .ag-presets button { border:1px dashed #1f4e78; background:#f0f6fc; color:#1f4e78; border-radius:999px; padding:5px 12px; font-size:10px; font-weight:900; cursor:pointer; }
         .ag-presets button:hover { background:#1f4e78; color:#fff; }
+        /* ===== Ageing: Excel-format pivots (Status x Age / Status Count / Hub x Status / Hub > Status x Age) ===== */
+        .ag-x-card { max-width:1500px; margin:0 auto; width:fit-content; min-width:300px; background:#fff; border:1px solid #cbd5e1; overflow:auto; }
+        .ag-pv-table.ag-x-table { font-size:14px; width:auto; }
+        .ag-pv-table.ag-x-table th, .ag-pv-table.ag-x-table td { padding:3px 12px; }
+        .ag-pv-table.ag-x-table thead th { background:#c1e4f5; font-weight:900; }
+        .ag-pv-table.ag-x-table thead tr.h2 th { border-bottom:1px solid #156082; }
+        .ag-pv-table.ag-x-table tbody td.gc { font-weight:400; }
+        .ag-pv-table.ag-x-table tr.gt td { background:#c1e4f5; font-weight:900; border-top:1px solid #156082; }
+        .ag-pv-table.ag-x-table tr.hub td { font-weight:900; border-top:1px solid #9dc3e6; }
+        .ag-pv-table.ag-x-table tr.hub:first-child td { border-top:0; }
+        .ag-pv-table.ag-x-table td.ind { padding-left:30px; }
+        .ag-pv-table.ag-x-table .count-link { color:#111827; font-weight:400; }
+        .ag-pv-table.ag-x-table tr.hub .count-link { font-weight:900; }
+        .ag-pv-table.ag-x-table.ag-x-grey thead th { background:#a8bcc6; }
+        .ag-pv-table.ag-x-table.ag-x-grey tbody td { background:#cbcbcb; }
+        .ag-pv-table.ag-x-table.ag-x-grey tr.gt td { background:#a8bcc6; border-bottom:1px solid #156082; }
         .ageing-bsec input[type=text].plain { width:100%; border:1px solid #cbd5e1; border-radius:5px; padding:5px 7px; font-size:11px; font-weight:700; background:#fff; color:#111827; margin-bottom:6px; }
         @media print { .ageing-card, .ageing-card * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
         .ageing-modal-backdrop {
@@ -1593,6 +1609,10 @@ try {
 <button class="ageing-mode-btn" id="ageingModeDeliveryBtn" onclick="ageingSetMode('delivery')" type="button"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Delivery Summary</button>
 <button class="ageing-mode-btn" id="ageingModeReceiveBtn" onclick="ageingSetMode('receive')" type="button"><i class="fa-solid fa-calendar-day mr-1"></i> Parcel Receive Age</button>
 <button class="ageing-mode-btn" id="ageingModeCustomBtn" onclick="ageingSetMode('custom')" type="button"><i class="fa-solid fa-table-list mr-1"></i> Custom Report</button>
+<button class="ageing-mode-btn" id="ageingModeXsaBtn" onclick="ageingSetMode('xsa')" type="button"><i class="fa-solid fa-table-cells mr-1"></i> Status × Age</button>
+<button class="ageing-mode-btn" id="ageingModeXscBtn" onclick="ageingSetMode('xsc')" type="button"><i class="fa-solid fa-list-ol mr-1"></i> Status Count</button>
+<button class="ageing-mode-btn" id="ageingModeXhsBtn" onclick="ageingSetMode('xhs')" type="button"><i class="fa-solid fa-building mr-1"></i> Hub × Status</button>
+<button class="ageing-mode-btn" id="ageingModeXhsaBtn" onclick="ageingSetMode('xhsa')" type="button"><i class="fa-solid fa-sitemap mr-1"></i> Hub › Status × Age</button>
 <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;">
 <label for="ageingRefInput" style="font-weight:600;">Age 0 date:</label>
 <input type="date" id="ageingRefInput" onchange="ageingSetRefDate(this.value)" style="border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;">
@@ -1604,6 +1624,10 @@ try {
 <div class="hidden" id="ageingDeliveryContent"></div>
 <div class="hidden" id="ageingReceiveContent"></div>
 <div class="hidden" id="ageingCustomContent"></div>
+<div class="hidden" id="ageingXsaContent"></div>
+<div class="hidden" id="ageingXscContent"></div>
+<div class="hidden" id="ageingXhsContent"></div>
+<div class="hidden" id="ageingXhsaContent"></div>
 <div id="ageingReportContent">
 <div class="ageing-card" style="margin-top:18px;">
 <div style="padding:45px 25px;text-align:center;">
@@ -8745,7 +8769,7 @@ const ACCOUNTS = [
         }
 
         function ageingSetMode(mode) {
-            ageingMode = ['pivot', 'delivery', 'receive', 'custom'].includes(mode) ? mode : 'pivot';
+            ageingMode = ['pivot', 'delivery', 'receive', 'custom', 'xsa', 'xsc', 'xhs', 'xhsa'].includes(mode) ? mode : 'pivot';
             agClearSel();
             document.getElementById('ageingReportContent')?.classList.toggle('hidden', ageingMode !== 'pivot');
             document.getElementById('ageingDeliveryContent')?.classList.toggle('hidden', ageingMode !== 'delivery');
@@ -8758,6 +8782,7 @@ const ACCOUNTS = [
             if (ageingMode === 'delivery') renderAgeingDelivery();
             if (ageingMode === 'receive') renderAgeingReceive();
             if (ageingMode === 'custom') renderAgeingCustom();
+            agxApplyMode();
         }
 
         function ageingUniqueValues(key) {
@@ -9224,6 +9249,182 @@ const ACCOUNTS = [
                     </tbody>
                 </table>
             </div>`;
+        }
+
+        /* =================== AGEING: EXCEL-FORMAT PIVOTS =================== */
+        const AGX_MODES = {
+            xsa:  { btn: 'ageingModeXsaBtn',  box: 'ageingXsaContent',  label: 'Status × Age' },
+            xsc:  { btn: 'ageingModeXscBtn',  box: 'ageingXscContent',  label: 'Status Count' },
+            xhs:  { btn: 'ageingModeXhsBtn',  box: 'ageingXhsContent',  label: 'Hub × Status' },
+            xhsa: { btn: 'ageingModeXhsaBtn', box: 'ageingXhsaContent', label: 'Hub › Status × Age' }
+        };
+        function agxApplyMode() {
+            Object.keys(AGX_MODES).forEach(k => {
+                document.getElementById(AGX_MODES[k].box)?.classList.toggle('hidden', ageingMode !== k);
+                document.getElementById(AGX_MODES[k].btn)?.classList.toggle('active', ageingMode === k);
+            });
+            if (ageingMode === 'xsa') renderAgeingXsa();
+            if (ageingMode === 'xsc') renderAgeingXsc();
+            if (ageingMode === 'xhs') renderAgeingXhs();
+            if (ageingMode === 'xhsa') renderAgeingXhsa();
+        }
+        function agxAlpha(a, b) { return String(a).localeCompare(String(b), undefined, { sensitivity: 'base' }); }
+        function agxAgeKey(r) { return r.age === null ? 'blank' : r.age; }
+        function agxColLabel(c) { return c === 'blank' ? '(blank)' : String(c); }
+        function agxToolbar(kind, sub) {
+            return `<div class="ageing-result-meta ageing-no-print">
+                <span>${ageingSafe(AGX_MODES[kind].label)} — ${ageingSafe(sub)}</span>
+                <span style="display:inline-flex;gap:7px;flex-wrap:wrap;">
+                    <button type="button" class="ageing-mode-btn" onclick="ageingViewCopy('${kind}')"><i class="fa-solid fa-copy mr-1"></i> Copy Table</button>
+                    <button type="button" class="ageing-mode-btn" onclick="ageingViewExcel('${kind}')"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                    <button type="button" class="ageing-mode-btn" onclick="printAgeingReport()"><i class="fa-solid fa-print mr-1"></i> Print / PDF</button>
+                </span>
+            </div>`;
+        }
+        // common data prep; returns null (and paints a message) when the report cannot be built
+        function agxPrepare(kind) {
+            const host = document.getElementById(AGX_MODES[kind].box);
+            if (!host) return null;
+            ageingViewStore[kind] = [];
+            ageingViewExport[kind] = null;
+            const sub = `Report date: ${ageingDateText(ageingReportDate || new Date())}  |  ${ageingRows.length} consignments`;
+            const statusKey = ageingStatusKey();
+            if (!statusKey) {
+                host.innerHTML = `<div class="ag-x-card"><div class="ag-pv-empty">এই file-এ Status column পাওয়া যায়নি।</div></div>`;
+                return null;
+            }
+            if (!ageingRows.length) {
+                host.innerHTML = `<div class="ag-x-card"><div class="ag-pv-empty">No data found.</div></div>`;
+                return null;
+            }
+            const recs = ageingRows.map(r => ({
+                st: String(r[statusKey] ?? '').trim() || '(blank)',
+                hub: ageingHub(r) || '(blank)',
+                age: ageingAgeOf(r),
+                id: ageingConsignmentId(r)
+            }));
+            return { host, sub, recs };
+        }
+        function agxAgeCols(recs) {
+            const set = new Set(); let blank = false;
+            recs.forEach(r => { if (r.age === null) blank = true; else set.add(r.age); });
+            const ages = [...set].sort((a, b) => a - b);
+            return blank ? [...ages, 'blank'] : ages;
+        }
+        function agxGroup(recs, keyFn) {
+            const m = new Map();
+            recs.forEach(r => { const k = keyFn(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r.id); });
+            return m;
+        }
+        function agxBtn(kind, title, ids) { return ids && ids.length ? ageingViewCountBtn(kind, title, ids) : ''; }
+        function agxFinish(kind, p, tableClass, headHtml, bodyHtml, exportRows) {
+            ageingViewExport[kind] = { name: AGX_MODES[kind].label.replace(/[×›]/g, 'x').replace(/\s+/g, ' ').trim(), rows: exportRows };
+            p.host.innerHTML = agxToolbar(kind, p.sub) + `<div class="ag-x-card">
+                <table class="ag-pv-table ag-x-table ${tableClass}">
+                    <thead>${headHtml}</thead>
+                    <tbody>${bodyHtml}</tbody>
+                </table>
+            </div>`;
+        }
+        function agxMatrixHead(corner, cols) {
+            return `<tr class="h1"><th class="l">Count of ConsignmentId</th><th class="l" colspan="${cols.length + 1}">Column Labels</th></tr>` +
+                   `<tr class="h2"><th class="l">${corner}</th>${cols.map(c => `<th>${ageingSafe(c.label)}</th>`).join('')}<th>Grand Total</th></tr>`;
+        }
+
+        // 1) Status (rows) x Age (columns)
+        function renderAgeingXsa() {
+            const p = agxPrepare('xsa'); if (!p) return;
+            const ageCols = agxAgeCols(p.recs);
+            const cols = ageCols.map(c => ({ key: c, label: agxColLabel(c) }));
+            const sts = [...new Set(p.recs.map(r => r.st))].sort(agxAlpha);
+            const g = agxGroup(p.recs, r => r.st + '\u0001' + agxAgeKey(r));
+            const colTot = cols.map(() => 0); let grand = 0;
+            const ex = [['Count of ConsignmentId', 'Column Labels'], ['Row Labels', ...cols.map(c => c.label), 'Grand Total']];
+            const body = sts.map(st => {
+                let rt = 0; const line = [st];
+                const cells = cols.map((c, i) => {
+                    const ids = g.get(st + '\u0001' + c.key) || [];
+                    rt += ids.length; colTot[i] += ids.length; line.push(ids.length || '');
+                    return `<td>${agxBtn('xsa', `${st} — Age ${c.label}`, ids)}</td>`;
+                }).join('');
+                grand += rt; line.push(rt); ex.push(line);
+                return `<tr><td class="l">${ageingSafe(st)}</td>${cells}<td class="gc">${rt}</td></tr>`;
+            }).join('') + `<tr class="gt"><td class="l">Grand Total</td>${colTot.map(n => `<td>${n || ''}</td>`).join('')}<td>${grand}</td></tr>`;
+            ex.push(['Grand Total', ...colTot.map(n => n || ''), grand]);
+            agxFinish('xsa', p, '', agxMatrixHead('Row Labels', cols), body, ex);
+        }
+
+        // 2) Status count (grey style)
+        function renderAgeingXsc() {
+            const p = agxPrepare('xsc'); if (!p) return;
+            const sts = [...new Set(p.recs.map(r => r.st))].sort(agxAlpha);
+            const g = agxGroup(p.recs, r => r.st);
+            const ex = [['Row Labels', 'Count of ConsignmentId']]; let grand = 0;
+            const body = sts.map(st => {
+                const ids = g.get(st) || []; grand += ids.length; ex.push([st, ids.length]);
+                return `<tr><td class="l">${ageingSafe(st)}</td><td>${agxBtn('xsc', st, ids)}</td></tr>`;
+            }).join('') + `<tr class="gt"><td class="l">Grand Total</td><td>${grand}</td></tr>`;
+            ex.push(['Grand Total', grand]);
+            agxFinish('xsc', p, 'ag-x-grey', `<tr class="h2"><th class="l">Row Labels</th><th>Count of ConsignmentId</th></tr>`, body, ex);
+        }
+
+        // 3) Hub (rows) x Status (columns)
+        function renderAgeingXhs() {
+            const p = agxPrepare('xhs'); if (!p) return;
+            const hubs = [...new Set(p.recs.map(r => r.hub))].sort(agxAlpha);
+            const sts = [...new Set(p.recs.map(r => r.st))].sort(agxAlpha);
+            const cols = sts.map(s => ({ key: s, label: s }));
+            const g = agxGroup(p.recs, r => r.hub + '\u0001' + r.st);
+            const colTot = cols.map(() => 0); let grand = 0;
+            const ex = [['Count of ConsignmentId', 'Column Labels'], ['Row Labels', ...cols.map(c => c.label), 'Grand Total']];
+            const body = hubs.map(h => {
+                let rt = 0; const line = [h];
+                const cells = cols.map((c, i) => {
+                    const ids = g.get(h + '\u0001' + c.key) || [];
+                    rt += ids.length; colTot[i] += ids.length; line.push(ids.length || '');
+                    return `<td>${agxBtn('xhs', `${h} — ${c.label}`, ids)}</td>`;
+                }).join('');
+                grand += rt; line.push(rt); ex.push(line);
+                return `<tr><td class="l">${ageingSafe(h)}</td>${cells}<td class="gc">${rt}</td></tr>`;
+            }).join('') + `<tr class="gt"><td class="l">Grand Total</td>${colTot.map(n => `<td>${n || ''}</td>`).join('')}<td>${grand}</td></tr>`;
+            ex.push(['Grand Total', ...colTot.map(n => n || ''), grand]);
+            agxFinish('xhs', p, '', agxMatrixHead('Row Labels', cols), body, ex);
+        }
+
+        // 4) Hub > Status (rows) x Age (columns)
+        function renderAgeingXhsa() {
+            const p = agxPrepare('xhsa'); if (!p) return;
+            const cols = agxAgeCols(p.recs).map(c => ({ key: c, label: agxColLabel(c) }));
+            const hubs = [...new Set(p.recs.map(r => r.hub))].sort(agxAlpha);
+            const gh = agxGroup(p.recs, r => r.hub + '\u0001' + agxAgeKey(r));
+            const gs = agxGroup(p.recs, r => r.hub + '\u0001' + r.st + '\u0001' + agxAgeKey(r));
+            const colTot = cols.map(() => 0); let grand = 0;
+            const ex = [['Count of ConsignmentId', 'Column Labels'], ['Row Labels', ...cols.map(c => c.label), 'Grand Total']];
+            let body = '';
+            hubs.forEach(h => {
+                let ht = 0; const hl = [h];
+                const hc = cols.map((c, i) => {
+                    const ids = gh.get(h + '\u0001' + c.key) || [];
+                    ht += ids.length; colTot[i] += ids.length; hl.push(ids.length || '');
+                    return `<td>${agxBtn('xhsa', `${h} — Age ${c.label}`, ids)}</td>`;
+                }).join('');
+                grand += ht; hl.push(ht); ex.push(hl);
+                body += `<tr class="hub"><td class="l">⊟ ${ageingSafe(h)}</td>${hc}<td class="gc">${ht}</td></tr>`;
+                const sts = [...new Set(p.recs.filter(r => r.hub === h).map(r => r.st))].sort(agxAlpha);
+                sts.forEach(st => {
+                    let rt = 0; const sl = ['    ' + st];
+                    const cells = cols.map(c => {
+                        const ids = gs.get(h + '\u0001' + st + '\u0001' + c.key) || [];
+                        rt += ids.length; sl.push(ids.length || '');
+                        return `<td>${agxBtn('xhsa', `${h} — ${st} — Age ${c.label}`, ids)}</td>`;
+                    }).join('');
+                    sl.push(rt); ex.push(sl);
+                    body += `<tr><td class="l ind">${ageingSafe(st)}</td>${cells}<td class="gc">${rt}</td></tr>`;
+                });
+            });
+            body += `<tr class="gt"><td class="l">Grand Total</td>${colTot.map(n => `<td>${n || ''}</td>`).join('')}<td>${grand}</td></tr>`;
+            ex.push(['Grand Total', ...colTot.map(n => n || ''), grand]);
+            agxFinish('xhsa', p, '', agxMatrixHead('Row Labels', cols), body, ex);
         }
 
         function ageingViewCopy(kind) {
