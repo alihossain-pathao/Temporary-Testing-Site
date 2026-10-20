@@ -10954,6 +10954,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     apply();
     try{showToast(on?'Edit mode ON — cell-e click kore value change korun':'Edit mode OFF');}catch(e){}
   };
+  window.agEditClear=function(){store={};};
   window.agEditReset=function(){
     if(!confirm('Shob edit muche original value-e fire jabe. Continue?'))return;
     store={}; var m=(typeof ageingMode!=='undefined')?ageingMode:'pivot';
@@ -11025,6 +11026,99 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   function init(){install();observe();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<script>
+/* ===== Pivot Table: changeable layout (rows / columns / sort / totals / show-hide) ===== */
+(function(){
+  var pv={row:null,col:null,sort:'label',dir:'asc',rowTot:true,colTot:true,hideR:{},hideC:{},open:false};
+  var cellIds={};
+  function hubKey(){return (typeof ageingHubKey==='function')?ageingHubKey():'';}
+  function isDefault(){return pv.row===hubKey()&&pv.col==='__age'&&pv.sort==='label'&&pv.dir==='asc'&&pv.rowTot&&pv.colTot&&!Object.keys(pv.hideR).length&&!Object.keys(pv.hideC).length;}
+  function esc(v){return ageingSafe(v);}
+  function initKeys(){ if(pv.row===null){pv.row=hubKey()||(ageingFields[0]||{}).key||'';pv.col='__age';} }
+  function opts(sel){return ageingFields.map(function(f){return '<option value="'+esc(f.key)+'"'+(f.key===sel?' selected':'')+'>'+esc(f.label)+'</option>';}).join('');}
+  function build(){
+    var rows=ageingRows,cell={},rs={},cs={};
+    rows.forEach(function(r){
+      var rk=String(ageingCellVal(ageingFieldValue(r,pv.row)))||'(blank)', ck=String(ageingCellVal(ageingFieldValue(r,pv.col)))||'(blank)';
+      rs[rk]=1;cs[ck]=1;var k=rk+'\u0001'+ck;(cell[k]=cell[k]||[]).push(ageingConsignmentId(r));
+    });
+    var rks=ageingSortKeys(Object.keys(rs),pv.row), cks=ageingSortKeys(Object.keys(cs),pv.col);
+    function tot(rk){return cks.reduce(function(a,ck){return a+((cell[rk+'\u0001'+ck]||[]).length);},0);}
+    if(pv.sort==='total'){rks.sort(function(a,b){return (tot(b)-tot(a))*(pv.dir==='asc'?-1:1);});}
+    else if(pv.dir==='desc'){rks.reverse();}
+    return {cell:cell,rks:rks,cks:cks};
+  }
+  function panel(){
+    var d=pv.open;
+    return '<div class="ageing-card ageing-no-print" id="agPvPanel" style="margin:12px 0;padding:10px 12px;">'
+    +'<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12px;">'
+    +'<b style="color:#1f4e78;"><i class="fa-solid fa-sliders"></i> Pivot Layout</b>'
+    +'<label>Rows <select onchange="agPvSet(\'row\',this.value)">'+opts(pv.row)+'</select></label>'
+    +'<label>Columns <select onchange="agPvSet(\'col\',this.value)">'+opts(pv.col)+'</select></label>'
+    +'<button type="button" class="ageing-mode-btn" onclick="agPvSwap()"><i class="fa-solid fa-right-left mr-1"></i> Swap</button>'
+    +'<label>Sort rows <select onchange="agPvSet(\'sort\',this.value)"><option value="label"'+(pv.sort==='label'?' selected':'')+'>By label</option><option value="total"'+(pv.sort==='total'?' selected':'')+'>By total</option></select></label>'
+    +'<label><select onchange="agPvSet(\'dir\',this.value)"><option value="asc"'+(pv.dir==='asc'?' selected':'')+'>Asc</option><option value="desc"'+(pv.dir==='desc'?' selected':'')+'>Desc</option></select></label>'
+    +'<label><input type="checkbox" '+(pv.colTot?'checked':'')+' onchange="agPvSet(\'colTot\',this.checked)"> Total row</label>'
+    +'<label><input type="checkbox" '+(pv.rowTot?'checked':'')+' onchange="agPvSet(\'rowTot\',this.checked)"> Total column</label>'
+    +'<button type="button" class="ageing-mode-btn" onclick="agPvToggleShow()"><i class="fa-solid fa-eye mr-1"></i> Show / Hide '+(d?'▲':'▼')+'</button>'
+    +'<button type="button" class="ageing-mode-btn" onclick="agPvReset()"><i class="fa-solid fa-rotate-left mr-1"></i> Default layout</button>'
+    +'</div><div id="agPvShow" style="display:'+(d?'block':'none')+';margin-top:8px;font-size:12px;"></div></div>';
+  }
+  function showPanel(b){
+    var el=document.getElementById('agPvShow'); if(!el)return;
+    function list(title,keys,h,kind){return '<div style="margin-bottom:6px;"><b>'+title+'</b> '+keys.map(function(k){return '<label style="display:inline-block;margin:2px 10px 2px 0;"><input type="checkbox" '+(h[k]?'':'checked')+' onchange="agPvHide(\''+kind+'\',this.dataset.k,this.checked)" data-k="'+esc(k)+'"> '+esc(k)+'</label>';}).join('')+'</div>';}
+    el.innerHTML=list('Rows:',b.rks,pv.hideR,'R')+list('Columns:',b.cks,pv.hideC,'C');
+  }
+  function render(){
+    var host=document.getElementById('ageingReportContent'); if(!host||!ageingRows||!ageingRows.length)return;
+    var b=build(), rks=b.rks.filter(function(k){return !pv.hideR[k];}), cks=b.cks.filter(function(k){return !pv.hideC[k];});
+    cellIds={};
+    var head='<tr><th class="row-label">'+esc(ageingFieldLabel(pv.row))+'</th>'+cks.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+(pv.rowTot?'<th>Grand Total</th>':'')+'</tr>';
+    var colT=cks.map(function(){return 0;}), grand=0, body='';
+    rks.forEach(function(rk){
+      var t=0;
+      body+='<tr><td class="row-label">'+esc(rk)+'</td>';
+      cks.forEach(function(ck,i){
+        var ids=b.cell[rk+'\u0001'+ck]||[], key=rk+'\u0001'+ck; t+=ids.length; colT[i]+=ids.length;
+        if(ids.length){cellIds[key]=ids;body+='<td><button type="button" class="count-link" data-k="'+esc(key)+'" onclick="agPvShowIds(this.dataset.k)">'+ids.length+'</button></td>';} else body+='<td></td>';
+      });
+      grand+=t; if(pv.rowTot)body+='<td><strong>'+t+'</strong></td>'; body+='</tr>';
+    });
+    if(pv.colTot){body+='<tr class="grand-total"><td class="row-label">Grand Total</td>'+colT.map(function(n){return '<td>'+(n||'')+'</td>';}).join('')+(pv.rowTot?'<td>'+grand+'</td>':'')+'</tr>';}
+    host.innerHTML=panel()+'<div class="ageing-card"><table class="ageing-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+    showPanel(b);
+  }
+  window.agPvShowIds=function(key){
+    var ids=cellIds[key]||[],parts=key.split('\u0001');
+    var m=document.getElementById('ageingConsignmentModal'),t=document.getElementById('ageingModalTitle'),bd=document.getElementById('ageingModalBody');
+    if(!m||!t||!bd)return;
+    t.innerHTML='<span>'+esc(parts[0])+' — '+esc(parts[1])+' ('+ids.length+' IDs)</span>';
+    bd.innerHTML='<table class="ageing-id-table"><thead><tr><th>#</th><th>ConsignmentId</th></tr></thead><tbody>'+ids.map(function(id,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(id)+'</td></tr>';}).join('')+'</tbody></table>';
+    m.classList.remove('hidden');
+  };
+  function changed(clearHidden){
+    if(clearHidden){pv.hideR={};pv.hideC={};}
+    if(window.agEditClear)window.agEditClear();
+    window.renderAgeingReport();
+  }
+  window.agPvSet=function(k,v){pv[k]=v;changed(k==='row'||k==='col');};
+  window.agPvSwap=function(){var t=pv.row;pv.row=pv.col;pv.col=t;changed(true);};
+  window.agPvHide=function(kind,k,checked){var h=(kind==='R'?pv.hideR:pv.hideC); if(checked)delete h[k]; else h[k]=true; pv.open=true; changed(false);};
+  window.agPvToggleShow=function(){pv.open=!pv.open;var el=document.getElementById('agPvShow');if(el)el.style.display=pv.open?'block':'none';};
+  window.agPvReset=function(){pv.row=hubKey();pv.col='__age';pv.sort='label';pv.dir='asc';pv.rowTot=pv.colTot=true;pv.hideR={};pv.hideC={};changed(false);};
+  var orig=window.renderAgeingReport;
+  window.renderAgeingReport=function(){
+    orig.apply(this,arguments);
+    if(!ageingRows||!ageingRows.length)return;
+    if(typeof ageingFields==='undefined'||!ageingFields.length){try{ageingBuildFields();}catch(e){}}
+    initKeys(); if(!ageingFields.some(function(f){return f.key===pv.row;})){pv.row=hubKey();}
+    if(!ageingFields.some(function(f){return f.key===pv.col;})){pv.col='__age';}
+    if(isDefault()){var h=document.getElementById('ageingReportContent');if(h)h.insertAdjacentHTML('afterbegin',panel());showPanel(build());}
+    else render();
+  };
 })();
 </script>
 </body>
