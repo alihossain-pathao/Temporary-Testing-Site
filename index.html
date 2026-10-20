@@ -144,22 +144,81 @@
         .ag-presets { max-width:1500px; margin:0 auto 10px; display:flex; gap:7px; flex-wrap:wrap; align-items:center; font-size:10px; font-weight:900; color:#475569; }
         .ag-presets button { border:1px dashed #1f4e78; background:#f0f6fc; color:#1f4e78; border-radius:999px; padding:5px 12px; font-size:10px; font-weight:900; cursor:pointer; }
         .ag-presets button:hover { background:#1f4e78; color:#fff; }
-        /* ===== Ageing: Excel-format pivots (Status x Age / Status Count / Hub x Status / Hub > Status x Age) ===== */
-        .ag-x-card { max-width:1500px; margin:0 auto; width:fit-content; min-width:300px; background:#fff; border:1px solid #cbd5e1; overflow:auto; }
-        .ag-pv-table.ag-x-table { font-size:14px; width:auto; }
-        .ag-pv-table.ag-x-table th, .ag-pv-table.ag-x-table td { padding:3px 12px; }
-        .ag-pv-table.ag-x-table thead th { background:#c1e4f5; font-weight:900; }
-        .ag-pv-table.ag-x-table thead tr.h2 th { border-bottom:1px solid #156082; }
-        .ag-pv-table.ag-x-table tbody td.gc { font-weight:400; }
-        .ag-pv-table.ag-x-table tr.gt td { background:#c1e4f5; font-weight:900; border-top:1px solid #156082; }
-        .ag-pv-table.ag-x-table tr.hub td { font-weight:900; border-top:1px solid #9dc3e6; }
-        .ag-pv-table.ag-x-table tr.hub:first-child td { border-top:0; }
-        .ag-pv-table.ag-x-table td.ind { padding-left:30px; }
-        .ag-pv-table.ag-x-table .count-link { color:#111827; font-weight:400; }
-        .ag-pv-table.ag-x-table tr.hub .count-link { font-weight:900; }
-        .ag-pv-table.ag-x-table.ag-x-grey thead th { background:#a8bcc6; }
-        .ag-pv-table.ag-x-table.ag-x-grey tbody td { background:#cbcbcb; }
-        .ag-pv-table.ag-x-table.ag-x-grey tr.gt td { background:#a8bcc6; border-bottom:1px solid #156082; }
+        /* ===== Ageing Report: modern professional theme (applies to all ageing formats) ===== */
+        #ageingReportView { --ag-line:#e2e8f0; --ag-ink:#0f172a; --ag-muted:#64748b; font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; }
+        #ageingReportView.ageing-report-wrap { background:linear-gradient(180deg,#e9f0f8 0,#f6f8fb 280px,#f8fafc 100%); padding:22px 18px 70px; }
+        #ageingReportView .ageing-report-toolbar { background:linear-gradient(135deg,#0f2942 0%,#1f4e78 62%,#2a6aa6 100%); border-radius:14px; padding:14px 18px; box-shadow:0 10px 28px rgba(15,41,66,.22); margin-bottom:16px; }
+        #ageingReportView .ageing-report-title { font-size:15px; font-weight:800; letter-spacing:.2px; }
+        #ageingReportView .ageing-report-meta { font-size:11px; font-weight:600; color:#cfe3f7; margin-top:4px; }
+        #ageingReportView .ageing-btn { border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.12); border-radius:9px; padding:8px 13px; font-size:11px; font-weight:700; transition:background .15s, transform .15s; }
+        #ageingReportView .ageing-btn:hover { background:rgba(255,255,255,.22); transform:translateY(-1px); }
+        #ageingReportView .ageing-btn.light { background:#fff; color:#1f4e78; border-color:#fff; }
+        #ageingReportView .ageing-btn.light:hover { background:#eef4fb; }
+        #ageingReportView .ageing-modebar { background:#fff; border:1px solid var(--ag-line); border-radius:14px; padding:6px; gap:4px; align-items:center; box-shadow:0 1px 3px rgba(15,23,42,.06); margin-bottom:16px; }
+        #ageingReportView .ageing-mode-btn { border:1px solid transparent; background:transparent; color:#334155; border-radius:9px; padding:8px 13px; font-size:11.5px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .15s, color .15s, box-shadow .15s; }
+        #ageingReportView .ageing-mode-btn:hover { background:#eef4fb; color:#1f4e78; }
+        #ageingReportView .ageing-mode-btn.active { background:linear-gradient(135deg,#1f4e78,#2a6aa6); color:#fff; box-shadow:0 4px 12px rgba(31,78,120,.32); }
+        #ageingReportView .ageing-modebar span .ageing-mode-btn { background:#f1f5f9; border-color:#e2e8f0; padding:5px 11px; font-size:11px; }
+        #ageingReportView .ageing-modebar span .ageing-mode-btn:hover { background:#1f4e78; border-color:#1f4e78; color:#fff; }
+        #ageingReportView .ageing-modebar input[type=date]:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+        #ageingDeliveryContent, #ageingReceiveContent, #ageingXsaContent, #ageingXscContent, #ageingXhsContent, #ageingXhsaContent { max-width:1500px; margin:0 auto; }
+        #ageingReportView .ageing-result-meta { margin:0 auto 10px; font-size:12px; font-weight:700; color:#334155; }
+        #ageingReportView .ageing-result-meta > span:first-child { color:#0f2942; font-weight:800; }
+        #ageingReportView .ageing-result-meta .ageing-mode-btn { background:#fff; border-color:#cbd5e1; color:#1f4e78; box-shadow:0 1px 2px rgba(15,23,42,.05); }
+        #ageingReportView .ageing-result-meta .ageing-mode-btn:hover { background:#1f4e78; border-color:#1f4e78; color:#fff; }
+        /* cards: no scrollbar sliver, rounded, soft shadow */
+        #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { background:#fff; border:1px solid var(--ag-line); border-radius:14px; box-shadow:0 6px 22px rgba(15,23,42,.07); overflow-x:auto; overflow-y:hidden; }
+        #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { margin:0; width:fit-content; max-width:100%; min-width:320px; }
+        #ageingReportView .ag-title { padding:16px 20px 12px; background:linear-gradient(180deg,#fff,#f8fafc); border-bottom:3px solid #1f4e78; }
+        #ageingReportView .ag-title .t { font-size:17px; font-weight:800; }
+        #ageingReportView .ag-title .st { font-size:11px; font-weight:600; margin-top:4px; }
+        /* pivot tables (Delivery Summary, Parcel Receive Age and the 4 Excel-format pivots) */
+        #ageingReportView .ag-pv-table { font-family:'Inter',system-ui,sans-serif; font-size:13px; color:var(--ag-ink); border-collapse:separate; border-spacing:0; width:100%; }
+        #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:9px 16px; border:0; border-bottom:1px solid #eef2f7; }
+        #ageingReportView .ag-pv-table thead th { background:#dfeaf6; color:#0f2942; font-weight:800; font-size:12px; letter-spacing:.2px; border-bottom:1px solid #c5d6ea; }
+        #ageingReportView .ag-pv-table thead tr:first-child th { border-bottom:0; }
+        #ageingReportView .ag-pv-table tbody tr:hover td { background:#f3f8fe; }
+        #ageingReportView .ag-pv-table tbody td.gc { font-weight:700; background:#f8fafc; }
+        #ageingReportView .ag-pv-table tbody tr:last-child td { border-bottom:0; }
+        #ageingReportView .ag-pv-table tr.gt td, #ageingReportView .ag-pv-table tr.gt:hover td { background:#e3edf9; color:#0f2942; font-weight:800; border-top:2px solid #1f4e78; border-bottom:0; }
+        #ageingReportView .ag-pv-table .count-link { color:#0f172a; font-weight:600; padding:2px 8px; border-radius:6px; transition:background .12s, color .12s; }
+        #ageingReportView .ag-pv-table .count-link:hover { background:#dbeafe; color:#1d4ed8; text-decoration:none; }
+        #ageingReportView .ag-x-table tr.hub td, #ageingReportView .ag-x-table tr.hub:hover td { background:#eef5fc; font-weight:800; border-top:1px solid #cfe0f3; }
+        #ageingReportView .ag-x-table tr.hub:first-child td { border-top:0; }
+        #ageingReportView .ag-x-table tr.hub .count-link { font-weight:800; }
+        #ageingReportView .ag-x-table td.ind { padding-left:38px; color:#334155; }
+        #ageingReportView .ag-pv-table.ag-x-grey thead th { background:#b4c4d2; color:#12263a; border-bottom:1px solid #8fa5b8; }
+        #ageingReportView .ag-pv-table.ag-x-grey tbody td { background:#e7ecf1; }
+        #ageingReportView .ag-pv-table.ag-x-grey tbody tr:nth-child(even) td { background:#dfe6ec; }
+        #ageingReportView .ag-pv-table.ag-x-grey tbody tr:hover td { background:#d3dde6; }
+        #ageingReportView .ag-pv-table.ag-x-grey tr.gt td, #ageingReportView .ag-pv-table.ag-x-grey tr.gt:hover td { background:#b4c4d2; }
+        #ageingReportView .ag-pv-total { background:linear-gradient(90deg,#ecfdf3,#dcfce7); border-top:1px solid #bbf7d0; padding:12px 20px; font-family:'Inter',system-ui,sans-serif; font-size:14px; font-weight:800; }
+        /* classic hub x age pivot + custom report tables */
+        #ageingReportView .ageing-table { font-family:'Inter',system-ui,sans-serif; font-size:12.5px; }
+        #ageingReportView .ageing-table th, #ageingReportView .ageing-table td { border-color:#e6ebf2; padding:8px 12px; }
+        #ageingReportContent .ageing-table thead th { background:#dfeaf6; color:#0f2942; }
+        #ageingReportContent .ageing-table .grand-total td { background:#e3edf9; color:#0f2942; border-top:2px solid #1f4e78; }
+        #ageingReportView .ageing-table tbody tr:not(.grand-total):hover td { background:#f3f8fe; }
+        #ageingReportView .ageing-table .count-link { color:#0f172a; font-weight:700; padding:2px 8px; border-radius:6px; transition:background .12s, color .12s; }
+        #ageingReportView .ageing-table .count-link:hover { background:#dbeafe; color:#1d4ed8; text-decoration:none; }
+        /* custom report builder */
+        #ageingReportView .ageing-builder { border-radius:14px; border:1px solid var(--ag-line); box-shadow:0 6px 22px rgba(15,23,42,.06); padding:16px; gap:16px; }
+        #ageingReportView .ageing-bsec { border-radius:10px; border:1px solid #e6ebf2; background:#f8fafc; padding:12px; }
+        #ageingReportView .ageing-bsec-title { font-size:10.5px; letter-spacing:.6px; }
+        #ageingReportView .ageing-bsec select, #ageingReportView .ageing-bsec input[type=text], #ageingReportView .ageing-colrow input[type=text] { border-radius:8px; border-color:#cbd5e1; }
+        #ageingReportView .ageing-bsec select:focus, #ageingReportView .ageing-bsec input[type=text]:focus, #ageingReportView .ageing-colrow input[type=text]:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+        #ageingReportView .ageing-mini { border-radius:7px; }
+        #ageingReportView .ag-presets button { border:1px solid #cbd5e1; background:#fff; color:#1f4e78; border-radius:999px; padding:6px 13px; box-shadow:0 1px 2px rgba(15,23,42,.05); transition:background .15s, color .15s; }
+        #ageingReportView .ag-presets button:hover { background:#1f4e78; border-color:#1f4e78; color:#fff; }
+        #ageingSelBar { border-radius:12px; background:rgba(15,23,42,.94); backdrop-filter:blur(6px); font-family:'Inter',system-ui,sans-serif; }
+        @media (max-width:640px) {
+            #ageingReportView.ageing-report-wrap { padding:12px 10px 60px; }
+            #ageingReportView .ageing-modebar { flex-wrap:nowrap; overflow-x:auto; }
+            #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:8px 10px; }
+        }
+        @media print {
+            #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { box-shadow:none; border-radius:0; }
+        }
         .ageing-bsec input[type=text].plain { width:100%; border:1px solid #cbd5e1; border-radius:5px; padding:5px 7px; font-size:11px; font-weight:700; background:#fff; color:#111827; margin-bottom:6px; }
         @media print { .ageing-card, .ageing-card * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
         .ageing-modal-backdrop {
@@ -9273,7 +9332,7 @@ const ACCOUNTS = [
         function agxColLabel(c) { return c === 'blank' ? '(blank)' : String(c); }
         function agxToolbar(kind, sub) {
             return `<div class="ageing-result-meta ageing-no-print">
-                <span>${ageingSafe(AGX_MODES[kind].label)} — ${ageingSafe(sub)}</span>
+                <span>${ageingSafe(AGX_MODES[kind].label)} <span style="color:#64748b;font-weight:600;">— ${ageingSafe(sub)}</span></span>
                 <span style="display:inline-flex;gap:7px;flex-wrap:wrap;">
                     <button type="button" class="ageing-mode-btn" onclick="ageingViewCopy('${kind}')"><i class="fa-solid fa-copy mr-1"></i> Copy Table</button>
                     <button type="button" class="ageing-mode-btn" onclick="ageingViewExcel('${kind}')"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
