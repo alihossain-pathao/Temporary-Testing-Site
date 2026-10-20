@@ -125,6 +125,13 @@
         .ageing-card.ag-themed .ageing-table .row-label { min-width:0; }
         /* ===== Ageing: Delivery Summary & Parcel Receive Age (Excel pivot look) ===== */
         .ag-pv-table td, .ageing-table td { user-select:none; cursor:cell; }
+        body.ag-edit-on .ag-pv-table td, body.ag-edit-on .ageing-table td, body.ag-edit-on .ag-pv-table th, body.ag-edit-on .ageing-table th { user-select:text; -webkit-user-select:text; cursor:text; }
+        body.ag-edit-on #ageingReportView table [contenteditable="true"] { outline:1px dashed #f59e0b; outline-offset:-2px; background-image:linear-gradient(rgba(254,243,199,.45),rgba(254,243,199,.45)); }
+        body.ag-edit-on #ageingReportView table [contenteditable="true"]:focus { outline:2px solid #2563eb; background:#fff; }
+        body.ag-edit-on #ageingReportView table .count-link { pointer-events:none; }
+        #ageingReportView table td.ag-edited, #ageingReportView table th.ag-edited { color:#b45309 !important; font-weight:800; }
+        #ageingEditBtn.on { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+
         .ag-sel { background:#2563eb !important; color:#fff !important; }
         .ag-sel .count-link { color:#fff !important; }
         #ageingSelBar { position:fixed; left:50%; bottom:14px; transform:translateX(-50%); z-index:99999; display:none; align-items:center; gap:16px; background:#0f172a; color:#fff; padding:8px 16px; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.35); font-family:Calibri,Arial,sans-serif; font-size:13px; font-weight:700; flex-wrap:wrap; justify-content:center; max-width:95vw; }
@@ -1672,6 +1679,8 @@ try {
 <button class="ageing-mode-btn" id="ageingModeXscBtn" onclick="ageingSetMode('xsc')" type="button"><i class="fa-solid fa-list-ol mr-1"></i> Status Count</button>
 <button class="ageing-mode-btn" id="ageingModeXhsBtn" onclick="ageingSetMode('xhs')" type="button"><i class="fa-solid fa-building mr-1"></i> Hub × Status</button>
 <button class="ageing-mode-btn" id="ageingModeXhsaBtn" onclick="ageingSetMode('xhsa')" type="button"><i class="fa-solid fa-sitemap mr-1"></i> Hub › Status × Age</button>
+<button class="ageing-mode-btn" id="ageingEditBtn" type="button" onclick="agEditToggle()" title="Table-er jekono value click kore change korun"><i class="fa-solid fa-pen-to-square mr-1"></i> <span id="ageingEditLbl">Edit Mode: OFF</span></button>
+<button class="ageing-mode-btn hidden" id="ageingEditResetBtn" type="button" onclick="agEditReset()"><i class="fa-solid fa-rotate-left mr-1"></i> Reset Edits</button>
 <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;">
 <label for="ageingRefInput" style="font-weight:600;">Age 0 date:</label>
 <input type="date" id="ageingRefInput" onchange="ageingSetRefDate(this.value)" style="border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;">
@@ -10915,6 +10924,107 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     new MutationObserver(function () { var a = $('agentPerformancePageModal'); if (a && !a.__navW) watch(); }).observe(document.body, { childList: true, subtree: true });   // sudhu notun popup toiri holei
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+
+<script>
+/* ===== Ageing Report: Edit Mode (all formats) ===== */
+(function(){
+  var IDS=['ageingReportContent','ageingDeliveryContent','ageingReceiveContent','ageingCustomContent','ageingXsaContent','ageingXscContent','ageingXhsContent','ageingXhsaContent'];
+  var store={}, on=false, busy=false, timer=null;
+  function conts(){return IDS.map(function(i){return document.getElementById(i);}).filter(Boolean);}
+  function cells(c){var out=[];c.querySelectorAll('table').forEach(function(t,ti){[].forEach.call(t.rows,function(r,ri){[].forEach.call(r.cells,function(cl,ci){out.push([c.id+'|'+ti+'|'+ri+'|'+ci,cl]);});});});return out;}
+  function cellKey(el){var c=el.closest('#'+IDS.join(',#'));if(!c)return null;var t=el.closest('table');if(!t)return null;var ti=[].indexOf.call(c.querySelectorAll('table'),t);var r=el.parentElement;return c.id+'|'+ti+'|'+r.rowIndex+'|'+el.cellIndex;}
+  function isDataCell(cl){return !cl.querySelector('table,input,select');}
+  function apply(){
+    busy=true;
+    try{conts().forEach(function(c){cells(c).forEach(function(p){var k=p[0],cl=p[1];
+      if(!isDataCell(cl))return;
+      if(Object.prototype.hasOwnProperty.call(store,k)){ if(cl.textContent!==store[k]) cl.textContent=store[k]; cl.classList.add('ag-edited'); } else cl.classList.remove('ag-edited');
+      if(on) cl.setAttribute('contenteditable','true'); else cl.removeAttribute('contenteditable');
+    });});}finally{busy=false;}
+    var rb=document.getElementById('ageingEditResetBtn'); if(rb) rb.classList.toggle('hidden',!Object.keys(store).length);
+  }
+  function sched(){ if(busy)return; clearTimeout(timer); timer=setTimeout(apply,30); }
+  window.agEditToggle=function(){
+    on=!on; document.body.classList.toggle('ag-edit-on',on);
+    var b=document.getElementById('ageingEditBtn'); if(b)b.classList.toggle('on',on);
+    var l=document.getElementById('ageingEditLbl'); if(l)l.textContent='Edit Mode: '+(on?'ON':'OFF');
+    if(on&&typeof agClearSel==='function')agClearSel();
+    apply();
+    try{showToast(on?'Edit mode ON — cell-e click kore value change korun':'Edit mode OFF');}catch(e){}
+  };
+  window.agEditReset=function(){
+    if(!confirm('Shob edit muche original value-e fire jabe. Continue?'))return;
+    store={}; var m=(typeof ageingMode!=='undefined')?ageingMode:'pivot';
+    try{ if(typeof ageingSetMode==='function')ageingSetMode(m);}catch(e){}
+    apply();
+  };
+  /* block the selection / count-link handlers while editing (capture phase, runs first) */
+  ['mousedown','mouseover','click'].forEach(function(ev){
+    window.addEventListener(ev,function(e){
+      if(!on||!e.target||!e.target.closest)return;
+      if(e.target.closest('#ageingReportView table')){ e.stopImmediatePropagation(); if(ev==='click'&&e.target.closest('button,a')) e.preventDefault(); }
+    },true);
+  });
+  document.addEventListener('input',function(e){
+    var el=e.target; if(!on||!el||!el.closest||el.getAttribute('contenteditable')!=='true')return;
+    var k=cellKey(el); if(k){store[k]=el.textContent; el.classList.add('ag-edited'); var rb=document.getElementById('ageingEditResetBtn'); if(rb)rb.classList.remove('hidden');}
+  });
+  document.addEventListener('keydown',function(e){
+    if(!on)return; var el=e.target; if(!el||el.getAttribute&&el.getAttribute('contenteditable')!=='true')return;
+    if(e.key==='Enter'){e.preventDefault();
+      var nxt=el.parentElement&&el.parentElement.nextElementSibling; var t=nxt&&nxt.cells[el.cellIndex];
+      if(t&&t.getAttribute('contenteditable')==='true'){t.focus();var r=document.createRange();r.selectNodeContents(t);var s=getSelection();s.removeAllRanges();s.addRange(r);} else el.blur();
+    }
+    if(e.key==='Escape'){el.blur();}
+  },true);
+  document.addEventListener('paste',function(e){
+    var el=e.target; if(!on||!el||!el.getAttribute||el.getAttribute('contenteditable')!=='true')return;
+    e.preventDefault(); var t=(e.clipboardData||window.clipboardData).getData('text').replace(/[\r\n\t]+/g,' ');
+    document.execCommand('insertText',false,t);
+  });
+  /* re-apply edits after every re-render */
+  function observe(){
+    var mo=new MutationObserver(function(){sched();});
+    conts().forEach(function(c){mo.observe(c,{childList:true,subtree:true});});
+  }
+  /* exports: use the on-screen (edited) table when edits exist */
+  function domRows(c){
+    var t=c.querySelector('table'); if(!t)return null;
+    return [].map.call(t.rows,function(r){return [].map.call(r.cells,function(cl){var v=cl.textContent.replace(/ /g,' ').trim(); var n=v.replace(/[,৳\s]/g,''); return (n!==''&&/^-?\d+(\.\d+)?$/.test(n)&&!/^0\d/.test(n))?Number(n):v;});});
+  }
+  function visibleCont(){return conts().filter(function(c){return !c.classList.contains('hidden');})[0];}
+  function hasEdits(){return Object.keys(store).length>0;}
+  function wrap(name,fn){
+    var orig=window[name]; if(typeof orig!=='function')return;
+    window[name]=function(){
+      var args=arguments, c=visibleCont();
+      if(!hasEdits()||!c) return orig.apply(this,args);
+      var rows=domRows(c); if(!rows) return orig.apply(this,args);
+      return fn(orig,args,rows);
+    };
+  }
+  function install(){
+    wrap('ageingViewCopy',function(orig,args,rows){var k=args[0],bk=ageingViewExport[k];if(!bk)return orig.apply(null,args);var old=bk.rows;bk.rows=rows;try{orig.apply(null,args);}finally{bk.rows=old;}});
+    wrap('ageingViewExcel',function(orig,args,rows){var k=args[0],bk=ageingViewExport[k];if(!bk)return orig.apply(null,args);var old=bk.rows;bk.rows=rows;try{orig.apply(null,args);}finally{bk.rows=old;}});
+    wrap('ageingCustomCopy',function(orig,args,rows){
+      var text=rows.map(function(r){return r.join('\t');}).join('\n');
+      if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(text).then(function(){try{showToast('Table copied — paste into Excel');}catch(e){}});
+      else{var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('Table copied');}catch(e){}ta.remove();}
+    });
+    wrap('ageingCustomDownload',function(orig,args,rows){
+      var type=args[0], stamp=(typeof ageingDateText==='function')?ageingDateText((typeof ageingReportDate!=='undefined'&&ageingReportDate)||new Date()):'edited';
+      if(type==='csv'){
+        var csv='﻿'+rows.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+        var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Ageing_Custom_Report_'+stamp+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);return;
+      }
+      if(typeof XLSX==='undefined')return;
+      var ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');XLSX.writeFile(wb,'Ageing_Custom_Report_'+stamp+'.xlsx');
+    });
+  }
+  function init(){install();observe();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 </body>
