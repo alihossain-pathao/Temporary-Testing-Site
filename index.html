@@ -10210,6 +10210,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   function fmtN(v){return Number.isInteger(v)?String(v):String(Math.round(v*100)/100)}
   function pct(a,b){return b>0?Math.floor(a/b*100+1e-9)+'%':''}
+  function pctR(a,b){return b>0?Math.round(a/b*100)+'%':''}  /* Closing Report er moto Math.round */
   function sumCol(h,col,r1,r2,tot){
     var s=0,any=false;
     for(var r=r1;r<=r2;r++){if(h.has(col+r)){any=true;s+=h.n(col+r)}}
@@ -10227,7 +10228,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   function dlt(h,r,I,B){
     if(!(B>0)||!h.has('K'+r))return '';
-    var d=Math.floor(I/B*100+1e-9)-h.n('K'+r);
+    var d=Math.round(I/B*100)-h.n('K'+r);
     return d===0?'0%':(d>0?'\u25B2 ':'\u25BC ')+Math.abs(d)+'%';
   }
   function arrow(i,k){if(!(k>0))return '';var d=(i-k)/k*100;return (d>=0?'\u25B2 ':'\u25BC ')+Math.floor(Math.abs(d)+1e-9)+'%'}
@@ -10250,17 +10251,17 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     for(r=16;r<=20;r++){
       var I=h.n('C'+r)+h.n('D'+r)+h.n('E'+r)+h.n('H'+r),B=h.n('B'+r);
       h.set('I'+r,fmtN(I));
-      h.set('J'+r,pct(I,B));
+      h.set('J'+r,pctR(I,B));
       h.set('L'+r,dlt(h,r,I,B));
-      h.set('N'+r,h.has('M'+r)?pct(h.n('M'+r),B):'');
-      h.set('P'+r,h.has('O'+r)?pct(h.n('O'+r),B):'');
+      h.set('N'+r,h.has('M'+r)?pctR(h.n('M'+r),B):'');
+      h.set('P'+r,h.has('O'+r)?pctR(h.n('O'+r),B):'');
     }
     ['B','C','D','E','F','G','H','I','M','O','Q'].forEach(function(c){t[c]=sumCol(h,c,16,20,21)});
-    h.set('J21',pct(t.I,t.B));
+    h.set('J21',pctR(t.I,t.B));
     h.set('L21',dlt(h,21,t.I,t.B));
     for(r=16;r<=21;r++){var ld=h.m['L'+r];if(ld){var tx=ld.textContent;ld.style.color=tx.indexOf('\u25BC')>-1?'#FF6B6B':(tx.indexOf('\u25B2')>-1?'#00FF00':'#FFFFFF')}}
-    h.set('N21',h.has('M21')?pct(t.M,t.B):'');
-    h.set('P21',h.has('O21')?pct(t.O,t.B):'');
+    h.set('N21',h.has('M21')?pctR(t.M,t.B):'');
+    h.set('P21',h.has('O21')?pctR(t.O,t.B):'');
     var s=0,c=0,pc=false;
     for(r=16;r<=20;r++){if(h.has('R'+r)){s+=h.n('R'+r);c++;if(h.raw('R'+r).indexOf('%')>-1)pc=true}}
     h.set('R21',c?fmtN(Math.round(s/c*100)/100)+(pc?'%':''):'');
