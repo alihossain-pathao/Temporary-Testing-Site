@@ -1004,18 +1004,10 @@ try {
 <button aria-label="Menu" class="px-3.5 py-2 text-sm font-bold rounded-lg transition bg-sky-600 hover:bg-sky-500 text-white shadow-sm flex items-center justify-center" onclick="toggleSidebar()" title="Menu">
 <i class="fa-solid fa-bars"></i>
                 </button>
-<button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-slate-700" data-owner-only="" id="topBtnHideMode" onclick="openVisibilityModal()" title="Choose what to hide from users (you always see everything)">
-<i class="fa-solid fa-eye" id="topHideModeIcon"></i> <span id="topHideModeLabel">Hide</span>
-</button>
 </div>
 <!-- TASK TABS (dynamic) -->
 <div class="flex items-center gap-2 flex-wrap" data-hide-key="taskTabs" id="topTaskTabsContainer">
 <!-- Rendered dynamically by renderTaskTabs() -->
-</div>
-<div class="flex items-center gap-2">
-<button class="px-3 py-2 text-xs font-bold rounded-lg transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2 border border-dashed border-slate-600" data-hide-key="tabsManage" data-owner-only="" onclick="openManageTabsModal()" title="Add / Edit / Remove Tabs">
-<i class="fa-solid fa-sliders"></i> Manage Tabs
-                </button>
 </div>
 </div>
 <!-- MANAGE TABS MODAL -->
@@ -7931,7 +7923,7 @@ const ACCOUNTS = [
             });
             set('sideHideModeIcon', el => el.className = 'fa-solid ' + (n ? 'fa-eye-slash' : 'fa-eye'));
             set('sideHideModePill', el => {
-                el.textContent = n ? String(n) : 'OFF';
+                el.textContent = n ? ('Hide (' + n + ')') : 'OFF';
                 el.className = 'px-2 py-0.5 rounded-full text-[9px] font-black ' + (n ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400');
             });
             set('visCount', el => el.textContent = n ? (n + ' of ' + known.length + ' hidden from users') : 'Nothing is hidden - all users see everything');
