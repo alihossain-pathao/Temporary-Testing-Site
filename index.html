@@ -427,7 +427,12 @@
         .rpt-date-widget .rw-mon { grid-column:1; grid-row:1; font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; }
         .rpt-date-widget .rw-year { grid-column:2; grid-row:1; font-size:11px; font-weight:800; text-transform:none; letter-spacing:0; margin:0; }
         .rpt-date-widget .rw-wk { grid-column:1 / span 2; grid-row:2; font-size:10px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; white-space:nowrap; }
-        @media (max-width: 600px) { .rpt-date-widget { position:static; margin:6px auto 0; } }
+        #morningReportCard .rpt-date-widget { bottom:4px; gap:5px; padding:1px 7px 1px 2px; border-radius:9px; }
+        #morningReportCard .rpt-date-widget .rw-circle { width:24px; height:24px; font-size:13px; }
+        #morningReportCard .rpt-date-widget .rw-mon, #morningReportCard .rpt-date-widget .rw-year { font-size:10px; }
+        #morningReportCard .rpt-date-widget .rw-wk { font-size:9.5px; }
+        #morningReportCard .rpt-date-widget .rw-txt { line-height:1; row-gap:1px; }
+        @media (max-width: 600px) { .rpt-date-widget, #morningReportCard .rpt-date-widget { position:static; margin:6px auto 0; } }
 
         .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; background-color: #ffffff; border: 1.5px solid #64748b; }
         .excel-table td { border: 1px solid #94a3b8; padding: 2px 4px; font-size: 10px; font-weight: 600; height: 23px; vertical-align: middle; color: #0f172a; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
