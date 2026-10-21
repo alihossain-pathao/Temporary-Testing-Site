@@ -40,7 +40,6 @@
         .notice-bell { position:relative; width:26px; height:26px; border-radius:999px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg,#8b5cf6,#d946ef); color:#fff; font-size:12px; }
         .notice-bell::after { content:''; position:absolute; inset:0; border-radius:999px; border:2px solid rgba(167,139,250,.7); animation: noticePulse 1.8s ease-out infinite; }
         @keyframes noticePulse { 0% { transform:scale(1); opacity:.9; } 100% { transform:scale(1.9); opacity:0; } }
-        .notice-count { min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:#ef4444; color:#fff; font-size:10px; font-weight:900; letter-spacing:0; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 0 0 3px rgba(239,68,68,.22); }
         .notice-ticker-wrap { overflow:hidden; position:relative; flex:1 1 auto; min-width:0;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent 100%);
                     mask-image: linear-gradient(90deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent 100%); }
@@ -402,7 +401,6 @@
         .import-report-table tbody tr.cluster-row td { background:#b7b7b7; font-weight:900; }
         .import-report-table tbody tr.total-row td { background:#f4b183; font-weight:900; }
         .import-report-table tbody tr.hub-row:nth-child(even) td { background:#fafafa; }
-        .import-report-empty { max-width:900px; margin:50px auto; background:#fff; border:1px dashed #94a3b8; border-radius:12px; padding:35px 20px; text-align:center; color:#475569; }
         .import-report-meta { font-size:10px; color:#475569; font-weight:700; margin:0 0 8px; }
         @media print {
             body.print-import-report * { visibility:hidden !important; }
@@ -552,8 +550,6 @@
         /* ===== Bulk Copy panel (separate from report table) ===== */
         .inv-bulk-panel { margin-top:12px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; overflow:hidden; font-family:Arial,sans-serif; }
         .inv-bulk-panel .inv-bulk-title { background:#595959; color:#fff; font-weight:900; font-size:11px; padding:7px 10px; text-align:center; }
-        .inv-bulk-panel .inv-bulk-date { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid #e2e8f0; font-size:11px; font-weight:800; color:#334155; }
-        .inv-bulk-panel .inv-bulk-date select { flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:4px 6px; font-size:11px; font-weight:700; color:#0f172a; background:#fff; }
         .inv-bulk-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 10px; border-bottom:1px solid #f1f5f9; font-size:11px; font-weight:700; color:#0f172a; }
         .inv-bulk-row:last-child { border-bottom:0; }
         .inv-bulk-row .inv-bulk-cnt { color:#64748b; font-weight:800; margin-left:4px; }
@@ -658,12 +654,10 @@
         .rcv-item:hover { background:#f8fafc; }
         .rcv-dot { width:9px; height:9px; border-radius:50%; margin-top:4px; flex:0 0 auto; background:#dc2626; }
         .rcv-item.warn .rcv-dot { background:#d97706; }
-        .rcv-sec { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:#475569; background:#e2e8f0; border-radius:4px; padding:1px 6px; margin-right:6px; }
         .rcv-it-title { font-size:11px; font-weight:800; }
         .rcv-it-msg { font-size:11px; color:#334155; margin-top:2px; }
         .rcv-it-diff { font-size:11px; font-weight:800; color:#b91c1c; }
         .rcv-item.warn .rcv-it-diff { color:#b45309; }
-        .rcv-it-hint { font-size:10px; color:#64748b; margin-top:2px; }
         /* ---- compact popup version ---- */
         .rcv-panel { position:fixed; top:12px; right:12px; width:330px; max-width:calc(100vw - 24px); margin:0; z-index:99999; display:none; }
         .rcv-panel.rcv-show { display:block; animation:rcvPop .2s ease-out; }
@@ -675,7 +669,6 @@
         .rcv-x:hover { color:#0f172a; }
         .rcv-list { max-height:200px; }
         .rcv-item { padding:6px 10px; }
-        .rcv-it-hint { display:none; }
         .rcv-grp { font-size:10px; font-weight:900; letter-spacing:.5px; color:#fff; background:#475569; padding:3px 10px; }
 </style>
 <script>
@@ -2993,13 +2986,6 @@ const ACCOUNTS = [
         const LS_STATE_KEY = 'narsingdi_dashboard_state_v1';
         const pendingWrites = { hubList: 0, reports: {}, attendance: {}, inventory: {} };
 
-        function debounce(fn, wait) {
-            let t;
-            return function (...args) {
-                clearTimeout(t);
-                t = setTimeout(() => fn.apply(this, args), wait);
-            };
-        }
 
         let lastCloudErrorToast = 0;
         function cloudFail(e) {
@@ -3249,12 +3235,6 @@ const ACCOUNTS = [
             queueSharedDocument('config/notices', { clusterNotices, dismissedNoticeIds: cloudDismissedNoticeIds })
                 .finally(() => { noticeWriteInFlight = Math.max(0, noticeWriteInFlight - 1); });
         }
-        async function writeNoticesNow() {
-            if (!cloudDb) return;
-            noticeWriteInFlight++;
-            try { await queueSharedDocument('config/notices', { clusterNotices, dismissedNoticeIds: cloudDismissedNoticeIds }); }
-            finally { noticeWriteInFlight = Math.max(0, noticeWriteInFlight - 1); }
-        }
         function cloudSyncUiHide() {
             if (!cloudDb || !dashboardOwnerUid) return;
             queueSharedDocument('ownerSettings/' + dashboardOwnerUid, { uiHide, updatedAt: Date.now() });
@@ -3401,21 +3381,6 @@ const ACCOUNTS = [
             }
         }
 
-        async function openOwnerAccessModal() {
-            if (!myAccess.isOwner) {
-                // Re-check once because Google auth and owner status can finish asynchronously.
-                try { await refreshGoogleOwnerStatus(); } catch (e) {}
-            }
-            if (!myAccess.isOwner) {
-                showToast('Only the owner can manage Owner Access');
-                return;
-            }
-            const modal = document.getElementById('ownerAccessModal');
-            if (modal) modal.classList.remove('hidden');
-            const input = document.getElementById('ownerAccessEmail');
-            if (input) { input.value = ''; setTimeout(() => input.focus(), 50); }
-            await renderOwnerAccessList();
-        }
 
         function closeOwnerAccessModal() {
             document.getElementById('ownerAccessModal')?.classList.add('hidden');
@@ -3658,25 +3623,7 @@ const ACCOUNTS = [
             }
         });
 
-                function googleAuthErrorMessage(e) {
-            const code = e && e.code ? String(e.code) : '';
-            const map = {
-                'auth/unauthorized-domain': 'This website domain is not authorized in Firebase. Add your GitHub Pages domain in Firebase Authentication → Settings → Authorized domains.',
-                'auth/popup-blocked': 'Google sign-in popup was blocked. Allow popups for this site and try again.',
-                'auth/popup-closed-by-user': 'Google sign-in was cancelled. Please try again.',
-                'auth/cancelled-popup-request': 'A Google sign-in window is already open. Please complete it first.',
-                'auth/network-request-failed': 'Network error. Check your internet connection and try again.',
-                'auth/operation-not-allowed': 'Google sign-in is not enabled in Firebase Authentication → Sign-in method.',
-                'auth/invalid-api-key': 'Firebase API key is invalid. Check the Firebase web app configuration.',
-                'auth/app-not-authorized': 'This Firebase app is not authorized for this domain.'
-            };
-            return map[code] || ('Google sign-in failed' + (code ? ' (' + code + ')' : '') + '. Check the browser console for details.');
-        }
 
-        function setGateMessage(msg) {
-            const el = document.getElementById('authGateStatus');
-            if (el) el.textContent = msg;
-        }
 
         /* Purono Google login ar nai. Ei naam-gulo ager code-er jonno rakha holo (shim) — asol kaj NSD_AUTH (nsdAuthModule) kore. */
         async function googleSignIn() { try { NSD_AUTH.focusLogin(); } catch (e) {} }
@@ -5456,13 +5403,6 @@ const ACCOUNTS = [
             try { runReportValidation(); } catch (e) {}
         }
 
-        function formatCurrentTime12Hour(date = new Date()) {
-            let hours = date.getHours();
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
-        }
 
         function resetReportFormToDefault() {
             const today = new Date();
@@ -6869,36 +6809,8 @@ const ACCOUNTS = [
             } catch (e) {}
         }
 
-        function openAddNoticeModal() {
-            document.getElementById('noticeForm').reset();
-            document.getElementById('addNoticeModal').classList.remove('hidden');
-        }
 
-        function closeAddNoticeModal() {
-            document.getElementById('addNoticeModal').classList.add('hidden');
-            document.getElementById('noticeForm').reset();
-        }
 
-        function handleSaveNotice(event) {
-            event.preventDefault();
-            const title = document.getElementById('noticeTitleInput').value.trim();
-            const message = document.getElementById('noticeMessageInput').value.trim();
-            const severity = document.getElementById('noticeSeverityInput').value;
-
-            clusterNotices.unshift({
-                id: 'notice_' + Date.now(),
-                title,
-                message,
-                severity,
-                createdAt: new Date().toISOString(),
-                responses: {}
-            });
-
-            saveNoticesToStorage();
-            renderClusterNotices();
-            closeAddNoticeModal();
-            showToast('Notice posted for everyone to see!');
-        }
 
         function getNoticeResponseKey() {
             return currentUser?.uid || currentUser?.email || 'local_user';
@@ -7474,10 +7386,6 @@ const ACCOUNTS = [
             setTimeout(() => { try { el.focus(); if (el.select) el.select(); } catch (e) {} }, 350);
         }
 
-        function rcvToggleList() {
-            __rcvListOpen = !__rcvListOpen;
-            rcvRenderPanel(__rcvIssues, 1);
-        }
 
         function rcvToggleMarks() {
             const view = document.getElementById('hubReportView');
@@ -8022,19 +7930,6 @@ const ACCOUNTS = [
 
         /* Owner account controls visibility directly. No PIN is required. */
         let uiPinOk = false;
-        function requirePin() { return false; }
-        function closePinModal() { document.getElementById('pinModal').classList.add('hidden'); }
-        function submitPin() { closePinModal(); }
-
-        function getSignedInOwnerEmail() {
-            try {
-                return String(
-                    currentUser?.email ||
-                    currentUser?.providerData?.find(p => p && p.email)?.email ||
-                    ''
-                ).trim().toLowerCase();
-            } catch (e) { return ''; }
-        }
 
         function isPrimaryOwnerAccount() {
             const email = getSignedInOwnerEmail();
@@ -8063,18 +7958,6 @@ const ACCOUNTS = [
             return !!myAccess.isOwner;
         }
 
-        // Old buttons/shortcuts that used to flip a global ON/OFF now simply open the Hide panel.
-        function toggleHideMode() { openVisibilityModal(); }
-
-        async function toggleHideKey(key, hide) {
-            if (!(await ensureOwnerAccess())) { showToast('Only the owner can change visibility settings'); renderVisibilityList(); return; }
-            const has = uiHide.keys.includes(key);
-            if (hide && !has) uiHide.keys.push(key);
-            if (!hide && has) uiHide.keys = uiHide.keys.filter(k => k !== key);
-            uiHide.active = uiHide.keys.length > 0;
-            saveUiHide();
-            applyUiHide();
-        }
 
         async function setHidePreset(kind) {
             if (!(await ensureOwnerAccess())) { showToast('Only the owner can change visibility settings'); return; }
@@ -8184,12 +8067,6 @@ const ACCOUNTS = [
                 return `${h}:${String(min).padStart(2, '0')} ${ap}`;
             }
 
-            function normalizeReportTimes() {
-                ['m_vanInTime', 'm_dispatchTime'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el && el.value) el.value = normalizeTime12(el.value);
-                });
-            }
 
             document.querySelectorAll('#hubReportView input, #hubReportView select').forEach(el => {
                 el.addEventListener('blur', () => {
@@ -9635,9 +9512,6 @@ const ACCOUNTS = [
             return Number.isFinite(n) ? n : 0;
         }
 
-        function excelPct(v) {
-            return Math.round((excelNum(v) + Number.EPSILON) * 100) / 100;
-        }
 
         function excelFmtNum(v) {
             const n = excelNum(v);
@@ -9733,11 +9607,6 @@ const ACCOUNTS = [
                 .join(' ') + ' Cluster';
         }
 
-        function excelGroupName(hub) {
-            const s = String(hub || '').trim();
-            if (!s) return 'Other Cluster';
-            return excelClusterLabelFromKey(excelClusterKey(s));
-        }
 
         function averageExcelRatio(rows, key) {
             if (!rows.length) return 0;
@@ -10073,7 +9942,6 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 #ncr .ncr-card .s{color:var(--c-sub);font-size:12.5px}
 #ncr .ncr-card .ch{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:20px;line-height:1;color:var(--c-sub);background:var(--c-panel);transition:all .18s}
 #ncr .ncr-card:hover .ch{background:#1d546d;color:#fff;transform:translateX(2px)}
-#ncr .ncr-foot{margin:22px 2px 0;font-size:12.5px;color:var(--c-sub);display:flex;gap:8px;align-items:center}
 #ncr .ncr-modal{position:fixed;inset:0;z-index:99999;display:none;background:rgba(5,12,20,.88);align-items:center;justify-content:center;padding:14px}
 #ncr .ncr-modal.open{display:flex}
 #ncr .ncr-panel{background:var(--c-panel);border-radius:16px;max-width:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.5);min-width:min(360px,100%)}
@@ -10086,7 +9954,6 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 #ncr .ncr-btn:hover,#ncr .ncr-btn:focus-visible{background:rgba(255,255,255,.28)}
 #ncr .ncr-body{overflow:auto;padding:0 12px 12px;scroll-padding-top:0}
 #ncr .ncr-body>table{margin-top:12px}
-#ncr .ncr-hint2{padding:8px 18px;font-size:12px;color:var(--c-sub);border-top:1px solid var(--c-line);background:var(--c-card);display:flex;justify-content:space-between;gap:12px}
 #ncr table{border:0;border-collapse:collapse;table-layout:fixed;background:#fff;font-family:Arial,sans-serif;margin:0;max-width:none}
 #ncr td{padding:0 3px;overflow:hidden;box-sizing:border-box;line-height:1.25;background-clip:padding-box}
 #ncr td:focus{outline:1px solid #1a73e8;outline-offset:-1px}
