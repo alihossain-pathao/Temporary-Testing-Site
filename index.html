@@ -420,13 +420,14 @@
         .header-title { text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #cbd5e1; }
         .header-title h2 { margin: 0; color: #0f2942; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .header-title p { margin: 3px 0 0; color: #475569; font-size: 11px; font-weight: 700; }
-        .rpt-date-row { display:flex; justify-content:center; margin:0 0 10px; }
-        .rpt-date-widget { display:inline-flex; align-items:center; gap:9px; background:#ffffff; border:1px solid #cbd5e1; border-radius:14px; padding:5px 14px 5px 5px; }
-        .rpt-date-widget .rw-circle { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#1c3d5a 0%,#1a5e54 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-size:21px; font-weight:700; line-height:1; flex:none; }
-        .rpt-date-widget .rw-txt { display:flex; flex-direction:column; justify-content:center; color:#0f172a; text-align:left; line-height:1.05; }
-        .rpt-date-widget .rw-mon { font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; }
-        .rpt-date-widget .rw-year { font-size:14px; font-weight:800; text-transform:none; letter-spacing:0; }
-        .rpt-date-widget .rw-wk { font-size:11px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; }
+        .header-title { position: relative; }
+        .rpt-date-widget { position:absolute; right:2px; bottom:7px; display:inline-flex; align-items:center; gap:6px; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:2px 8px 2px 3px; }
+        .rpt-date-widget .rw-circle { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#1c3d5a 0%,#1a5e54 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; line-height:1; flex:none; }
+        .rpt-date-widget .rw-txt { display:grid; grid-template-columns:auto 1fr; column-gap:4px; align-items:center; color:#0f172a; text-align:left; line-height:1.1; }
+        .rpt-date-widget .rw-mon { grid-column:1; grid-row:1; font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; }
+        .rpt-date-widget .rw-year { grid-column:2; grid-row:1; font-size:11px; font-weight:800; text-transform:none; letter-spacing:0; margin:0; }
+        .rpt-date-widget .rw-wk { grid-column:1 / span 2; grid-row:2; font-size:10px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; white-space:nowrap; }
+        @media (max-width: 600px) { .rpt-date-widget { position:static; margin:6px auto 0; } }
 
         .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; background-color: #ffffff; border: 1.5px solid #64748b; }
         .excel-table td { border: 1px solid #94a3b8; padding: 2px 4px; font-size: 10px; font-weight: 600; height: 23px; vertical-align: middle; color: #0f172a; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1295,8 +1296,8 @@ try {
 <div class="header-title">
 <h2 id="morningHeaderTitle">NARSINGDI HUB - MORNING DISPATCH REPORT</h2>
 <p>Daily Operations &amp; Dispatch Summary</p>
+<div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
 </div>
-<div class="rpt-date-row"><div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div></div>
 <table class="excel-table" id="morningReportTable">
 <colgroup>
 <col style="width: 25%;"/>
@@ -1448,8 +1449,8 @@ try {
 <div class="header-title">
 <h2 id="closingHeaderTitle">NARSINGDI HUB - CLOSING REPORT</h2>
 <p>Delivery Performance &amp; Operational Summary</p>
+<div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
 </div>
-<div class="rpt-date-row"><div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div></div>
 <table class="excel-table" id="fullReportTable">
 <colgroup>
 <col style="width: 130px;"/>
