@@ -420,14 +420,13 @@
         .header-title { text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #cbd5e1; }
         .header-title h2 { margin: 0; color: #0f2942; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .header-title p { margin: 3px 0 0; color: #475569; font-size: 11px; font-weight: 700; }
-        .header-title { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 14px; text-align:left; }
-        .header-title .ht-text { flex:1; min-width:220px; text-align:center; }
-        .rpt-date-widget { display:inline-flex; align-items:center; gap:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:18px; padding:8px 16px 8px 8px; flex:none; }
-        .rpt-date-widget .rw-circle { width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,#1c3d5a 0%,#1a5e54 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; line-height:1; flex:none; }
-        .rpt-date-widget .rw-txt { display:flex; flex-direction:column; justify-content:center; color:#0f172a; text-align:left; }
-        .rpt-date-widget .rw-mon { font-size:16px; font-weight:700; line-height:1.1; text-transform:none; letter-spacing:0; }
-        .rpt-date-widget .rw-year { font-size:20px; font-weight:800; line-height:1.1; margin-bottom:2px; text-transform:none; letter-spacing:0; }
-        .rpt-date-widget .rw-wk { font-size:12px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; }
+        .rpt-date-row { display:flex; justify-content:center; margin:0 0 10px; }
+        .rpt-date-widget { display:inline-flex; align-items:center; gap:9px; background:#ffffff; border:1px solid #cbd5e1; border-radius:14px; padding:5px 14px 5px 5px; }
+        .rpt-date-widget .rw-circle { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#1c3d5a 0%,#1a5e54 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-size:21px; font-weight:700; line-height:1; flex:none; }
+        .rpt-date-widget .rw-txt { display:flex; flex-direction:column; justify-content:center; color:#0f172a; text-align:left; line-height:1.05; }
+        .rpt-date-widget .rw-mon { font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; }
+        .rpt-date-widget .rw-year { font-size:14px; font-weight:800; text-transform:none; letter-spacing:0; }
+        .rpt-date-widget .rw-wk { font-size:11px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; }
 
         .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; background-color: #ffffff; border: 1.5px solid #64748b; }
         .excel-table td { border: 1px solid #94a3b8; padding: 2px 4px; font-size: 10px; font-weight: 600; height: 23px; vertical-align: middle; color: #0f172a; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1294,10 +1293,10 @@ try {
 <div class="morning-report-col">
 <div class="report-card" id="morningReportCard">
 <div class="header-title">
-<div class="ht-text"><h2 id="morningHeaderTitle">NARSINGDI HUB - MORNING DISPATCH REPORT</h2>
-<p>Daily Operations &amp; Dispatch Summary</p></div>
-<div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
+<h2 id="morningHeaderTitle">NARSINGDI HUB - MORNING DISPATCH REPORT</h2>
+<p>Daily Operations &amp; Dispatch Summary</p>
 </div>
+<div class="rpt-date-row"><div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div></div>
 <table class="excel-table" id="morningReportTable">
 <colgroup>
 <col style="width: 25%;"/>
@@ -1447,10 +1446,10 @@ try {
 </div>
 <div class="report-card" id="closingReportCard">
 <div class="header-title">
-<div class="ht-text"><h2 id="closingHeaderTitle">NARSINGDI HUB - CLOSING REPORT</h2>
-<p>Delivery Performance &amp; Operational Summary</p></div>
-<div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
+<h2 id="closingHeaderTitle">NARSINGDI HUB - CLOSING REPORT</h2>
+<p>Delivery Performance &amp; Operational Summary</p>
 </div>
+<div class="rpt-date-row"><div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div></div>
 <table class="excel-table" id="fullReportTable">
 <colgroup>
 <col style="width: 130px;"/>
