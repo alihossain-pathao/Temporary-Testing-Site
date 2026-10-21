@@ -998,15 +998,10 @@ try {
 </div>
 </div>
 </div>
-<!-- NAVIGATION MENU TRIGGER & TASK TABS BAR -->
-<div class="flex flex-wrap items-center justify-between bg-[#131d36] p-2.5 rounded-xl border border-slate-800 gap-3">
-<div class="flex items-center gap-2">
-<button aria-label="Menu" class="px-3.5 py-2 text-sm font-bold rounded-lg transition bg-sky-600 hover:bg-sky-500 text-white shadow-sm flex items-center justify-center" onclick="toggleSidebar()" title="Menu">
-<i class="fa-solid fa-bars"></i>
-                </button>
-</div>
+<!-- TASK TABS BAR (centered) -->
+<div class="flex flex-wrap items-center justify-center bg-[#131d36] p-2.5 rounded-xl border border-slate-800 gap-3">
 <!-- TASK TABS (dynamic) -->
-<div class="flex items-center gap-2 flex-wrap" data-hide-key="taskTabs" id="topTaskTabsContainer">
+<div class="flex items-center justify-center gap-2 flex-wrap" data-hide-key="taskTabs" id="topTaskTabsContainer">
 <!-- Rendered dynamically by renderTaskTabs() -->
 </div>
 </div>
