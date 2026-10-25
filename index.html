@@ -696,6 +696,7 @@ var APP_LOGO_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   if (fav && APP_LOGO_SRC.indexOf('data:image/svg+xml') !== 0) { fav.removeAttribute('type'); fav.href = APP_LOGO_SRC; }
   function apply() { document.querySelectorAll('img.app-logo').forEach(function (im) { im.src = APP_LOGO_SRC; }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
+  window.addEventListener('load', apply); window.addEventListener('pageshow', apply);
 })();
 </script>
 <style id="nsdAuthCss">
@@ -750,7 +751,7 @@ select.nsd-input{appearance:auto}
 <div class="fixed inset-0 z-[100] bg-[#0b1329] flex items-start justify-center p-5 overflow-y-auto" id="authGate" style="position:fixed;inset:0;z-index:100;background:#0b1329;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;box-sizing:border-box">
 <div style="width:100%;max-width:380px;margin:auto 0">
 <div class="nsd-card">
-<img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg" src="" style="display:block;margin:0 auto 14px;width:56px;height:56px"/>
+<img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2338bdf8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230369a1%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M32%2011%20L51%2022%20V42%20L32%2053%20L13%2042%20V22%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2040%20V25%20L40%2040%20V25%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E" style="display:block;margin:0 auto 14px;width:56px;height:56px"/>
 <h2 id="authGateTitle" style="text-align:center;margin:0;font-size:18px;font-weight:900;color:#fff">Login</h2>
 <p id="authGateStatus" class="nsd-hint" style="text-align:center;margin:8px 0 4px;font-size:11px;line-height:1.5"></p>
 <form id="nsdLoginForm" autocomplete="on" novalidate>
