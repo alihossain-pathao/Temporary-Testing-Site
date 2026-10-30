@@ -741,11 +741,46 @@ select.nsd-input{appearance:auto}
 .nsd-row{display:flex;align-items:center;gap:10px;background:#0b1329;border:1px solid #1e293b;border-radius:12px;padding:8px 10px;margin-top:8px}
 .nsd-code{display:block;word-break:break-all;background:#0b1329;border:1px dashed #334155;border-radius:10px;padding:10px;font:600 11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#7dd3fc;margin-top:6px;user-select:all}
 .nsd-x{background:none;border:0;color:#94a3b8;font-size:18px;cursor:pointer;padding:2px 8px}
+/* ===== SITE CONTROL (maintenance notice + full close) ===== */
+.nsd-maint{position:sticky;top:0;z-index:30;display:none;align-items:center;justify-content:center;gap:10px;padding:10px 14px;background:linear-gradient(90deg,#78350f,#b45309);color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:1.55;border-bottom:1px solid rgba(245,158,11,.35);flex-shrink:0}
+.nsd-maint.closed{background:linear-gradient(90deg,#4c0519,#9f1239);border-bottom-color:rgba(251,113,133,.35)}
+.nsd-maint i{font-size:14px;flex-shrink:0}
+#nsdClosedOverlay{position:fixed;inset:0;z-index:99;background:radial-gradient(circle at 50% 0%,#14213d 0%,#0b1329 62%);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;overflow-y:auto}
+.nsd-closed-card{width:100%;max-width:440px;text-align:center;background:#131d36;border:1px solid #1e293b;border-radius:22px;padding:34px 24px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.nsd-closed-ic{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:28px;background:rgba(120,53,15,.35);color:#fbbf24;border:1px solid rgba(180,83,9,.45)}
+body.nsd-site-closed{overflow:hidden}
+body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):not(script):not(style){visibility:hidden!important}
+.nsd-gate-closed{display:none;margin:10px 0 2px;padding:10px 12px;border-radius:12px;background:rgba(120,53,15,.3);border:1px solid rgba(180,83,9,.5);color:#fcd34d;font-size:12px;font-weight:800;line-height:1.55;text-align:center}
+.nsd-opt{background:#0b1329;border:1px solid #1e293b;border-radius:14px;padding:12px;margin-top:12px}
+.nsd-opt-head{display:flex;align-items:center;gap:12px}
+.nsd-opt-title{font-size:13px;font-weight:900;color:#fff}
+.nsd-opt-desc{font-size:10px;font-weight:700;color:#64748b;margin-top:2px;line-height:1.5}
+.nsd-sw{-webkit-appearance:none;appearance:none;width:46px;height:26px;border-radius:999px;background:#334155;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;border:0;outline:none;margin:0}
+.nsd-sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.nsd-sw:checked{background:#0ea5e9}
+.nsd-sw.danger:checked{background:#e11d48}
+.nsd-sw:checked::after{transform:translateX(20px)}
+.nsd-sitestat{display:block;text-align:center;padding:8px 10px;border-radius:10px;font-size:11px;font-weight:900;letter-spacing:.03em;margin-top:12px}
+.nsd-sitestat.live{background:#064e3b;color:#6ee7b7}
+.nsd-sitestat.notice{background:#78350f;color:#fcd34d}
+.nsd-sitestat.closed{background:#4c0519;color:#fda4af}
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
 <div class="toast-notify" id="toastNotify">
 <span id="toastMsg">Action completed successfully</span>
+</div>
+
+<!-- MAINTENANCE BANNER (Owner "Maintenance Notice" on korle sob logged-in user-er upore dekhay) -->
+<div id="nsdMaintBanner" class="nsd-maint" style="display:none" role="status"><i id="nsdMaintIcon" class="fa-solid fa-screwdriver-wrench"></i><span id="nsdMaintText"></span></div>
+<!-- CLOSED SCREEN (Owner "Close Dashboard" on korle Owner chhara sobar jonno puro page cover kore) -->
+<div id="nsdClosedOverlay" role="alertdialog" aria-live="assertive">
+  <div class="nsd-closed-card">
+    <div class="nsd-closed-ic"><i class="fa-solid fa-lock"></i></div>
+    <h2 style="margin:0;font-size:18px;font-weight:900;color:#fff">Dashboard Temporarily Closed</h2>
+    <p id="nsdClosedMsg" style="margin:12px 0 0;font-size:14px;font-weight:700;color:#cbd5e1;line-height:1.7;white-space:pre-line"></p>
+    <button class="nsd-btn" type="button" style="margin-top:22px" onclick="NSD_AUTH.logout(false)"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </div>
 </div>
 <!-- LOGIN GATE: Gmail + Password. Login na korle ei screen puro page cover kore thake (app-er kichu dekha jay na) -->
 <div class="fixed inset-0 z-[100] bg-[#0b1329] flex items-start justify-center p-5 overflow-y-auto" id="authGate" style="position:fixed;inset:0;z-index:100;background:#0b1329;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;box-sizing:border-box">
@@ -754,6 +789,7 @@ select.nsd-input{appearance:auto}
 <img alt="Logo" class="app-logo mx-auto w-14 h-14 rounded-2xl shadow-lg" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2338bdf8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230369a1%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M32%2011%20L51%2022%20V42%20L32%2053%20L13%2042%20V22%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2040%20V25%20L40%2040%20V25%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E" style="display:block;margin:0 auto 14px;width:56px;height:56px"/>
 <h2 id="authGateTitle" style="text-align:center;margin:0;font-size:18px;font-weight:900;color:#fff">Login</h2>
 <p id="authGateStatus" class="nsd-hint" style="text-align:center;margin:8px 0 4px;font-size:11px;line-height:1.5"></p>
+<div id="nsdGateClosed" class="nsd-gate-closed" role="alert"></div>
 <form id="nsdLoginForm" autocomplete="on" novalidate>
 <label class="nsd-lbl" for="nsdLoginEmail">Gmail</label>
 <input id="nsdLoginEmail" class="nsd-input" type="text" name="username" inputmode="email" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="name@gmail.com">
@@ -844,6 +880,16 @@ try {
 <i class="fa-solid fa-user-shield"></i>
 </span>
 <span class="truncate">Admin Panel</span>
+</button>
+</div>
+<div class="space-y-1.5" data-owner-strict="" style="display:none">
+<p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Access Control</p>
+<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" onclick="NSD_AUTH.openSite(); toggleSidebar();">
+<span class="w-8 h-8 rounded-lg bg-rose-950/60 border border-rose-800/40 flex items-center justify-center flex-shrink-0 text-rose-400 text-sm">
+<i class="fa-solid fa-power-off"></i>
+</span>
+<span class="truncate flex-1 text-left">Dashboard Control</span>
+<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-800 text-slate-400" id="nsdSidePill">LIVE</span>
 </button>
 </div>
 <div class="space-y-1.5">
@@ -2142,6 +2188,49 @@ try {
   </div>
 </div>
 
+<!-- ===== DASHBOARD CONTROL (sudhu primary Owner — Admin-ra dekhbe na, change korte parbe na) ===== -->
+<div id="nsdSiteCtl" class="nsd-overlay" style="display:none;z-index:96" onclick="if(event.target===this)NSD_AUTH.closeSite()">
+  <div class="nsd-sheet wide">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:16px;font-weight:900;color:#fff;margin:0">Dashboard Control</h2>
+        <div class="nsd-hint" style="margin-top:2px">Owner only &mdash; Admin ba Incharge eta dekhte ba change korte pare na.</div>
+      </div>
+      <button class="nsd-x" type="button" onclick="NSD_AUTH.closeSite()" title="Close">&times;</button>
+    </div>
+    <div id="nsdSiteStatus" class="nsd-sitestat live"></div>
+
+    <div class="nsd-opt">
+      <div class="nsd-opt-head">
+        <div style="flex:1;min-width:0">
+          <div class="nsd-opt-title"><i class="fa-solid fa-screwdriver-wrench" style="color:#fbbf24;margin-right:6px"></i>Maintenance Notice</div>
+          <div class="nsd-opt-desc">Dashboard cholbe. Sob user-er upore ekta notice dekhabe (jemon &ldquo;ekhon kaj cholche&rdquo;).</div>
+        </div>
+        <input id="nsdSiteNoticeOn" class="nsd-sw" type="checkbox" aria-label="Maintenance notice on/off">
+      </div>
+      <label class="nsd-lbl" for="nsdSiteNoticeMsg">Notice message</label>
+      <textarea id="nsdSiteNoticeMsg" class="nsd-input" rows="2" maxlength="300" style="resize:vertical;font-family:inherit"></textarea>
+    </div>
+
+    <div class="nsd-opt">
+      <div class="nsd-opt-head">
+        <div style="flex:1;min-width:0">
+          <div class="nsd-opt-title"><i class="fa-solid fa-lock" style="color:#fb7185;margin-right:6px"></i>Close Dashboard</div>
+          <div class="nsd-opt-desc">Owner chhara kew dhukte parbe na. Sobar screen-e nicher message dekhabe.</div>
+        </div>
+        <input id="nsdSiteClosedOn" class="nsd-sw danger" type="checkbox" aria-label="Close dashboard on/off">
+      </div>
+      <label class="nsd-lbl" for="nsdSiteClosedMsg">Closed message</label>
+      <textarea id="nsdSiteClosedMsg" class="nsd-input" rows="2" maxlength="300" style="resize:vertical;font-family:inherit"></textarea>
+    </div>
+
+    <label class="nsd-lbl" for="nsdSitePw">Confirm with your Owner password</label>
+    <div class="nsd-pwrow"><input id="nsdSitePw" class="nsd-input" type="password" autocomplete="current-password" placeholder="Owner password"><button class="nsd-eye" type="button" onclick="NSD_AUTH.togglePw('nsdSitePw',this)">Show</button></div>
+    <div id="nsdSiteErr" class="nsd-err" role="alert"></div>
+    <button class="nsd-btn primary" type="button" onclick="NSD_AUTH.saveSite()">Save changes</button>
+  </div>
+</div>
+
 <!-- ===== ADMIN PANEL (sudhu Owner / Admin) ===== -->
 <div id="nsdAdminPanel" class="nsd-overlay" style="display:none;z-index:95" onclick="if(event.target===this)NSD_AUTH.closeAdmin()">
   <div class="nsd-sheet wide">
@@ -2280,11 +2369,11 @@ const ACCOUNTS = [
   }
 
   /* =================== STATE (accounts, remove list, profiles) =================== */
-  function emptyState() { return { accounts: {}, removed: {}, profiles: {}, owner: null }; }
+  function emptyState() { return { accounts: {}, removed: {}, profiles: {}, owner: null, site: null }; }
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem(LS_STATE));
-      if (s && typeof s === 'object') return { accounts: s.accounts || {}, removed: s.removed || {}, profiles: s.profiles || {}, owner: s.owner || null };
+      if (s && typeof s === 'object') return { accounts: s.accounts || {}, removed: s.removed || {}, profiles: s.profiles || {}, owner: s.owner || null, site: (s.site && typeof s.site === 'object') ? s.site : null };
     } catch (e) {}
     return emptyState();
   }
@@ -2365,6 +2454,7 @@ const ACCOUNTS = [
     for (k in (t.removed || {})) { if (t.removed[k]) s.removed[decKey(k)] = 1; }
     for (k in (t.profiles || {})) { v = t.profiles[k]; if (v && typeof v === 'object') s.profiles[decKey(k)] = v; }
     if (t.owner && typeof t.owner === 'object') s.owner = t.owner;
+    if (t.site && typeof t.site === 'object') s.site = t.site;
     state = s; saveState(); changed();
   }
   function dbFlush() {
@@ -2471,6 +2561,9 @@ const ACCOUNTS = [
       var ok = makeHash(email, pw) === a.hash;
       if (!ok) { var t = trimEnd(pw); if (t && t !== pw) ok = makeHash(email, t) === a.hash; }   // shesh-er extra space trim kore abar try
       if (!ok) { failAttempt('password thik nai'); return; }
+      /* Dashboard closed thakle Owner chhara kew login korte parbe na (bhul-password count hobe na) */
+      var stc = siteState();
+      if (stc.closedOn && a.role !== 'owner') { writeLock({ n: 0, until: 0 }); $('nsdLoginPw').value = ''; setHint(''); setErr(stc.closedMsg); updateLoginUi(); return; }
       writeLock({ n: 0, until: 0 }); setHint(''); setErr('');
       $('nsdLoginPw').value = '';
       writeSession(email);
@@ -2530,6 +2623,7 @@ const ACCOUNTS = [
     var slb = $('sidebarLogoutBtn'); if (slb) slb.classList.toggle('hidden', !u);   /* Navigation Menu er Logout: login thakle-i dekhay */
     if (!u) { var open = $('nsdProfileSheet'); if (open) open.style.display = 'none'; }
     else if ($('nsdProfileSheet').style.display !== 'none') fillProfile(false);
+    applySite();
   }
 
   /* =================== PROFILE (name, photo) =================== */
@@ -2555,12 +2649,13 @@ const ACCOUNTS = [
     var item = 'display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;border-radius:10px;background:transparent;font-size:12px;font-weight:800;cursor:pointer;text-align:left;';
     m.innerHTML =
       (isAdm(u) ? '<button type="button" data-mn="admin" style="' + item + 'color:#e2e8f0"><i class="fa-solid fa-user-shield" style="width:16px;color:#38bdf8"></i> Admin Panel</button>' : '') +
+      (isOwnerUser(u) ? '<button type="button" data-mn="site" style="' + item + 'color:#e2e8f0"><i class="fa-solid fa-power-off" style="width:16px;color:#fb7185"></i> Dashboard Control</button>' : '') +
       '<button type="button" data-mn="logout" style="' + item + 'color:#fda4af"><i class="fa-solid fa-right-from-bracket" style="width:16px"></i> Logout</button>';
     m.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-mn]'); m.querySelectorAll('[data-mn]').forEach(function (x) { x.style.background = x === b ? '#1e293b' : 'transparent'; }); });
     m.addEventListener('click', function (e) {
       var b = e.target.closest('[data-mn]'); if (!b) return;
       closeMenu();
-      if (b.getAttribute('data-mn') === 'admin') openAdmin(); else logout(true);
+      var act = b.getAttribute('data-mn'); if (act === 'admin') openAdmin(); else if (act === 'site') openSite(); else logout(true);
     });
     document.body.appendChild(m);
     document.addEventListener('click', onMenuOutside, true);
@@ -2796,6 +2891,85 @@ const ACCOUNTS = [
     setInterval(function () { changed(); }, 20000);   // file/config-er por role ba access bodlaleo dhore felbe
   }
 
+  /* =================== SITE CONTROL (sudhu primary Owner) ===================
+     Database-e save hoy:  /nsdAuth/site  =  { notice:{on,msg}, closed:{on,msg}, by, at }
+     1) Maintenance Notice : user-ra dhukte pare, upore notice banner dekhay.
+     2) Close Dashboard    : Owner chhara kew dhukte pare na; sobar screen-e closed message dekhay.
+     Control kora jay sudhu role === 'owner' (OWNER_EMAIL) — Admin/Incharge na. Save-er somoy Owner password lage. */
+  var DEF_NOTICE = 'এই মুহূর্তে ড্যাশবোর্ডে কাজ চলছে। সাময়িক অসুবিধার জন্য আমরা দুঃখিত।';
+  var DEF_CLOSED = 'ড্যাশবোর্ডটি সাময়িকভাবে বন্ধ আছে। অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন।';
+  function isOwnerUser(u) { return !!u && u.role === 'owner'; }
+  function siteState() {
+    var s = (state && state.site) || {}, n = s.notice || {}, c = s.closed || {};
+    return {
+      noticeOn: n.on === true, noticeMsg: String(n.msg || '').trim() || DEF_NOTICE,
+      closedOn: c.on === true, closedMsg: String(c.msg || '').trim() || DEF_CLOSED
+    };
+  }
+  function applySite() {
+    var u = user(), st = siteState(), owner = isOwnerUser(u), blocked = st.closedOn && !!u && !owner;
+    document.body.classList.toggle('nsd-site-closed', blocked);
+    var ov = $('nsdClosedOverlay');
+    if (ov) { ov.style.display = blocked ? 'flex' : 'none'; var cm = $('nsdClosedMsg'); if (cm) cm.textContent = st.closedMsg; }
+    var gn = $('nsdGateClosed');
+    if (gn) { gn.style.display = (st.closedOn && !u) ? 'block' : 'none'; gn.textContent = st.closedMsg; }
+    var b = $('nsdMaintBanner');
+    if (b) {
+      var ownerClosed = owner && st.closedOn, show = !!u && !blocked && (st.noticeOn || ownerClosed);
+      b.style.display = show ? 'flex' : 'none';
+      if (show) {
+        b.className = 'nsd-maint' + (ownerClosed ? ' closed' : '');
+        $('nsdMaintText').textContent = ownerClosed ? 'ড্যাশবোর্ড এখন ইউজারদের জন্য বন্ধ আছে — শুধু আপনি (Owner) এটি দেখতে পাচ্ছেন।' : st.noticeMsg;
+        $('nsdMaintIcon').className = 'fa-solid ' + (ownerClosed ? 'fa-lock' : 'fa-screwdriver-wrench');
+      }
+    }
+    document.querySelectorAll('[data-owner-strict]').forEach(function (el) { el.style.display = owner ? '' : 'none'; });
+    var pill = $('nsdSidePill');
+    if (pill) {
+      pill.textContent = st.closedOn ? 'CLOSED' : st.noticeOn ? 'NOTICE' : 'LIVE';
+      pill.className = 'px-2 py-0.5 rounded-full text-[9px] font-black ' + (st.closedOn ? 'bg-rose-900 text-rose-200' : st.noticeOn ? 'bg-amber-900 text-amber-200' : 'bg-slate-800 text-slate-400');
+    }
+    renderSiteStatus();
+  }
+  function renderSiteStatus() {
+    var el = $('nsdSiteStatus'); if (!el) return; var st = siteState();
+    el.className = 'nsd-sitestat ' + (st.closedOn ? 'closed' : st.noticeOn ? 'notice' : 'live');
+    el.textContent = st.closedOn ? 'CLOSED — ইউজাররা ঢুকতে পারছে না' : st.noticeOn ? 'NOTICE ON — ইউজারদের উপরে নোটিশ দেখাচ্ছে' : 'LIVE — সব স্বাভাবিক';
+  }
+  function openSite() {
+    if (!isOwnerUser(user())) { toast('Only the Owner can use Dashboard Control'); return; }
+    closeProfile(); closeAdmin();
+    var st = siteState();
+    $('nsdSiteNoticeOn').checked = st.noticeOn; $('nsdSiteNoticeMsg').value = st.noticeMsg;
+    $('nsdSiteClosedOn').checked = st.closedOn; $('nsdSiteClosedMsg').value = st.closedMsg;
+    $('nsdSitePw').value = ''; $('nsdSiteErr').textContent = '';
+    renderSiteStatus();
+    $('nsdSiteCtl').style.display = 'flex';
+  }
+  function closeSite() { var p = $('nsdSiteCtl'); if (p) p.style.display = 'none'; }
+  function saveSite() {
+    var err = $('nsdSiteErr'); err.textContent = '';
+    if (!isOwnerUser(user())) { err.textContent = 'Only the Owner can change this.'; return; }
+    var pw = $('nsdSitePw').value, a = accountsMap()[OWNER];
+    var ok = !!(a && pw && (makeHash(OWNER, pw) === a.hash || makeHash(OWNER, trimEnd(pw)) === a.hash));
+    if (!ok) { err.textContent = 'Owner password thik nai.'; return; }
+    var nOn = $('nsdSiteNoticeOn').checked, cOn = $('nsdSiteClosedOn').checked;
+    var nMsg = $('nsdSiteNoticeMsg').value.trim().slice(0, 300), cMsg = $('nsdSiteClosedMsg').value.trim().slice(0, 300);
+    if (nOn && !nMsg) { err.textContent = 'Notice message likhun.'; return; }
+    if (cOn && !cMsg) { err.textContent = 'Closed message likhun.'; return; }
+    function commit() {
+      var rec = { notice: { on: nOn, msg: nMsg }, closed: { on: cOn, msg: cMsg }, by: OWNER, at: Date.now() };
+      state.site = rec; saveState(); applySite();
+      dbSet('/site', rec);
+      $('nsdSitePw').value = ''; closeSite();
+      toast(cOn ? 'Dashboard closed for users' : nOn ? 'Maintenance notice is live' : 'Dashboard is live (normal)');
+    }
+    if (cOn && !siteState().closedOn) {
+      ask({ title: 'Close dashboard?', icon: 'fa-lock', tone: 'danger', ok: 'Close it',
+        html: '<div class="nsd-hint" style="font-size:12px;line-height:1.6">Owner chhara sob user sathe sathe block hoye jabe ar closed message dekhbe. Apni pore ei option off korle abar khule jabe.</div>' }, commit);
+    } else commit();
+  }
+
   /* =================== public API =================== */
   window.NSD_AUTH = {
     user: user,
@@ -2805,6 +2979,7 @@ const ACCOUNTS = [
     focusLogin: function () { var e = $('nsdLoginEmail'); if (e) e.focus(); },
     toggleMenu: toggleMenu, openProfile: openProfile, closeProfile: closeProfile, saveProfile: saveProfile, removePhoto: removePhoto,
     openAdmin: openAdmin, closeAdmin: closeAdmin, adminDone: adminDone,
+    openSite: openSite, closeSite: closeSite, saveSite: saveSite,
     togglePw: togglePw, copyEl: copyEl, makeLine: makeLine, saveOwner: saveOwner, closeHash: closeHash,
     _t: { sha256: sha256, encKey: encKey, decKey: decKey, accountsMap: accountsMap, makeHash: makeHash }
   };
