@@ -742,9 +742,19 @@ select.nsd-input{appearance:auto}
 .nsd-code{display:block;word-break:break-all;background:#0b1329;border:1px dashed #334155;border-radius:10px;padding:10px;font:600 11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#7dd3fc;margin-top:6px;user-select:all}
 .nsd-x{background:none;border:0;color:#94a3b8;font-size:18px;cursor:pointer;padding:2px 8px}
 /* ===== SITE CONTROL (maintenance notice + full close) ===== */
-.nsd-maint{position:sticky;top:0;z-index:30;display:none;align-items:center;justify-content:center;gap:10px;padding:10px 14px;background:linear-gradient(90deg,#78350f,#b45309);color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:1.55;border-bottom:1px solid rgba(245,158,11,.35);flex-shrink:0}
-.nsd-maint.closed{background:linear-gradient(90deg,#4c0519,#9f1239);border-bottom-color:rgba(251,113,133,.35)}
-.nsd-maint i{font-size:14px;flex-shrink:0}
+/* Maintenance bar: existing Notice ticker-er (notice-bar / notice-ticker-*) same style + same right->left motion, amber color */
+.notice-bar.nsd-maint{position:sticky;top:8px;z-index:30;margin:8px 12px 0;flex-shrink:0;border-color:rgba(245,158,11,.38);box-shadow:0 8px 30px -12px rgba(245,158,11,.55),inset 0 1px 0 rgba(255,255,255,.06);background:linear-gradient(110deg,rgba(217,119,6,.26) 0%,rgba(19,29,54,.94) 38%,rgba(19,29,54,.94) 100%)}
+.notice-bar.nsd-maint::before{background:linear-gradient(180deg,#fbbf24,#f59e0b,#ea580c)}
+.nsd-maint .notice-badge{background:rgba(245,158,11,.18);border-color:rgba(251,191,36,.4);color:#fde68a}
+.nsd-maint .notice-bell{background:linear-gradient(135deg,#f59e0b,#ea580c)}
+.nsd-maint .notice-bell::after{border-color:rgba(251,191,36,.7)}
+.notice-bar.nsd-maint.closed{border-color:rgba(251,113,133,.4);box-shadow:0 8px 30px -12px rgba(244,63,94,.55),inset 0 1px 0 rgba(255,255,255,.06);background:linear-gradient(110deg,rgba(225,29,72,.28) 0%,rgba(19,29,54,.94) 38%,rgba(19,29,54,.94) 100%)}
+.notice-bar.nsd-maint.closed::before{background:linear-gradient(180deg,#fb7185,#e11d48,#9f1239)}
+.nsd-maint.closed .notice-badge{background:rgba(244,63,94,.18);border-color:rgba(251,113,133,.4);color:#fecdd3}
+.nsd-maint.closed .notice-bell{background:linear-gradient(135deg,#f43f5e,#be123c)}
+.nsd-maint.closed .notice-bell::after{border-color:rgba(251,113,133,.7)}
+.nsd-maint .notice-item-ico{background:rgba(245,158,11,.16);color:#fbbf24}
+.nsd-maint.closed .notice-item-ico{background:rgba(244,63,94,.16);color:#fb7185}
 #nsdClosedOverlay{position:fixed;inset:0;z-index:99;background:radial-gradient(circle at 50% 0%,#14213d 0%,#0b1329 62%);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;overflow-y:auto}
 .nsd-closed-card{width:100%;max-width:440px;text-align:center;background:#131d36;border:1px solid #1e293b;border-radius:22px;padding:34px 24px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .nsd-closed-ic{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:28px;background:rgba(120,53,15,.35);color:#fbbf24;border:1px solid rgba(180,83,9,.45)}
@@ -772,7 +782,7 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
 </div>
 
 <!-- MAINTENANCE BANNER (Owner "Maintenance Notice" on korle sob logged-in user-er upore dekhay) -->
-<div id="nsdMaintBanner" class="nsd-maint" style="display:none" role="status"><i id="nsdMaintIcon" class="fa-solid fa-screwdriver-wrench"></i><span id="nsdMaintText"></span></div>
+<div id="nsdMaintBanner" class="notice-bar nsd-maint" style="display:none" role="status"><div class="notice-badge"><span class="notice-bell"><i id="nsdMaintBell" class="fa-solid fa-screwdriver-wrench"></i></span><span class="notice-badge-text" id="nsdMaintBadge">Maintenance</span></div><div class="notice-ticker-wrap"><div class="notice-ticker-track" id="nsdMaintTrack"></div></div></div>
 <!-- CLOSED SCREEN (Owner "Close Dashboard" on korle Owner chhara sobar jonno puro page cover kore) -->
 <div id="nsdClosedOverlay" role="alertdialog" aria-live="assertive">
   <div class="nsd-closed-card">
@@ -2906,6 +2916,16 @@ const ACCOUNTS = [
       closedOn: c.on === true, closedMsg: String(c.msg || '').trim() || DEF_CLOSED
     };
   }
+  function fitMaint() {
+    var tr = $('nsdMaintTrack'); if (!tr || !tr.parentElement) return;
+    var c = tr.parentElement.clientWidth, w = tr.offsetWidth; if (!c || !w) return;
+    if (tr.dataset.tkC !== String(c) || tr.dataset.tkW !== String(w)) {
+      tr.dataset.tkC = String(c); tr.dataset.tkW = String(w);
+      tr.style.setProperty('--tk-to', c + 'px');
+      tr.style.animationDuration = Math.max(6, Math.round((w + c) / 130)) + 's';
+    }
+  }
+  window.addEventListener('resize', fitMaint);
   function applySite() {
     var u = user(), st = siteState(), owner = isOwnerUser(u), blocked = st.closedOn && !!u && !owner;
     document.body.classList.toggle('nsd-site-closed', blocked);
@@ -2918,9 +2938,17 @@ const ACCOUNTS = [
       var ownerClosed = owner && st.closedOn, show = !!u && !blocked && (st.noticeOn || ownerClosed);
       b.style.display = show ? 'flex' : 'none';
       if (show) {
-        b.className = 'nsd-maint' + (ownerClosed ? ' closed' : '');
-        $('nsdMaintText').textContent = ownerClosed ? 'ড্যাশবোর্ড এখন ইউজারদের জন্য বন্ধ আছে — শুধু আপনি (Owner) এটি দেখতে পাচ্ছেন।' : st.noticeMsg;
-        $('nsdMaintIcon').className = 'fa-solid ' + (ownerClosed ? 'fa-lock' : 'fa-screwdriver-wrench');
+        var ttl = ownerClosed ? 'Closed' : 'Maintenance';
+        var txt = ownerClosed ? 'ড্যাশবোর্ড এখন ইউজারদের জন্য বন্ধ আছে — শুধু আপনি (Owner) এটি দেখতে পাচ্ছেন।' : st.noticeMsg;
+        var ico = ownerClosed ? 'fa-lock' : 'fa-screwdriver-wrench';
+        b.className = 'notice-bar nsd-maint' + (ownerClosed ? ' closed' : '');
+        $('nsdMaintBell').className = 'fa-solid ' + ico; $('nsdMaintBadge').textContent = ttl;
+        var tr = $('nsdMaintTrack'), sig = ttl + '|' + txt;
+        if (tr.dataset.sig !== sig) {   /* sudhu message bodlale rebuild, nahole scroll restart hoy */
+          tr.dataset.sig = sig; tr.dataset.tkC = '';
+          tr.innerHTML = '<span class="notice-item"><span class="notice-item-ico"><i class="fa-solid ' + ico + '"></i></span><span class="notice-item-title">' + esc(ttl) + '</span><span class="notice-item-msg">' + esc(String(txt).replace(/\s+/g, ' ')) + '</span></span>';
+        }
+        fitMaint();
       }
     }
     document.querySelectorAll('[data-owner-strict]').forEach(function (el) { el.style.display = owner ? '' : 'none'; });
