@@ -1248,6 +1248,7 @@ try {
 <i class="fa-solid fa-chart-pie text-emerald-400"></i> ALL HUB CURRENT DAY KPI REPORT
                     </h2>
 <p class="text-[10px] md:text-xs text-slate-400 font-semibold mt-1">Separate Morning &amp; Closing KPI for all hubs — <span id="currentDayKpiReportDate">-</span></p>
+<p id="kpiMissingNote" class="text-[10px] md:text-xs font-bold text-amber-400 mt-1" style="display:none"></p>
 </div>
 <div class="flex items-center gap-2">
 <button class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[10px] font-black" id="btnKpiPreviousDay" onclick="toggleKpiPreviousDay()" type="button">
@@ -6493,6 +6494,13 @@ const ACCOUNTS = [
             const targetISO = kpiReportTargetISO || getTodayISO();
             const rows = getCurrentDayKpiRows(targetISO);
             const currentRows = rows.filter(r => r.isCurrent);
+            // Je hub-er aajker report nei, tar naam dekhano (ta-i 'faka' dekhar karon)
+            const missingNote = document.getElementById('kpiMissingNote');
+            if (missingNote) {
+                const missing = rows.filter(r => !r.isCurrent).map(r => String(r.hub.name || 'HUB').replace(/\s*Hub$/i, '').trim());
+                missingNote.style.display = missing.length ? '' : 'none';
+                missingNote.textContent = missing.length ? ('Aajker report nei: ' + missing.join(', ') + ' (tarikh niye report lekhun)') : '';
+            }
             const sum = key => currentRows.reduce((a, r) => a + (Number(r[key]) || 0), 0);
             const totalParcels = sum('totalParcels');
             const totalAssign = sum('totalAssign');
