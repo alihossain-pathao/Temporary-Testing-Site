@@ -4391,8 +4391,15 @@ const ACCOUNTS = [
                     previousRatioOverrides[id] = d.previousRatioOverrides || {};
                     if (id === currentActiveHubId) touchedActive = true;
                 });
-                Object.keys(hubReportsData).forEach(id => { if (!seen.has(id)) delete hubReportsData[id]; });
-                Object.keys(hubReportHistory).forEach(id => { if (!seen.has(id)) delete hubReportHistory[id]; });
+                // FIX: cloud-e na thaka report-er local data ekhon-i mucche na. Local-e thakle prothombar cloud-e abar pathay.
+                const __repushed = window.__nsdRepushed || (window.__nsdRepushed = {});
+                Object.keys(hubReportsData).forEach(id => {
+                    if (seen.has(id)) return;
+                    const local = hubReportsData[id];
+                    if (local && Object.keys(local).length && !__repushed[id]) { __repushed[id] = 1; cloudSyncHubReport(id); return; }
+                    delete hubReportsData[id];
+                });
+                Object.keys(hubReportHistory).forEach(id => { if (!seen.has(id) && !__repushed[id]) delete hubReportHistory[id]; });
                 Object.keys(previousRatioOverrides).forEach(id => { if (!seen.has(id)) delete previousRatioOverrides[id]; });
                 saveLocalState();
                 if (touchedActive && document.getElementById('hubReportView') && !document.getElementById('hubReportView').classList.contains('hidden') && !isEditingInside('hubReportView')) {
