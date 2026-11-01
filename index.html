@@ -11253,5 +11253,51 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   setTimeout(sync, 1200); setTimeout(sync, 4800);                                              // page load-er por ekbar thik kore nei
 })();
 </script>
+<script>
+/* DEBUG: sob hub-er report tothya alert-e dekhay ebong clipboard-e copy kore.
+   Trigger: (1) Ctrl+Alt+D (keyboard layout jai hok, e.code diye dhora hoy)
+            (2) URL-e ?debug=1 thakle page khular 4 second por auto-dekhabe */
+(function () {
+  async function runDebug() {
+    try {
+      const lines = ['today=' + getTodayISO()];
+      const hubs = (typeof hubList !== 'undefined' && Array.isArray(hubList)) ? hubList : [];
+      lines.push('hubs=' + hubs.length);
+      for (const h of hubs) {
+        const L = (typeof hubReportsData !== 'undefined') ? hubReportsData[h.id] : null;
+        const n = L ? Object.keys(L).length : 0;
+        let cloud = '?';
+        try {
+          // Cloud read atke gele (offline / sign-in na thakle) 3 sec pore chhere debug alert dekhabe
+          cloud = await Promise.race([
+            cloudDb.doc('hubReports/' + h.id).get().then(d => d.exists),
+            new Promise(res => setTimeout(() => res('timeout'), 3000))
+          ]);
+        } catch (err) { cloud = 'err'; }
+        lines.push([
+          h.name,
+          'id=' + h.id,
+          'localKeys=' + n,
+          'date=' + (L && L.m_reportDate),
+          'iso=' + (L ? parseReportDateToISO(L.m_reportDate) : ''),
+          'delivered=' + (L && L.delivered),
+          'cloud=' + cloud
+        ].join(' | '));
+      }
+      const text = lines.join('\n');
+      try { await navigator.clipboard.writeText(text); } catch (_) {}
+      alert(text + '\n\n(Clipboard-e copy hoyeche - eta paste kore pathao)');
+    } catch (err) {
+      alert('debug error: ' + err);
+    }
+  }
+  window.__nsdDebug = runDebug;
+  document.addEventListener('keydown', function (e) {
+    const isD = e.code === 'KeyD' || e.key === 'd' || e.key === 'D';
+    if (e.ctrlKey && e.altKey && isD) { e.preventDefault(); runDebug(); }
+  }, true);
+  if (/[?&]debug=1/.test(location.search)) setTimeout(runDebug, 4000);
+})();
+</script>
 </body>
 </html>
