@@ -2,9 +2,6 @@
 
 <html class="app-booting" lang="en">
 <head>
-<script>/* GitHub Pages 404.html redirect: /?/Morning-Tasks -> /Morning-Tasks */
-(function(){var l=location;if(l.search.slice(0,2)==='?/'){var q=l.search.slice(2).split('&').join('&').replace(/~and~/g,'&');var i=q.indexOf('&');var path=i<0?q:q.slice(0,i);try{history.replaceState(null,'',l.pathname.replace(/[^\/]*$/,'')+path+l.hash);}catch(e){}}})();</script>
-
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>Narsingdi Cluster &amp; Hub Dashboard</title>
@@ -11001,17 +10998,15 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     } catch (e) { return ''; }
   }
   function urlAt(d) {                                   // d = koyta layer khola (0 = shudhu tab)
-    if (!PATHOK) return undefined;
     if (String(location.hash || '').toLowerCase() === '#hash') return undefined;   // hidden #hash box ke nosto korbo na
     var top = d > 0 ? stack[d - 1] : null, parts = [];
     if (curTab !== 'overview' || top) parts.push(slug(tabLabel(curTab)));
     if (top) { parts.push(NAMES[top] || top); var sub = subOf(top); if (sub) parts.push(sub); }
-    return BASE + parts.join('/');
+    return location.pathname + location.search + (parts.length ? '#' + parts.join('/') : '');
   }
   function tabFromHash() {
     var raw = '';
-    try { raw = decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length) : ''); } catch (e) {}
-    if (!raw) raw = String(location.hash || '').replace(/^#\/?/, '');
+    try { raw = decodeURIComponent(String(location.hash || '').replace(/^#\/?/, '')); } catch (e) {}
     raw = raw.split('/')[0];
     var h = raw.replace(/\.html?$/i, '').toLowerCase().replace(/[\s_-]+/g, '');
     if (!h || h === 'hash' || h === 'index') return null;
@@ -11071,6 +11066,11 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     if (dead) return;
     if (ignorePop > 0) { ignorePop--; fix(); return; }   // amader nijer history.go() er pore
     var s = e.state && e.state[KEY] === 1 ? e.state : { d: 0, tab: null };
+    if (!(e.state && e.state[KEY] === 1)) {               // user nijer hate URL-e tab-er naam likhle / link e click korle
+      var ht = tabFromHash();
+      if (!ht && !location.hash) ht = 'overview';
+      if (ht) s = { d: 0, tab: ht };
+    }
     while (stack.length > s.d) {                          // Back: upor theke bondho
       var id = stack[stack.length - 1], l = BY[id];
       stack.pop(); fwd.push(id);
@@ -11116,6 +11116,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     safe(function () { history.replaceState(st(0), '', urlAt(0)); });
     /* link-e #Morning-Tasks thakle sei tab khulbe (tab list load hote deri hole abar try) */
     function openFromHash() { var t = wantedTab || tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } }
+    window.addEventListener('hashchange', function () { var t = tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } });
     openFromHash(); setTimeout(openFromHash, 600); setTimeout(function () { openFromHash(); wantedTab = null; }, 2000);
 
     var mo = new MutationObserver(schedule);
@@ -11328,14 +11329,12 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
 </script>
 <script id="nsdTabUrl">
 /* ===== URL sync (bhorsa layer): nav script jeta URL chay oita-i address bar-e boshay;
-   nav script na thakle/fail korle shudhu tab-er naam boshay. ===== */
+   nav script fail korle shudhu tab-er naam (#Morning-Tasks) boshay. ===== */
 (function () {
-  var BASE = (location.pathname.indexOf('/NSD-Cluster-Ops-Dashboard/') === 0) ? '/NSD-Cluster-Ops-Dashboard/' : location.pathname.replace(/[^\/]*$/, '');
-  var HTTP = /^https?:$/.test(location.protocol);
-  function norm(x) { return String(x || '').toLowerCase().replace(/\.html?$/, '').replace(/[\s_\-\/]+/g, ''); }
+  function norm(x) { return String(x || '').toLowerCase().replace(/[\s_\-\/]+/g, ''); }
   var initial = '';
-  try { initial = norm(decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length).split('/')[0] : '')); } catch (e) {}
-  var born = Date.now(), initDone = !initial || initial === 'index';
+  try { initial = norm(decodeURIComponent(String(location.hash || '').replace(/^#\/?/, '')).split('/')[0]); } catch (e) {}
+  var born = Date.now(), initDone = !initial || initial === 'hash';
 
   function currentTab() {
     var lb = document.getElementById('viewLeaderboard');
@@ -11350,23 +11349,17 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   function sync() {
     if (String(location.hash).toLowerCase() === '#hash') return;       // hidden #hash box
-    if (location.search.slice(0, 2) === '?/') return;                    // 404 redirect cholche
     var t = currentTab(), label = labelOf(t);
     if (!initDone) {                                                     // link theke ashle age oi tab khulte dao
       if (norm(label) === initial) initDone = true;
       else if (Date.now() - born < 4500) return;
       else initDone = true;
     }
-    var slug = encodeURIComponent(String(label).trim().replace(/\s+/g, '-'));
     var want = null;
     try { if (window.__nsdWantUrl) want = window.__nsdWantUrl(); } catch (e) {}
-    if (!want) want = t === 'overview' ? BASE : BASE + slug;
-    if (HTTP) {
-      if (location.pathname !== want) { try { history.replaceState(history.state, '', want + location.search); return; } catch (e) {} }
-      else return;
-    }
-    var h = '#' + slug;                                                  // file:// ba sandbox: #Naam
-    if (t !== 'overview' && location.hash !== h) { try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) {} }
+    if (!want) want = location.pathname + location.search + (t === 'overview' ? '' : '#' + encodeURIComponent(String(label).trim().replace(/\s+/g, '-')));
+    var now = location.pathname + location.search + location.hash;
+    if (now !== want) { try { history.replaceState(history.state, '', want); } catch (e) {} }
   }
   setInterval(sync, 300);
   window.addEventListener('popstate', function () { setTimeout(sync, 80); });
