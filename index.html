@@ -4645,12 +4645,18 @@ const ACCOUNTS = [
         }
 
         function closeReportView() {
+            const __wasPrevMode = previousDayReportMode;
             if (previousDayReportMode) {
                 previousDayReportMode = false;
                 previousDayReturnSnapshot = null;
                 setReportFormViewOnly(false);
                 const previousBtn = document.querySelector('#btnPreviousDay span');
                 if (previousBtn) previousBtn.textContent = 'Previous Day';
+            }
+            // FIX: report bondho korar age, form-e ja dekhachhe (jemon report-er tarikh) tai save hobe.
+            // Ekhon saved tarikh ar screen-er tarikh sob somoy ek thakbe. Previous Day view-te thakle save hobe na.
+            if (!__wasPrevMode && currentActiveHubId && hubReportsData[currentActiveHubId]) {
+                try { saveCurrentHubReportData(); } catch (e) { console.warn('report save on close failed', e); }
             }
             document.getElementById('hubReportView').classList.add('hidden');
             document.getElementById('hubDashboardView').classList.remove('hidden');
