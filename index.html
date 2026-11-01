@@ -11149,7 +11149,12 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       });
     }
     watch();
-    new MutationObserver(function () { var a = $('agentPerformancePageModal'); if (a && !a.__navW) watch(); }).observe(document.body, { childList: true, subtree: true });   // sudhu notun popup toiri holei
+    new MutationObserver(function () {
+      // FIX: Agent Performance popup prothombar toiri hoy 'hidden' chhaara, tai open-er attribute change kono observer dhorte parto na.
+      // Tai notun layer node paoa gele watch korar pore reconcile chalai, jate URL-e naam ar Back-er history thik thake.
+      var a = $('agentPerformancePageModal');
+      if (a && !a.__navW) { watch(); if (isOpen(BY.agentPerformancePageModal)) schedule(); }
+    }).observe(document.body, { childList: true, subtree: true });   // sudhu notun popup toiri holei
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
