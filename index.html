@@ -4322,6 +4322,7 @@ const ACCOUNTS = [
                 writeHubSnapshotCache(next);
                 saveLocalState();
                 rerenderAll();
+                if (Object.keys(hubReportsData).length) repairAllHubSummaries(false);   // FIX: sob hub ekbar thik hobe
             }, err => {
                 console.error('hubs listener failed', err);
                 hubCloudStateReady = false;
@@ -5327,10 +5328,8 @@ const ACCOUNTS = [
             document.getElementById('att_absentList').value = 0;
             document.getElementById('att_onTraining').value = 0;
 
+            // Empty row auto-show hobe na: Add Row click korle tokhon-i row add hobe
             currentAttendanceRows = [];
-            for (let i = 0; i < totalDA; i++) {
-                currentAttendanceRows.push({ id: '', name: '', remarks: '' });
-            }
 
             renderAttendanceRows();
             calculateAttendanceFormulas();
@@ -5604,16 +5603,23 @@ const ACCOUNTS = [
             const hub = hubList.find(h => h.id === hubId);
             if (!hub) return;
 
-            const totalVol = parseFloat(document.getElementById('m_totalParcels')?.innerText) || 0;
+            // FIX: DOM-e value na thakle (report page open na thakle) saved data theke same hisab kore nei
+            const num = k => parseFloat(data[k]) || 0;
+            // DOM value shudhu tkhnoi nebo jokhon ei hub-er report page khola; onno hub-er jonno DOM na
+            const domNum = id => (hubId === currentActiveHubId) ? (parseFloat(document.getElementById(id)?.innerText) || 0) : 0;
+            const derivedTotal = Math.max(0, num('m_prevHold') + num('m_reattemptReq') + num('m_recParcel') - num('m_areaChange'));
+            const derivedHold = num('officeHoldReason') + num('capShortage') + num('fieldHold');
+            const derivedOnWay = Math.max(0, num('prevHold') + num('recParcel') - num('areaChange') - num('officeHoldReason') - num('capShortage'));
+            const totalVol = domNum('m_totalParcels') || derivedTotal;
             const delivered = parseFloat(data['delivered']) || 0;
-            const totalHold = parseFloat(document.getElementById('totalHold')?.innerText) || 0;
+            const totalHold = domNum('totalHold') || derivedHold;
             const collection = parseFloat(data['totalCollection']) || 0;
             const daPresent = parseFloat(data['m_presentDA']) || 0;
             const daTotal = parseFloat(data['m_totalDA']) || hub.daTotal || daPresent;
 
             // Same base the Closing Report uses for its Delivered % (Assign For Delivery),
             // so the hub card and the report always show the same whole-number ratio.
-            const onTheWay = parseFloat(document.getElementById('onTheWay')?.innerText) || 0;
+            const onTheWay = domNum('onTheWay') || derivedOnWay;
 
             hub.totalVolume = totalVol;
             hub.onTheWay = onTheWay;
@@ -5628,6 +5634,45 @@ const ACCOUNTS = [
             renderDashboard();
             cloudSyncHub(hubId);
         }
+
+        /* ---- Sob hub-er summary ek-saathe thik kora (saved report data theke, DOM chhara) ---- */
+        function applySavedSummaryToHub(hub, data) {
+            const num = k => parseFloat(data[k]) || 0;
+            const delivered = num('delivered');
+            const onWay = Math.max(0, num('prevHold') + num('recParcel') - num('areaChange') - num('officeHoldReason') - num('capShortage'));
+            const daPresent = num('m_presentDA');
+            hub.totalVolume = Math.max(0, num('m_prevHold') + num('m_reattemptReq') + num('m_recParcel') - num('m_areaChange'));
+            hub.onTheWay = onWay;
+            hub.delivered = delivered;
+            hub.totalHold = num('officeHoldReason') + num('capShortage') + num('fieldHold');
+            hub.collection = num('totalCollection');
+            hub.daPresent = daPresent;
+            hub.daTotal = num('m_totalDA') || hub.daTotal || daPresent;
+            hub.deliveryRate = onWay > 0 ? Math.round((delivered / onWay) * 100) + '%' : '0%';
+        }
+        let summaryRepairRunning = false;
+        // force=false: ek-bar-i cholbe (localStorage flag). force=true: console theke jekono somoy cholte parbe.
+        function repairAllHubSummaries(force) {
+            const FLAG = 'nsdSummaryRepair_v1';
+            try { if (!force && localStorage.getItem(FLAG)) return 0; } catch (e) {}
+            if (summaryRepairRunning) return 0;
+            summaryRepairRunning = true;
+            let fixed = 0;
+            try {
+                hubList.forEach(hub => {
+                    const data = hubReportsData[hub.id];
+                    if (!data || !Object.keys(data).length) return;
+                    applySavedSummaryToHub(hub, data);
+                    cloudSyncHub(hub.id, hub);
+                    fixed++;
+                });
+                renderDashboard();
+                renderLeaderboard();
+                if (!force) { try { localStorage.setItem(FLAG, new Date().toISOString()); } catch (e) {} }
+            } finally { summaryRepairRunning = false; }
+            return fixed;
+        }
+        window.repairAllHubSummaries = repairAllHubSummaries;
 
         /* DAILY / WEEKLY / MONTHLY / CUSTOM REPORT SUMMARY */
         function getTodayISO() {
