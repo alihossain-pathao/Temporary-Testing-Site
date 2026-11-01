@@ -10971,7 +10971,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   function safe(f) { try { return f(); } catch (e) { dead = true; console.warn('BackNav off:', e); } }
   /* ---- URL-e tab + page/popup-er naam (jemon /Morning-Tasks ba /Overview/Ageing-Report/Delivery-Summary) ---- */
   var NAMES = {
-    hubReportView: 'Hub-Report', attendanceReportView: 'Attendance-Report', inventoryReportView: 'Inventory-Report',
+    hubReportView: 'Morning-Closing-Report', attendanceReportView: 'Attendance-Report', inventoryReportView: 'Inventory-Report',
     ageingReportView: 'Ageing-Report', excelImportReportView: 'Excel-Import-Report',
     hubSummaryModal: 'Hub-Summary', clusterSummaryModal: 'Cluster-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
     agentPerformancePageModal: 'Agent-Performance', ageingConsignmentModal: 'Ageing-Consignment', inventoryClearConfirm: 'Clear-Inventory',
@@ -10997,11 +10997,25 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       return b ? slug(b.textContent.replace(/[^\w\s\u00C0-\uFFFF\-›×]/g, ' ').replace(/[›×]/g, ' ')) : '';
     } catch (e) { return ''; }
   }
+  /* je report / popup kono hub-er jonno khole, tar hub-er naam */
+  var HUBFN = { hubReportView: 'generateReport', attendanceReportView: 'generateAttendanceReport', inventoryReportView: 'generateInventoryReport',
+                hubSummaryModal: 'openHubSummaryModal', agentPerformancePageModal: 'openAgentPerformanceReport' };
+  function hubOf(id) {
+    try {
+      var f = HUBFN[id] && window[HUBFN[id]], a = f && f.__navArgs;
+      var name = a && a[1] ? String(a[1]) : '';
+      if (!name && a && a[0] && typeof hubsData !== 'undefined') name = String(a[0]);
+      return name ? slug(name) : '';
+    } catch (e) { return ''; }
+  }
   function urlAt(d) {                                   // d = koyta layer khola (0 = shudhu tab)
     if (String(location.hash || '').toLowerCase() === '#hash') return undefined;   // hidden #hash box ke nosto korbo na
     var top = d > 0 ? stack[d - 1] : null, parts = [];
-    if (curTab !== 'overview' || top) parts.push(slug(tabLabel(curTab)));
-    if (top) { parts.push(NAMES[top] || top); var sub = subOf(top); if (sub) parts.push(sub); }
+    if (curTab !== 'overview') parts.push(slug(tabLabel(curTab)));   // Overview-er naam URL-e lagbe na
+    if (top) {
+      var hub = hubOf(top); if (hub) parts.push(hub);                      // Hub-er naam (jemon Narsingdi-Shibpur-Hub)
+      parts.push(NAMES[top] || top); var sub = subOf(top); if (sub) parts.push(sub);
+    }
     return location.pathname + location.search + (parts.length ? '#' + parts.join('/') : '');
   }
   function tabFromHash() {
