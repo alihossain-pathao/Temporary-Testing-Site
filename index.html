@@ -11301,5 +11301,58 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   };
 })();
 </script>
+<script id="nsdTabUrl">
+/* ===== Tab-er naam URL-e dekhano: .../Morning-Tasks =====
+   Ei script alada kore kaj kore: tab jekhanei bodlak, URL-er sheshe tab-er naam boshe jabe. */
+(function () {
+  var BASE = (location.pathname.indexOf('/NSD-Cluster-Ops-Dashboard/') === 0) ? '/NSD-Cluster-Ops-Dashboard/' : location.pathname.replace(/[^\/]*$/, '');
+  var HTTP = /^https?:$/.test(location.protocol);
+  function norm(x) { return String(x || '').toLowerCase().replace(/\.html?$/, '').replace(/[\s_\-\/]+/g, ''); }
+  var initial = '';
+  try { initial = norm(decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length) : '')); } catch (e) {}
+  var born = Date.now(), initDone = !initial || initial === 'index';
+
+  function currentTab() {
+    var lb = document.getElementById('viewLeaderboard');
+    try { if (typeof currentGenericTabType !== 'undefined' && currentGenericTabType) return currentGenericTabType; } catch (e) {}
+    if (lb && !lb.classList.contains('hidden')) return 'leaderboard';
+    return 'overview';
+  }
+  function labelOf(t) {
+    if (t === 'overview') return 'Overview';
+    if (t === 'leaderboard') return 'Leaderboard';
+    try { var f = taskTabs.filter(function (x) { return x.type === t; })[0]; return f ? f.label : t; } catch (e) { return t; }
+  }
+  function sync() {
+    if (String(location.hash).toLowerCase() === '#hash') return;       // hidden #hash box
+    if (location.search.slice(0, 2) === '?/') return;                    // 404 redirect cholche
+    var t = currentTab(), label = labelOf(t);
+    if (!initDone) {                                                     // link theke ashle age oi tab khulte dao
+      if (norm(label) === initial) initDone = true;
+      else if (Date.now() - born < 4500) return;
+      else initDone = true;
+    }
+    var slug = String(label).trim().replace(/\s+/g, '-');
+    var want = t === 'overview' ? BASE : BASE + slug;
+    if (HTTP && location.pathname !== want) {
+      try { history.replaceState(history.state, '', want + location.search); return; } catch (e) {}
+    }
+    if (!HTTP || location.pathname !== want) {                           // path na parle (file:// ba sandbox) #Naam
+      var h = '#' + slug;
+      if (t !== 'overview' && location.hash !== h) { try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) {} }
+    }
+  }
+  function wrap() {
+    var f = window.switchDashboardTab;
+    if (typeof f !== 'function' || f.__urlSync) return;
+    var w = function () { var r = f.apply(this, arguments); setTimeout(sync, 0); return r; };
+    w.__urlSync = 1; for (var k in f) { try { w[k] = f[k]; } catch (e) {} }
+    window.switchDashboardTab = w;
+  }
+  wrap(); setInterval(function () { wrap(); sync(); }, 400);              // bhorsa: kono hook fail korleo URL thik hobe
+  window.addEventListener('popstate', function () { setTimeout(sync, 50); });
+  document.addEventListener('click', function () { setTimeout(sync, 60); }, true);
+})();
+</script>
 </body>
 </html>
