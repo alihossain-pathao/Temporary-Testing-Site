@@ -10971,8 +10971,18 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     try { return taskTabs.some(function (x) { return x.type === t; }); } catch (e) { return false; }
   }
   function st(d) { var s = { d: d, tab: curTab }; s[KEY] = 1; return s; }
-  /* ---- URL-e tab-er naam (#Morning-Tasks) ---- */
-  function slug(x) { return String(x || '').trim().replace(/\s+/g, '-'); }
+  function safe(f) { try { return f(); } catch (e) { dead = true; console.warn('BackNav off:', e); } }
+  /* ---- URL-e tab + page/popup-er naam (jemon /Morning-Tasks ba /Overview/Ageing-Report/Delivery-Summary) ---- */
+  var NAMES = {
+    hubReportView: 'Hub-Report', attendanceReportView: 'Attendance-Report', inventoryReportView: 'Inventory-Report',
+    ageingReportView: 'Ageing-Report', excelImportReportView: 'Excel-Import-Report',
+    hubSummaryModal: 'Hub-Summary', clusterSummaryModal: 'Cluster-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
+    agentPerformancePageModal: 'Agent-Performance', ageingConsignmentModal: 'Ageing-Consignment', inventoryClearConfirm: 'Clear-Inventory',
+    addSheetModal: 'Add-Sheet', manageTabsModal: 'Manage-Tabs', addHubModal: 'Add-Hub', removeHubModal: 'Remove-Hub',
+    visibilityModal: 'Visibility', ownerAccessModal: 'Owner-Access', pinModal: 'PIN', dashboardNotificationModal: 'Notifications',
+    sidebarOverlay: 'Menu', nsdProfileSheet: 'Profile', nsdAdminPanel: 'Admin', dailyOpsOverlay: 'Daily-Ops-Report', ncrSection: 'NCR'
+  };
+  function slug(x) { return encodeURIComponent(String(x || '').replace(/[\/\\?#%]+/g, ' ').trim().replace(/\s+/g, '-')); }
   function tabLabel(t) {
     if (t === 'overview') return 'Overview';
     if (t === 'leaderboard') return 'Leaderboard';
@@ -10980,16 +10990,30 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   var BASE = (location.pathname.indexOf('/NSD-Cluster-Ops-Dashboard/') === 0) ? '/NSD-Cluster-Ops-Dashboard/' : location.pathname.replace(/[^\/]*$/, '');
   var PATHOK = /^https?:$/.test(location.protocol);
-  function urlFor(t) {
+  /* report page-er bhitorer mode / tab (Pivot Table, Delivery Summary ...) */
+  function subOf(id) {
+    try {
+      var q = id === 'ageingReportView' ? '#ageingModeBar .ageing-mode-btn.active'
+            : id === 'excelImportReportView' ? '#excelImportReportView .import-report-tab.active' : null;
+      if (!q) return '';
+      var b = document.querySelector(q);
+      return b ? slug(b.textContent.replace(/[^\w\s\u00C0-\uFFFF\-›×]/g, ' ').replace(/[›×]/g, ' ')) : '';
+    } catch (e) { return ''; }
+  }
+  function urlAt(d) {                                   // d = koyta layer khola (0 = shudhu tab)
     if (!PATHOK) return undefined;
     if (String(location.hash || '').toLowerCase() === '#hash') return undefined;   // hidden #hash box ke nosto korbo na
-    return t === 'overview' ? BASE : BASE + slug(tabLabel(t));
+    var top = d > 0 ? stack[d - 1] : null, parts = [];
+    if (curTab !== 'overview' || top) parts.push(slug(tabLabel(curTab)));
+    if (top) { parts.push(NAMES[top] || top); var sub = subOf(top); if (sub) parts.push(sub); }
+    return BASE + parts.join('/');
   }
   function tabFromHash() {
     var raw = '';
     try { raw = decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length) : ''); } catch (e) {}
     if (!raw) raw = String(location.hash || '').replace(/^#\/?/, '');
-    var h = raw.replace(/\/+$/, '').replace(/\.html?$/i, '').toLowerCase().replace(/[\s_-]+/g, '');
+    raw = raw.split('/')[0];
+    var h = raw.replace(/\.html?$/i, '').toLowerCase().replace(/[\s_-]+/g, '');
     if (!h || h === 'hash' || h === 'index') return null;
     var all = ['overview', 'leaderboard'];
     try { taskTabs.forEach(function (x) { all.push(x.type); }); } catch (e) {}
@@ -10999,6 +11023,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     }
     return null;
   }
+  window.__nsdWantUrl = function () { return dead ? undefined : urlAt(stack.length); };
 
   /* ---- layer open/close holo -> history sync ---- */
   function reconcile() {
@@ -11014,7 +11039,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     if (opened.length) fwd.length = 0;               // notun action = Forward history muche jay
     var n = stack.length;
     if (n > curD) {
-      safe(function () { for (var k = curD + 1; k <= n; k++) history.pushState(st(k), '', urlFor(curTab)); });
+      safe(function () { for (var k = curD + 1; k <= n; k++) history.pushState(st(k), '', urlAt(k)); });
       curD = n;
     } else if (n < curD) {
       ignorePop++;
@@ -11027,7 +11052,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   function fix() {
     curD = stack.length;
     var s = history.state;
-    if (!s || s[KEY] !== 1 || s.d !== curD || s.tab !== curTab) safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); });
+    if (!s || s[KEY] !== 1 || s.d !== curD || s.tab !== curTab) safe(function () { history.replaceState(st(curD), '', urlAt(curD)); });
   }
   function closeLayer(l) {
     try { l.close(); } catch (e) { console.error(e); }
@@ -11070,8 +11095,8 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       var r = orig.apply(this, arguments);
       if (!silentTab && tab !== curTab && validTab(tab)) {
         curTab = tab;
-        if (stack.length) safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); });
-        else { safe(function () { history.pushState(st(curD), '', urlFor(curTab)); }); fwd.length = 0; }
+        if (stack.length) safe(function () { history.replaceState(st(curD), '', urlAt(curD)); });
+        else { safe(function () { history.pushState(st(curD), '', urlAt(0)); }); fwd.length = 0; }
       }
       return r;
     };
@@ -11088,9 +11113,9 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     } catch (e) {}
     hookTabs();
     LAYERS.forEach(function (l) { if (isOpen(l)) ign[l.id] = 1; });
-    safe(function () { history.replaceState(st(0), '', urlFor(curTab)); });
+    safe(function () { history.replaceState(st(0), '', urlAt(0)); });
     /* link-e #Morning-Tasks thakle sei tab khulbe (tab list load hote deri hole abar try) */
-    function openFromHash() { var t = wantedTab || tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); }); } }
+    function openFromHash() { var t = wantedTab || tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } }
     openFromHash(); setTimeout(openFromHash, 600); setTimeout(function () { openFromHash(); wantedTab = null; }, 2000);
 
     var mo = new MutationObserver(schedule);
@@ -11302,14 +11327,14 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
 })();
 </script>
 <script id="nsdTabUrl">
-/* ===== Tab-er naam URL-e dekhano: .../Morning-Tasks =====
-   Ei script alada kore kaj kore: tab jekhanei bodlak, URL-er sheshe tab-er naam boshe jabe. */
+/* ===== URL sync (bhorsa layer): nav script jeta URL chay oita-i address bar-e boshay;
+   nav script na thakle/fail korle shudhu tab-er naam boshay. ===== */
 (function () {
   var BASE = (location.pathname.indexOf('/NSD-Cluster-Ops-Dashboard/') === 0) ? '/NSD-Cluster-Ops-Dashboard/' : location.pathname.replace(/[^\/]*$/, '');
   var HTTP = /^https?:$/.test(location.protocol);
   function norm(x) { return String(x || '').toLowerCase().replace(/\.html?$/, '').replace(/[\s_\-\/]+/g, ''); }
   var initial = '';
-  try { initial = norm(decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length) : '')); } catch (e) {}
+  try { initial = norm(decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length).split('/')[0] : '')); } catch (e) {}
   var born = Date.now(), initDone = !initial || initial === 'index';
 
   function currentTab() {
@@ -11332,26 +11357,20 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       else if (Date.now() - born < 4500) return;
       else initDone = true;
     }
-    var slug = String(label).trim().replace(/\s+/g, '-');
-    var want = t === 'overview' ? BASE : BASE + slug;
-    if (HTTP && location.pathname !== want) {
-      try { history.replaceState(history.state, '', want + location.search); return; } catch (e) {}
+    var slug = encodeURIComponent(String(label).trim().replace(/\s+/g, '-'));
+    var want = null;
+    try { if (window.__nsdWantUrl) want = window.__nsdWantUrl(); } catch (e) {}
+    if (!want) want = t === 'overview' ? BASE : BASE + slug;
+    if (HTTP) {
+      if (location.pathname !== want) { try { history.replaceState(history.state, '', want + location.search); return; } catch (e) {} }
+      else return;
     }
-    if (!HTTP || location.pathname !== want) {                           // path na parle (file:// ba sandbox) #Naam
-      var h = '#' + slug;
-      if (t !== 'overview' && location.hash !== h) { try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) {} }
-    }
+    var h = '#' + slug;                                                  // file:// ba sandbox: #Naam
+    if (t !== 'overview' && location.hash !== h) { try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) {} }
   }
-  function wrap() {
-    var f = window.switchDashboardTab;
-    if (typeof f !== 'function' || f.__urlSync) return;
-    var w = function () { var r = f.apply(this, arguments); setTimeout(sync, 0); return r; };
-    w.__urlSync = 1; for (var k in f) { try { w[k] = f[k]; } catch (e) {} }
-    window.switchDashboardTab = w;
-  }
-  wrap(); setInterval(function () { wrap(); sync(); }, 400);              // bhorsa: kono hook fail korleo URL thik hobe
-  window.addEventListener('popstate', function () { setTimeout(sync, 50); });
-  document.addEventListener('click', function () { setTimeout(sync, 60); }, true);
+  setInterval(sync, 300);
+  window.addEventListener('popstate', function () { setTimeout(sync, 80); });
+  document.addEventListener('click', function () { setTimeout(sync, 80); }, true);
 })();
 </script>
 </body>
