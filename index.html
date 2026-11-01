@@ -4553,7 +4553,6 @@ const ACCOUNTS = [
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             loadHubReportData(hubId);
-            showToast(`Loaded report for ${hubName}`);
         }
 
         let previousDayReportMode = false;
@@ -7398,20 +7397,9 @@ const ACCOUNTS = [
             if (!issues.length) {
                 __rcvSig = '';
                 __rcvDismissedSig = null;
-                if (__rcvState !== 'ok') {
-                    __rcvState = 'ok';
-                    panel.classList.add('ok');
-                    title.innerHTML = '&#10004; All counts match (' + evaluated + ' check' + (evaluated === 1 ? '' : 's') + ' passed)';
-                    list.style.display = 'none'; list.innerHTML = '';
-                    bMarks.style.display = 'none';
-                    clearTimeout(__rcvHideTimer);
-                    panel.classList.remove('rcv-leaving');
-                    panel.classList.add('rcv-show');
-                    __rcvHideTimer = setTimeout(() => {
-                        panel.classList.add('rcv-leaving');
-                        setTimeout(() => rcvHidePanel(panel), 380);
-                    }, 2500);
-                }
+                __rcvState = 'ok';
+                clearTimeout(__rcvHideTimer);
+                rcvHidePanel(panel);   // OK hole kono text dekhano hobe na
                 return;
             }
 
