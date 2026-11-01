@@ -6821,7 +6821,7 @@ const ACCOUNTS = [
 
             updateHeaderDigitalClock();
         updateLastUpdatedTime();
-        setInterval(updateHeaderDigitalClock, 1000);
+        if (!window.__nsdClockTimer) window.__nsdClockTimer = setInterval(updateHeaderDigitalClock, 1000); // FIX: ekbar-i start hobe, renderDashboard-er pore pore stack hobe na
 
             const grid = document.getElementById('hubCardsGrid');
             if (!grid) return;
@@ -6975,6 +6975,14 @@ const ACCOUNTS = [
                 "            if (m && m.classList.contains('hidden')) document.getElementById('agentSetupInput').value = masterList.map(a => a.eid + '\\t' + a.name).join('\\n');\n" +
                 "        };\n" +
                 "        function openAgentModal() {");
+
+            // FIX (lag/focus): typing-er shomoy protibar pura table rebuild hocchilo, tai input focus hariye jacchilo.
+            // Ekhon typing-e shudhu total update hobe; row sort/hide hobe input chhere gele (onchange).
+            reportHtml = must(reportHtml,
+                "                agent[field] = parseFloat(value) || 0;\n                renderTable();",
+                "                agent[field] = parseFloat(value) || 0;\n                calculateGrandTotals();");
+            reportHtml = reportHtml.replace(/oninput="updateValue\(\$\{agent\.id\}, '(\w+)', this\.value\)"/g,
+                'oninput="updateValue(${agent.id}, \'$1\', this.value)" onchange="renderTable()"');
 
             // Speed: load the report's Google Fonts without blocking the first paint
             reportHtml = reportHtml
@@ -8285,7 +8293,7 @@ const ACCOUNTS = [
             safeStep(renderDashboard);
             safeStep(renderLeaderboard);
             safeStep(renderClusterNotices);
-            safeStep(() => setInterval(updateLastUpdatedTime, 1000));
+            safeStep(() => { if (!window.__nsdLastUpdTimer) window.__nsdLastUpdTimer = setInterval(updateLastUpdatedTime, 1000); }); // FIX: interval stack bondho
 
             // If sign-in check does not finish quickly, still show the login button.
             setTimeout(() => { if (!authStateResolved) { authCheckSlow = true; try { updateProfileUI(); } catch (e) {} } }, 4000);
@@ -10080,7 +10088,7 @@ const ACCOUNTS = [
   paint();
   document.addEventListener('input',function(e){if(e.target&&e.target.id==='m_reportDate')paint()});
   document.addEventListener('change',function(e){if(e.target&&e.target.id==='m_reportDate')paint()});
-  setInterval(paint,1000);
+  setInterval(paint,30000);   // FIX: 1s theke 30s — date change-er jonno eto ghon ghon dorkar nei
 })();
 </script>
 
@@ -11375,9 +11383,20 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     var now = location.pathname + location.search + location.hash;
     if (now !== want) { try { history.replaceState(history.state, '', want); } catch (e) {} }
   }
-  setInterval(sync, 300);
-  window.addEventListener('popstate', function () { setTimeout(sync, 80); });
-  document.addEventListener('click', function () { setTimeout(sync, 80); }, true);
+  /* polling nai: shudhu click / back-forward / link bodlale ekbar kore (debounced) cholbe, tai dashboard halka thakbe */
+  var tm = null;
+  function later(ms) { clearTimeout(tm); tm = setTimeout(sync, ms); }
+  window.addEventListener('popstate', function () { later(80); });
+  window.addEventListener('hashchange', function () { later(80); });
+  document.addEventListener('click', function () { later(120); }, true);
+  /* report-er bhitorer mode/tab bodlale (button click chhaday-o) URL update hobe */
+  ['ageingSetMode', 'renderExcelHubReport', 'switchDashboardTab'].forEach(function (n) {
+    var f = window[n]; if (typeof f !== 'function' || f.__urlSync) return;
+    var w = function () { var r = f.apply(this, arguments); later(60); return r; };
+    for (var k in f) { try { w[k] = f[k]; } catch (e) {} }
+    w.__urlSync = 1; window[n] = w;
+  });
+  setTimeout(sync, 1200); setTimeout(sync, 4800);                                              // page load-er por ekbar thik kore nei
 })();
 </script>
 </body>
