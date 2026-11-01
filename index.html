@@ -863,12 +863,6 @@ try {
 </div>
 <div class="space-y-1.5">
 <p class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Hub Management</p>
-<button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="hubSummary" onclick="openClusterSummaryModal(); toggleSidebar();">
-<span class="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-sm">
-<i class="fa-solid fa-chart-pie"></i>
-</span>
-<span class="truncate">All Hub Summary</span>
-</button>
 <button class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/70" data-hide-key="hubAdd" data-owner-only="" onclick="openAddHubModal(); toggleSidebar();">
 <span class="w-8 h-8 rounded-lg bg-sky-950/60 border border-sky-800/40 flex items-center justify-center flex-shrink-0 text-sky-400 text-sm">
 <i class="fa-solid fa-plus"></i>
@@ -1999,67 +1993,6 @@ try {
 <div class="text-[10px] text-slate-500 font-medium text-center pt-3 mt-3 border-t border-slate-800/60" id="summaryReportCount"></div>
 </div>
 </div>
-<!-- ALL-HUB CLUSTER SUMMARY MODAL (DAILY / WEEKLY / MONTHLY / CUSTOM) -->
-<div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="clusterSummaryModal">
-<div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
-<h3 class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-solid fa-warehouse text-emerald-400"></i> Narsingdi Cluster - All Hub Summary
-                </h3>
-<div class="flex items-center gap-3">
-<button class="text-slate-400 hover:text-emerald-400 text-sm" data-html2canvas-ignore="true" onclick="exportClusterSummaryImage()" title="Save this summary as an image">
-<i class="fa-solid fa-camera"></i>
-</button>
-<button class="text-slate-400 hover:text-white text-lg" onclick="closeClusterSummaryModal()">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
-</div>
-<div class="flex items-center gap-2 mb-3">
-<button class="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition bg-emerald-600 text-white" id="clusterSummaryTabDaily" onclick="switchClusterSummaryPeriod('daily')">Daily</button>
-<button class="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition text-slate-400 bg-slate-800 hover:text-white" id="clusterSummaryTabWeekly" onclick="switchClusterSummaryPeriod('weekly')">Weekly</button>
-<button class="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition text-slate-400 bg-slate-800 hover:text-white" id="clusterSummaryTabMonthly" onclick="switchClusterSummaryPeriod('monthly')">Monthly</button>
-<button class="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition text-slate-400 bg-slate-800 hover:text-white" id="clusterSummaryTabCustom" onclick="switchClusterSummaryPeriod('custom')">Custom</button>
-</div>
-<div class="hidden flex items-end gap-2 mb-3 bg-[#0b1329] border border-slate-800 rounded-lg p-3" id="clusterSummaryCustomRange">
-<div class="flex-1">
-<label class="block text-[10px] font-bold text-slate-400 mb-1">From</label>
-<input class="w-full bg-[#131d36] text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500" id="clusterSummaryCustomFrom" type="date"/>
-</div>
-<div class="flex-1">
-<label class="block text-[10px] font-bold text-slate-400 mb-1">To</label>
-<input class="w-full bg-[#131d36] text-xs text-slate-200 rounded-lg px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500" id="clusterSummaryCustomTo" type="date"/>
-</div>
-<button class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition" onclick="applyCustomClusterSummaryRange()">Apply</button>
-</div>
-<p class="text-[11px] text-slate-400 font-semibold mb-3" id="clusterSummaryPeriodLabel">Today's report</p>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5" id="clusterSummaryStatsGrid"></div>
-<div class="bg-[#0b1329] border border-slate-800 rounded-lg p-3 mb-5" style="height: 220px;">
-<canvas id="clusterSummaryChart"></canvas>
-</div>
-<div class="border-t border-slate-800 pt-4">
-<h4 class="text-xs font-black text-white mb-2 flex items-center gap-2">
-<i class="fa-solid fa-table-list text-sky-400"></i> Per-Hub Breakdown
-                </h4>
-<div class="overflow-x-auto rounded-lg border border-slate-800">
-<table class="w-full text-xs">
-<thead>
-<tr class="bg-slate-800/60 text-slate-300">
-<th class="p-2 text-left font-bold">Hub</th>
-<th class="p-2 text-center font-bold">Volume</th>
-<th class="p-2 text-center font-bold">Delivered</th>
-<th class="p-2 text-center font-bold">Rate</th>
-<th class="p-2 text-center font-bold">Hold</th>
-<th class="p-2 text-center font-bold">Collection</th>
-</tr>
-</thead>
-<tbody id="clusterSummaryHubBreakdown"></tbody>
-</table>
-</div>
-</div>
-<div class="text-[10px] text-slate-500 font-medium text-center pt-3 mt-3 border-t border-slate-800/60" id="clusterSummaryReportCount"></div>
-</div>
-</div>
 <!-- ADD NEW HUB MODAL -->
 <div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="addHubModal">
 <div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-md p-6 shadow-2xl relative">
@@ -3149,8 +3082,7 @@ const ACCOUNTS = [
         let currentActiveHubId = null;
         let currentSummaryHubId = null;
         let currentSummaryPeriod = 'daily';
-        let currentClusterSummaryPeriod = 'daily';
-        let clusterNotices = [];
+                let clusterNotices = [];
         let noticeWriteInFlight = 0;
         let cloudDismissedNoticeIds = [];
         let cloudUserResponses = {};
@@ -4569,27 +4501,7 @@ const ACCOUNTS = [
         }
 
 
-        function exportClusterSummaryImage() {
-            const modalContent = document.querySelector('#clusterSummaryModal > div');
-            if (!modalContent || typeof html2canvas === 'undefined') {
-                showToast('Image export is not available right now');
-                return;
-            }
-            showToast('Preparing image...');
-            html2canvas(modalContent, {
-                backgroundColor: '#131d36',
-                scale: 2,
-                useCORS: true,
-                ignoreElements: (node) => node.hasAttribute && node.hasAttribute('data-html2canvas-ignore')
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Cluster_Summary_${getTodayISO()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast('Image saved!');
-            }).catch(() => showToast('Could not save image'));
-        }
-
+        
         function formatHubDisplayName(hubName) {
             const name = String(hubName || 'HUB').trim().replace(/\s+/g, ' ');
             if (!name) return 'HUB';
@@ -5906,80 +5818,6 @@ const ACCOUNTS = [
             }
         }
 
-        /* ---- ALL-HUB CLUSTER SUMMARY MODAL ---- */
-        function openClusterSummaryModal() {
-            currentClusterSummaryPeriod = 'daily';
-            document.getElementById('clusterSummaryCustomRange').classList.add('hidden');
-            document.getElementById('clusterSummaryModal').classList.remove('hidden');
-            renderClusterSummary();
-        }
-
-        function closeClusterSummaryModal() {
-            document.getElementById('clusterSummaryModal').classList.add('hidden');
-        }
-
-        function switchClusterSummaryPeriod(period) {
-            currentClusterSummaryPeriod = period;
-            document.getElementById('clusterSummaryCustomRange').classList.toggle('hidden', period !== 'custom');
-            renderClusterSummary();
-        }
-
-        function applyCustomClusterSummaryRange() {
-            currentClusterSummaryPeriod = 'custom';
-            renderClusterSummary();
-        }
-
-        function renderClusterSummary() {
-            ['daily', 'weekly', 'monthly', 'custom'].forEach(p => {
-                const btn = document.getElementById(`clusterSummaryTab${p.charAt(0).toUpperCase() + p.slice(1)}`);
-                if (btn) btn.className = p === currentClusterSummaryPeriod
-                    ? "flex-1 px-3 py-2 rounded-lg text-xs font-bold transition bg-emerald-600 text-white"
-                    : "flex-1 px-3 py-2 rounded-lg text-xs font-bold transition text-slate-400 bg-slate-800 hover:text-white";
-            });
-
-            const range = resolveSummaryRange(currentClusterSummaryPeriod, 'clusterSummaryCustomFrom', 'clusterSummaryCustomTo');
-            if (!range) {
-                document.getElementById('clusterSummaryPeriodLabel').innerText = 'Select a From and To date, then click Apply';
-                document.getElementById('clusterSummaryStatsGrid').innerHTML = '';
-                document.getElementById('clusterSummaryHubBreakdown').innerHTML = '';
-                document.getElementById('clusterSummaryReportCount').innerText = '';
-                return;
-            }
-
-            document.getElementById('clusterSummaryPeriodLabel').innerText = range.label;
-
-            const { totals, reportCount, avgDeliveryRate, avgDAPresent, avgDATotal } = computeSummaryStats('ALL', range.startISO, range.endISO);
-
-            const grid = document.getElementById('clusterSummaryStatsGrid');
-            if (grid) grid.innerHTML = statsGridHTML(totals, avgDeliveryRate, avgDAPresent, avgDATotal);
-
-            const breakdownBody = document.getElementById('clusterSummaryHubBreakdown');
-            if (breakdownBody) {
-                breakdownBody.innerHTML = getVisibleHubs().map(hub => {
-                    const hubStats = computeSummaryStats(hub.id, range.startISO, range.endISO);
-                    return `
-                        <tr class="border-t border-slate-800/60 hover:bg-slate-800/30 transition">
-                            <td class="p-2 font-bold text-white">${formatHubDisplayName(hub.name)}</td>
-                            <td class="p-2 text-center text-slate-200">${hubStats.totals.totalVolume}</td>
-                            <td class="p-2 text-center text-emerald-400 font-bold">${hubStats.totals.delivered}</td>
-                            <td class="p-2 text-center text-sky-400 font-bold">${hubStats.avgDeliveryRate}%</td>
-                            <td class="p-2 text-center text-amber-400 font-bold">${hubStats.totals.totalHold}</td>
-                            <td class="p-2 text-center text-slate-200">৳ ${hubStats.totals.collection.toLocaleString()}</td>
-                        </tr>
-                    `;
-                }).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-500">No hubs found.</td></tr>`;
-            }
-
-            const countEl = document.getElementById('clusterSummaryReportCount');
-            if (countEl) {
-                countEl.innerText = reportCount > 0
-                    ? `Based on ${reportCount} saved report${reportCount > 1 ? 's' : ''} across all hubs in this period`
-                    : `No saved reports found across the cluster in this period yet`;
-            }
-
-            renderClusterSummaryChart();
-        }
-
         /* ===================== DYNAMIC TASK TABS ===================== */
         // Each tab: { type, label, icon (fa-* class), color (tailwind color name) }
         let taskTabs = [
@@ -6370,8 +6208,7 @@ const ACCOUNTS = [
 
         let hubComparisonChartInstance = null;
         let leaderboardChartInstance = null;
-        let clusterSummaryChartInstance = null;
-
+        
         function renderLeaderboardChart() {
             normalizeHubRates();
             const canvas = document.getElementById('leaderboardChart');
@@ -6406,41 +6243,7 @@ const ACCOUNTS = [
             });
         }
 
-        function renderClusterSummaryChart() {
-            const canvas = document.getElementById('clusterSummaryChart');
-            if (!canvas || typeof Chart === 'undefined') return;
-            const range = resolveSummaryRange(currentClusterSummaryPeriod, 'clusterSummaryCustomFrom', 'clusterSummaryCustomTo');
-            if (!range) {
-                if (clusterSummaryChartInstance) { clusterSummaryChartInstance.destroy(); clusterSummaryChartInstance = null; }
-                return;
-            }
-            const hubs = getVisibleHubs();
-            const labels = hubs.map(h => h.name);
-            const volumes = hubs.map(h => computeSummaryStats(h.id, range.startISO, range.endISO).totals.totalVolume);
-            const delivered = hubs.map(h => computeSummaryStats(h.id, range.startISO, range.endISO).totals.delivered);
-
-            if (clusterSummaryChartInstance) clusterSummaryChartInstance.destroy();
-            clusterSummaryChartInstance = new Chart(canvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [
-                        { label: 'Volume', data: volumes, backgroundColor: '#334155', borderRadius: 4, maxBarThickness: 26 },
-                        { label: 'Delivered', data: delivered, backgroundColor: '#10b981', borderRadius: 4, maxBarThickness: 26 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 10, weight: 700 } } } },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8', font: { size: 10, weight: 700 } }, grid: { display: false } },
-                        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.1)' } }
-                    }
-                }
-            });
-        }
-
+        
         function updateHeaderDigitalClock() {
             const now = new Date();
             const timeEl = document.getElementById('headerDigitalTime');
@@ -8094,7 +7897,6 @@ const ACCOUNTS = [
             { group: 'hubbtns',  key: 'hubBtnAttendance',icon: 'fa-user-check',        label: 'D.A. Attendance Report button' },
             { group: 'hubbtns',  key: 'hubBtnInventory', icon: 'fa-boxes-stacked',     label: 'Inventory Report button' },
             { group: 'hubbtns',  key: 'hubBtnAgentPerf', icon: 'fa-chart-line',        label: 'Agent Performance Report button' },
-            { group: 'menu',     key: 'hubSummary',      icon: 'fa-chart-pie',         label: 'All Hub Summary' },
             { group: 'menu',     key: 'dataExport',      icon: 'fa-download',          label: 'Export Data (JSON)' },
             { group: 'controls', key: 'sheetActions',    icon: 'fa-pen-to-square',     label: 'Add / Edit / Delete Sheet buttons' }
         ];
@@ -10938,7 +10740,6 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     hid('excelImportReportView', 'closeExcelImportReportView', function () { call('openExcelImportReportView'); }),
     /* popup / modal */
     hid('hubSummaryModal', 'closeHubSummaryModal', reopenRec('openHubSummaryModal')),
-    hid('clusterSummaryModal', 'closeClusterSummaryModal', function () { call('openClusterSummaryModal'); }),
     hid('currentDayKpiReportModal', 'closeCurrentDayKpiReport', function () { call('openCurrentDayKpiReport'); }),
     hid('agentPerformancePageModal', 'closeAgentPerformanceReport', reopenRec('openAgentPerformanceReport')),
     hid('ageingConsignmentModal', 'closeAgeingConsignmentModal'),
@@ -10985,7 +10786,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   var NAMES = {
     hubReportView: 'Morning-Closing-Report', attendanceReportView: 'Attendance-Report', inventoryReportView: 'Inventory-Report',
     ageingReportView: 'Ageing-Report', excelImportReportView: 'Excel-Import-Report',
-    hubSummaryModal: 'Hub-Summary', clusterSummaryModal: 'Cluster-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
+    hubSummaryModal: 'Hub-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
     agentPerformancePageModal: 'Agent-Performance', ageingConsignmentModal: 'Ageing-Consignment', inventoryClearConfirm: 'Clear-Inventory',
     addSheetModal: 'Add-Sheet', manageTabsModal: 'Manage-Tabs', addHubModal: 'Add-Hub', removeHubModal: 'Remove-Hub',
     visibilityModal: 'Visibility', ownerAccessModal: 'Owner-Access', pinModal: 'PIN', dashboardNotificationModal: 'Notifications',
