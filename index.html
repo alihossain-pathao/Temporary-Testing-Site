@@ -2501,16 +2501,20 @@ const ACCOUNTS = [
     }
     applyTree(); updateLoginUi(); renderSync();
   }
+  var streamRestartT = null;
+  function queueStreamRestart() {   // FIX (timing): cancel/auth_revoked/error ekshonge hole 2-bar restart na hoy
+    clearTimeout(streamRestartT); streamRestartT = setTimeout(startStream, 5000);
+  }
   function startStream() {
     if (!dbBase() || typeof EventSource === 'undefined') { db.gaveUp = true; updateLoginUi(); renderSync(); return; }
     if (db.es) { try { db.es.close(); } catch (e) {} }
     var es = new EventSource(dbUrl('')); db.es = es;
     es.addEventListener('put', function (ev) { onStream('put', ev); });
     es.addEventListener('patch', function (ev) { onStream('patch', ev); });
-    es.addEventListener('cancel', function () { es.close(); db.online = false; setTimeout(startStream, 5000); renderSync(); });
-    es.addEventListener('auth_revoked', function () { es.close(); db.online = false; setTimeout(startStream, 5000); renderSync(); });
+    es.addEventListener('cancel', function () { es.close(); db.online = false; queueStreamRestart(); renderSync(); });
+    es.addEventListener('auth_revoked', function () { es.close(); db.online = false; queueStreamRestart(); renderSync(); });
     es.onopen = function () { db.online = true; dbFlush(); renderSync(); };
-    es.onerror = function () { db.online = false; if (es.readyState === 2) setTimeout(startStream, 5000); renderSync(); };
+    es.onerror = function () { db.online = false; if (es.readyState === 2) queueStreamRestart(); renderSync(); };
     setTimeout(function () { if (!db.loaded) { db.gaveUp = true; updateLoginUi(); } }, 7000);   // 7s-e na ashle cache diye login cholbe
   }
   /* login-er thik age taja data ene dekha (remove kora user jate puran cache diye dhukte na pare) */
@@ -11138,7 +11142,10 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     safe(function () { history.replaceState(st(0), '', urlAt(0)); });
     /* link-e #Morning-Tasks thakle sei tab khulbe (tab list load hote deri hole abar try) */
     function openFromHash() { var t = wantedTab || tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } }
-    window.addEventListener('hashchange', function () { var t = tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } });
+    window.addEventListener('hashchange', function () { wantedTab = null; var t = tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlAt(curD)); }); } });
+    // FIX (timing): user nijer click/hash/back dile URL-er shuru-er tab-er restore ar chalbe na (na hole user-er tab ulte jacchilo)
+    document.addEventListener('click', function () { wantedTab = null; }, true);
+    window.addEventListener('popstate', function () { wantedTab = null; });
     openFromHash(); setTimeout(openFromHash, 600); setTimeout(function () { openFromHash(); wantedTab = null; }, 2000);
 
     var mo = new MutationObserver(schedule);
