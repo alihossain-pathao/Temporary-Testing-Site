@@ -4660,7 +4660,6 @@ const ACCOUNTS = [
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             loadAttendanceData(hubId);
-            showToast(`Loaded D.A. Attendance Report for ${hubName}`);
         }
 
         function closeAttendanceReportView() {
@@ -5269,7 +5268,6 @@ const ACCOUNTS = [
             document.getElementById('inventoryReportView').classList.remove('hidden');
             window.scrollTo({top:0,behavior:'smooth'});
             loadInventoryData(hubId);
-            showToast(`Loaded Inventory Report for ${hubName}`);
         }
 
         function closeInventoryReportView() {
