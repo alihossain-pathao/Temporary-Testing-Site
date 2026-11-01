@@ -483,6 +483,9 @@
         /* Morning report: action buttons sit in their own bar outside the card */
         .morning-report-col { flex:1; min-width:0; display:flex; flex-direction:column; gap:12px; }
         .morning-report-col > .report-card { flex:none; }
+        /* Morning/Closing report: upore-niche same jaega. Wrapper-er Tailwind pt-4 (16px) upore ekta extra jaega korto,
+           tai shudhu ei report page-e oi extra padding bad dewa holo; body-r 15px padding upore-niche duiyei thakbe. */
+        #hubReportView > #captureContainer { padding-top: 0; padding-bottom: 0; }
         .action-toolbar-bottom.action-toolbar-detached { margin:0; padding:4px 0; background:transparent; border:0; border-top:0; border-radius:0; box-shadow:none; }
         @media (max-width: 1200px) { .morning-report-col { width:100%; max-width:760px; } }
         .action-toolbar-bottom { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1.5px dashed #cbd5e1; }
