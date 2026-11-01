@@ -427,6 +427,7 @@
         .rpt-date-widget .rw-mon { grid-column:1; grid-row:1; font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; }
         .rpt-date-widget .rw-year { grid-column:2; grid-row:1; font-size:11px; font-weight:800; text-transform:none; letter-spacing:0; margin:0; }
         .rpt-date-widget .rw-wk { grid-column:1 / span 2; grid-row:2; font-size:10px; font-weight:500; color:#334155; text-transform:none; letter-spacing:0; white-space:nowrap; }
+        .rpt-date-picker { position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; border:0; padding:0; margin:0; z-index:2; }
         @media (max-width: 600px) { .rpt-date-widget { position:static; margin:6px auto 0; transform:none; } }
 
         .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; background-color: #ffffff; border: 1.5px solid #64748b; }
@@ -1489,7 +1490,7 @@ try {
 <div class="header-title">
 <h2 id="closingHeaderTitle">NARSINGDI HUB - CLOSING REPORT</h2>
 <p>Delivery Performance &amp; Operational Summary</p>
-<div class="rpt-date-widget"><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
+<div class="rpt-date-widget"><input type="date" id="m_reportDatePicker" class="rpt-date-picker" title="Report tarikh bodlate click korun"/><div class="rw-circle"><span class="rw-day"></span></div><div class="rw-txt"><span class="rw-mon"></span><span class="rw-year"></span><span class="rw-wk"></span></div></div>
 </div>
 <table class="excel-table" id="fullReportTable">
 <colgroup>
@@ -5543,6 +5544,23 @@ const ACCOUNTS = [
 
         /* =================== END D.A. ATTENDANCE REPORT =================== */
 
+        /* Report tarikh: widget-er upor click korle calendar khule tarikh bodlano jay (layout/format same) */
+        function syncDatePicker() {
+            const p = document.getElementById('m_reportDatePicker');
+            const iso = parseReportDateToISO(document.getElementById('m_reportDate')?.value);
+            if (p) p.value = iso || '';
+        }
+        document.addEventListener('change', function (e) {
+            if (!e.target || e.target.id !== 'm_reportDatePicker') return;
+            const v = e.target.value;            // yyyy-mm-dd
+            if (!v || !currentActiveHubId || previousDayReportMode) { syncDatePicker(); return; }
+            const parts = v.split('-');
+            const hidden = document.getElementById('m_reportDate');
+            hidden.value = parts[2] + '-' + parts[1] + '-' + parts[0];   // dd-mm-yyyy (form er format)
+            // input event: calculation, previous ratio, widget refresh ar SAVE - sob ekbar-e
+            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+            syncDatePicker();
+        });
         function saveCurrentHubReportData() {
             if (!currentActiveHubId) return;
 
@@ -5585,6 +5603,7 @@ const ACCOUNTS = [
             syncPreviousDayRatios({ preserveExisting: true });
             updateAllComparisons();
             try { runReportValidation(); } catch (e) {}
+            syncDatePicker();
         }
 
 
