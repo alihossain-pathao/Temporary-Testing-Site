@@ -2,6 +2,9 @@
 
 <html class="app-booting" lang="en">
 <head>
+<script>/* GitHub Pages 404.html redirect: /?/Morning-Tasks -> /Morning-Tasks */
+(function(){var l=location;if(l.search.slice(0,2)==='?/'){var q=l.search.slice(2).split('&').join('&').replace(/~and~/g,'&');var i=q.indexOf('&');var path=i<0?q:q.slice(0,i);try{history.replaceState(null,'',l.pathname.replace(/[^\/]*$/,'')+path+l.hash);}catch(e){}}})();</script>
+
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>Narsingdi Cluster &amp; Hub Dashboard</title>
@@ -10968,7 +10971,34 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     try { return taskTabs.some(function (x) { return x.type === t; }); } catch (e) { return false; }
   }
   function st(d) { var s = { d: d, tab: curTab }; s[KEY] = 1; return s; }
-  function safe(f) { try { return f(); } catch (e) { dead = true; console.warn('BackNav off:', e); } }
+  /* ---- URL-e tab-er naam (#Morning-Tasks) ---- */
+  function slug(x) { return String(x || '').trim().replace(/\s+/g, '-'); }
+  function tabLabel(t) {
+    if (t === 'overview') return 'Overview';
+    if (t === 'leaderboard') return 'Leaderboard';
+    try { var f = taskTabs.filter(function (x) { return x.type === t; })[0]; return f ? f.label : t; } catch (e) { return t; }
+  }
+  var BASE = (location.pathname.indexOf('/NSD-Cluster-Ops-Dashboard/') === 0) ? '/NSD-Cluster-Ops-Dashboard/' : location.pathname.replace(/[^\/]*$/, '');
+  var PATHOK = /^https?:$/.test(location.protocol);
+  function urlFor(t) {
+    if (!PATHOK) return undefined;
+    if (String(location.hash || '').toLowerCase() === '#hash') return undefined;   // hidden #hash box ke nosto korbo na
+    return t === 'overview' ? BASE : BASE + slug(tabLabel(t));
+  }
+  function tabFromHash() {
+    var raw = '';
+    try { raw = decodeURIComponent(location.pathname.indexOf(BASE) === 0 ? location.pathname.slice(BASE.length) : ''); } catch (e) {}
+    if (!raw) raw = String(location.hash || '').replace(/^#\/?/, '');
+    var h = raw.replace(/\/+$/, '').replace(/\.html?$/i, '').toLowerCase().replace(/[\s_-]+/g, '');
+    if (!h || h === 'hash' || h === 'index') return null;
+    var all = ['overview', 'leaderboard'];
+    try { taskTabs.forEach(function (x) { all.push(x.type); }); } catch (e) {}
+    for (var i = 0; i < all.length; i++) {
+      var t = all[i];
+      if (t.toLowerCase() === h || tabLabel(t).toLowerCase().replace(/[\s_-]+/g, '') === h) return t;
+    }
+    return null;
+  }
 
   /* ---- layer open/close holo -> history sync ---- */
   function reconcile() {
@@ -10984,7 +11014,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     if (opened.length) fwd.length = 0;               // notun action = Forward history muche jay
     var n = stack.length;
     if (n > curD) {
-      safe(function () { for (var k = curD + 1; k <= n; k++) history.pushState(st(k), ''); });
+      safe(function () { for (var k = curD + 1; k <= n; k++) history.pushState(st(k), '', urlFor(curTab)); });
       curD = n;
     } else if (n < curD) {
       ignorePop++;
@@ -10997,7 +11027,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   function fix() {
     curD = stack.length;
     var s = history.state;
-    if (!s || s[KEY] !== 1 || s.d !== curD || s.tab !== curTab) safe(function () { history.replaceState(st(curD), ''); });
+    if (!s || s[KEY] !== 1 || s.d !== curD || s.tab !== curTab) safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); });
   }
   function closeLayer(l) {
     try { l.close(); } catch (e) { console.error(e); }
@@ -11040,8 +11070,8 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       var r = orig.apply(this, arguments);
       if (!silentTab && tab !== curTab && validTab(tab)) {
         curTab = tab;
-        if (stack.length) safe(function () { history.replaceState(st(curD), ''); });
-        else { safe(function () { history.pushState(st(curD), ''); }); fwd.length = 0; }
+        if (stack.length) safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); });
+        else { safe(function () { history.pushState(st(curD), '', urlFor(curTab)); }); fwd.length = 0; }
       }
       return r;
     };
@@ -11050,6 +11080,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
 
   /* ---- init ---- */
   function init() {
+    var wantedTab = tabFromHash();   // URL replace hobar age hash-ta pore nei
     try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
     try {
       if (typeof currentGenericTabType !== 'undefined' && currentGenericTabType) curTab = currentGenericTabType;
@@ -11057,7 +11088,11 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     } catch (e) {}
     hookTabs();
     LAYERS.forEach(function (l) { if (isOpen(l)) ign[l.id] = 1; });
-    safe(function () { history.replaceState(st(0), ''); });
+    safe(function () { history.replaceState(st(0), '', urlFor(curTab)); });
+    /* link-e #Morning-Tasks thakle sei tab khulbe (tab list load hote deri hole abar try) */
+    function openFromHash() { var t = wantedTab || tabFromHash(); if (t && t !== curTab) { setTab(t); safe(function () { history.replaceState(st(curD), '', urlFor(curTab)); }); } }
+    openFromHash(); setTimeout(openFromHash, 600); setTimeout(function () { openFromHash(); wantedTab = null; }, 2000);
+
     var mo = new MutationObserver(schedule);
     function watch() {
       LAYERS.forEach(function (l) {
