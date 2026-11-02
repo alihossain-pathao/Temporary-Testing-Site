@@ -1175,24 +1175,6 @@ try {
 </div>
 </div>
 </div>
-<!-- PIN MODAL (needed to un-hide / open hide settings) -->
-<div class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4" id="pinModal">
-<div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-xs p-5 shadow-2xl">
-<div class="text-center mb-4">
-<div class="w-12 h-12 mx-auto rounded-xl bg-amber-950/60 border border-amber-800/40 flex items-center justify-center text-amber-400 text-xl mb-2">
-<i class="fa-solid fa-lock"></i>
-</div>
-<h3 class="text-sm font-black text-white">Enter PIN</h3>
-<p class="text-[11px] text-slate-400 font-semibold mt-0.5">PIN dile hidden section gulo abar dekha jabe</p>
-</div>
-<input autocomplete="off" class="w-full bg-[#0b1329] text-sm text-center text-white placeholder-slate-500 rounded-lg px-4 py-2.5 border border-slate-700 focus:outline-none focus:border-sky-500 tracking-widest" id="pinInput" onkeydown="if(event.key==='Enter') submitPin()" placeholder="PIN" type="password"/>
-<p class="hidden text-[11px] text-rose-400 font-bold text-center mt-2" id="pinError">Wrong PIN</p>
-<div class="flex gap-2 mt-4">
-<button class="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition" onclick="closePinModal()">Cancel</button>
-<button class="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg transition" onclick="submitPin()">Unlock</button>
-</div>
-</div>
-</div>
 <!-- OWNER ACCESS MODAL -->
 <div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex items-center justify-center p-4" id="ownerAccessModal">
 <div class="bg-[#131d36] border border-slate-700 rounded-xl w-full max-w-lg shadow-2xl">
@@ -4326,7 +4308,7 @@ const ACCOUNTS = [
                 writeHubSnapshotCache(next);
                 saveLocalState();
                 rerenderAll();
-                if (Object.keys(hubReportsData).length) repairAllHubSummaries(false);   // FIX: sob hub ekbar thik hobe
+                if (window.__nsdHubReportsLoaded && Object.keys(hubReportsData).length) repairAllHubSummaries(false);   // FIX: sob hub ekbar thik hobe
             }, err => {
                 console.error('hubs listener failed', err);
                 hubCloudStateReady = false;
@@ -4426,6 +4408,8 @@ const ACCOUNTS = [
                 renderDashboard();
             } catch (e) { cloudFail(e); }
             cloudDb.collection('attendanceReports').onSnapshot(snap => {
+                if (snap.fromCache) return;
+                window.__nsdAttLoaded = true;
                 const seen = new Set();
                 let touched = false;
                 snap.docs.forEach(doc => {
@@ -4438,7 +4422,7 @@ const ACCOUNTS = [
                 saveLocalState();
                 if (touched && !isEditingInside('attendanceReportView')) { try { loadAttendanceData(currentActiveAttendanceHubId); } catch (e) {} }
                 renderDashboard();
-            }, err => { console.error('attendance listener failed', err); cloudFail(err); });
+            }, err => { console.error('attendance listener failed', err); window.__nsdAttError = true; cloudFail(err); });
 
             // 7) every hub's inventory report (shared, live)
             try {
@@ -4447,6 +4431,8 @@ const ACCOUNTS = [
                 saveLocalState();
             } catch (e) { cloudFail(e); }
             cloudDb.collection('inventoryReports').onSnapshot(snap => {
+                if (snap.fromCache) return;
+                window.__nsdInvLoaded = true;
                 const seen = new Set();
                 let touched = false;
                 snap.docs.forEach(doc => {
@@ -4458,7 +4444,7 @@ const ACCOUNTS = [
                 Object.keys(inventoryReportsData).forEach(id => { if (!seen.has(id)) delete inventoryReportsData[id]; });
                 saveLocalState();
                 if (touched && !isEditingInside('inventoryReportView')) { try { loadInventoryData(currentActiveInventoryHubId); } catch (e) {} }
-            }, err => { console.error('inventory listener failed', err); cloudFail(err); });
+            }, err => { console.error('inventory listener failed', err); window.__nsdInvError = true; cloudFail(err); });
 
             // 8) every hub's Agent Setup list (shared, live, separate per hub)
             try {
@@ -5265,6 +5251,7 @@ const ACCOUNTS = [
         })();
 
         function saveCurrentInventoryData() {
+            if (cloudDb && !window.__nsdInvLoaded && !window.__nsdInvError) return;   // FIX: cloud load hoyar age blank save na
             if (!currentActiveInventoryHubId) return;
             inventoryReportsData[currentActiveInventoryHubId] = { rows: currentInventoryRows };
             cloudSyncInventory(currentActiveInventoryHubId);
@@ -5472,6 +5459,7 @@ const ACCOUNTS = [
         }
 
         function saveCurrentAttendanceData() {
+            if (cloudDb && !window.__nsdAttLoaded && !window.__nsdAttError) return;   // FIX: cloud load hoyar age blank save na
             if (!currentActiveAttendanceHubId) return;
 
             attendanceReportsData[currentActiveAttendanceHubId] = {
@@ -10838,7 +10826,6 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     hid('removeHubModal', 'closeRemoveHubModal'),
     hid('visibilityModal', 'closeVisibilityModal'),
     hid('ownerAccessModal', 'closeOwnerAccessModal'),
-    hid('pinModal', 'closePinModal'),
     hid('dashboardNotificationModal', 'closeDashboardNotificationModal'),
     hid('sidebarOverlay', 'toggleSidebar', null, { hide: function () { call('toggleSidebar'); } }),
     /* profile / admin (login system) */
@@ -10877,7 +10864,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     hubSummaryModal: 'Hub-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
     agentPerformancePageModal: 'Agent-Performance', ageingConsignmentModal: 'Ageing-Consignment', inventoryClearConfirm: 'Clear-Inventory',
     addSheetModal: 'Add-Sheet', manageTabsModal: 'Manage-Tabs', addHubModal: 'Add-Hub', removeHubModal: 'Remove-Hub',
-    visibilityModal: 'Visibility', ownerAccessModal: 'Owner-Access', pinModal: 'PIN', dashboardNotificationModal: 'Notifications',
+    visibilityModal: 'Visibility', ownerAccessModal: 'Owner-Access', dashboardNotificationModal: 'Notifications',
     sidebarOverlay: 'Menu', nsdProfileSheet: 'Profile', nsdAdminPanel: 'Admin', dailyOpsOverlay: 'Daily-Ops-Report', ncrSection: 'NCR'
   };
   function slug(x) { return encodeURIComponent(String(x || '').replace(/[\/\\?#%]+/g, ' ').trim().replace(/\s+/g, '-')); }
