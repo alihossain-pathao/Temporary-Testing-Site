@@ -3189,7 +3189,8 @@ const ACCOUNTS = [
             console.error('Cloud save failed', e);
             if (Date.now() - lastCloudErrorToast > 8000) {
                 lastCloudErrorToast = Date.now();
-                showToast('Could not save to shared database (saved on this device only)');
+                const __code = (e && (e.code || e.message)) ? ' [' + (e.code || e.message) + ']' : '';
+                showToast('Could not save to shared database (saved on this device only)' + __code);
             }
         }
 
@@ -3520,6 +3521,7 @@ const ACCOUNTS = [
                     },
                     isEmpty: async () => (await ref.limit(1).get()).empty,
                     onSnapshot: (ok, err) => ref.onSnapshot(qs => ok({
+                        fromCache: !!(qs.metadata && qs.metadata.fromCache),
                         docs: qs.docs.map(d => wrapSnap(d)),
                         docChanges: () => qs.docChanges().map(c => ({ type: c.type, doc: wrapSnap(c.doc) }))
                     }), err)
@@ -4382,6 +4384,10 @@ const ACCOUNTS = [
 
             // 5) every hub's morning/closing report + history (shared, live)
             cloudDb.collection('hubReports').onSnapshot(snap => {
+                // FIX: cache/offline snapshot-e kichu kora jabe na (ager moto local data muche felto)
+                if (snap.fromCache) return;
+                window.__nsdHubReportsLoaded = true;
+                window.__nsdHubReportsError = false;
                 const seen = new Set();
                 let touchedActive = false;
                 snap.docs.forEach(doc => {
@@ -4408,7 +4414,7 @@ const ACCOUNTS = [
                     try { loadHubReportData(currentActiveHubId); } catch (e) {}
                 }
                 rerenderAll();
-            }, err => { console.error('hubReports listener failed', err); cloudFail(err); });
+            }, err => { console.error('hubReports listener failed', err); window.__nsdHubReportsError = true; cloudFail(err); });
 
             // 6) every hub's D.A. attendance (shared, live)
             try {
@@ -5564,6 +5570,14 @@ const ACCOUNTS = [
         });
         function saveCurrentHubReportData() {
             if (!currentActiveHubId) return;
+            // FIX: Cloud theke report load hoyar age save korle blank/0 form cloud-er asol data (ebong hub card) overwrite kore dito.
+            if (cloudDb && !window.__nsdHubReportsLoaded && !window.__nsdHubReportsError) {
+                if (!window.__nsdLoadToastAt || Date.now() - window.__nsdLoadToastAt > 5000) {
+                    window.__nsdLoadToastAt = Date.now();
+                    showToast('Report data cloud theke load hocche... ektu opekkha korun, tarpor edit korun');
+                }
+                return;
+            }
 
             const reportData = {};
             document.querySelectorAll('#hubReportView input, #hubReportView select').forEach(el => {
