@@ -11317,6 +11317,14 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
           'delivered=' + (L && L.delivered),
           'cloud=' + cloud
         ].join(' | '));
+        try {
+          const H = (typeof hubReportHistory !== 'undefined' && hubReportHistory[h.id]) || {};
+          const ks = Object.keys(H).sort().slice(-4);
+          lines.push('   history keys=' + Object.keys(H).length + ' last: ' + (ks.map(k => {
+            const e = H[k] || {}; const rd = e.reportData || {};
+            return k + '{date=' + e.date + ',rawDate=' + e.reportDate + ',snapDate=' + rd.m_reportDate + ',fields=' + Object.keys(rd).length + ',delivered=' + rd.delivered + '}';
+          }).join(' ; ') || 'none'));
+        } catch (err) { lines.push('   history err ' + err); }
       }
       const text = lines.join('\n');
       try { await navigator.clipboard.writeText(text); } catch (_) {}
