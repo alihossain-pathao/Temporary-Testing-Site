@@ -10515,6 +10515,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     sub.textContent='Narsingdi Cluster \u00b7 '+today;
     var __t=getTable(i);if(HS[i]){FILL(i,HS[i]);RECALC[i](HS[i]);}body.replaceChildren(__t);
     modal.classList.add('open');
+    try{updateMissing()}catch(e){}
     fit();body.scrollTop=0;body.scrollLeft=0;
   }
   function closeSec(){modal.classList.remove('open');current=null;if(lastBtn)lastBtn.focus();}
@@ -10670,7 +10671,15 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       }
     }
   }
-  function SYNC(){Object.keys(HS).forEach(function(k){FILL(+k,HS[k]);RECALC[+k](HS[k])})}
+  /* Je hub-er selected diner (Current/Previous Day) saved report nei, tar nam header-e dekhay -- jate faka row dekhe confusion na hoy */
+  var missEl=null;
+  function updateMissing(){
+    if(!missEl){missEl=document.createElement('div');missEl.style.cssText='margin-top:4px;font:600 12px Inter,Arial,sans-serif;color:#f59e0b';sub.insertAdjacentElement('afterend',missEl)}
+    var miss=[];
+    hubsArr().forEach(function(hb){if(!fieldsFor(hb,selISO))miss.push(String(hb.name||hb.id).replace(/\s*Hub$/i,'').trim())});
+    missEl.textContent=miss.length?('\u26A0 '+selISO.split('-').reverse().join('-')+' tarikhe report save kora nei: '+miss.join(', ')):'';
+  }
+  function SYNC(){Object.keys(HS).forEach(function(k){FILL(+k,HS[k]);RECALC[+k](HS[k])});try{updateMissing()}catch(e){}}
   window.__dailyOpsSync=SYNC;
   setInterval(function(){var o=document.getElementById('dailyOpsOverlay');if(o&&o.style.display==='block'){try{SYNC()}catch(e){}}},3000);
   /* ===== Previous Day button (date picker nai) =====
