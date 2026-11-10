@@ -779,6 +779,151 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
 .nsd-sitestat.notice{background:#78350f;color:#fcd34d}
 .nsd-sitestat.closed{background:#4c0519;color:#fda4af}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ====== tab cards + views ====== */
+  .cp-card {
+    display: flex; align-items: center; gap: 18px; width: 100%; min-height: 100px; padding: 22px 20px;
+    text-align: left; cursor: pointer; font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #f1f5ff; background: #111a37; border: 1px solid #1d2950; border-radius: 16px;
+  }
+  .cp-card:hover { background: #152042; border-color: #2f7f92; }
+  .cp-card:focus-visible { outline: 2px solid #5fb3c4; outline-offset: 2px; }
+  .cp-ico {
+    width: 58px; height: 58px; flex: none; display: grid; place-items: center; border-radius: 14px;
+    background: linear-gradient(145deg, #2f7d8e, #1b4a5c); box-shadow: 0 6px 16px rgba(30,110,130,.35);
+  }
+  .cp-ico svg { width: 28px; height: 28px; fill: none; stroke: #e9f6f9; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .cp-txt { flex: 1; min-width: 0; }
+  .cp-txt strong { display: block; font-size: 18px; font-weight: 700; line-height: 1.25; }
+  .cp-txt small { display: block; margin-top: 4px; font-size: 14.5px; line-height: 1.4; color: #8c9ab8; }
+  .cp-chev { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #0d152e; color: #b9c6e2; font-size: 20px; }
+
+  .cp-view[hidden] { display: none; }
+  .cp-back {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 11px 18px;
+    font: 600 15px "Inter", system-ui, sans-serif; color: #f1f5ff;
+    background: #101a38; border: 1px solid #1f2a4e; border-radius: 10px;
+  }
+  .cp-back:hover { background: #16224a; }
+  .cp-back { margin-bottom: 14px; }
+  .cp-sheet { background: #fff; padding: 12px; border-radius: 12px; box-sizing: border-box; }
+  .cp-sheet table { margin: 0; }
+
+  /* ====== the 3 report tables ====== */
+.ncp {
+    --line: #0c3a42;      /* cell border colour */
+    --teal: #0c3a42; --teal-2: #124850; --plum: #4a1a3c;
+    --orange: #b8650f; --brown: #7a4410; --red: #e5171f;
+    font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+    width: 100%; overflow-x: auto; box-sizing: border-box;
+    background: var(--teal); border: 2px solid #111;
+  }
+  .ncp table {
+    width: 100%; min-width: 1100px; table-layout: fixed;
+    border-collapse: collapse; text-align: center;
+  }
+  .ncp th, .ncp td {
+    padding: 0; font-weight: 500; vertical-align: middle;
+    border: 2px solid var(--line);
+  }
+
+  .ncp .title { background: var(--teal); color: #fff; font-size: 28px; height: 40px; letter-spacing: .3px; }
+  .ncp .hd { background: var(--plum); color: #fff; font-size: 15px; height: 34px; }
+  .ncp .hub-hd { font-size: 24px; }
+  .ncp .hd-orange { background: var(--orange); font-size: 18px; height: 36px; }
+  .ncp .sub-hd { background: var(--plum); color: #fff; font-size: 14px; height: 24px; }
+
+  .ncp .hub { background: var(--teal-2); color: #fff; font-size: 14.5px; height: 25px; padding: 0 6px; white-space: nowrap; }
+  .ncp .num { background: #fff; color: #111; font-size: 13.5px; font-weight: 400; }
+  .ncp .ratio { color: #111; font-size: 16px; }
+  .ncp .g-high { background: #3f7a22; }
+  .ncp .g-mid  { background: #8b9a2c; }
+  .ncp .g-low  { background: #f2b93a; }
+  .ncp .prev { background: #fff; color: #111; font-size: 15px; font-weight: 400; }
+  .ncp .chg { background: var(--teal-2); font-size: 16px; }
+  .ncp .down { color: var(--red); }
+  .ncp .flat { color: #ffe600; }
+
+  .ncp .gt { background: var(--brown); color: #fff; font-size: 17px; font-weight: 600; height: 30px; }
+  .ncp .gt .down { color: var(--red); }
+
+  /* ---------- Narsingdi Cluster Agent Summary ---------- */
+  .nas-gap { height: 18px; }
+  .nas {
+    font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+    width: 100%; overflow-x: auto; box-sizing: border-box;
+    background: #fff; border: 2px solid #111;
+  }
+  .nas table {
+    width: 100%; min-width: 980px; table-layout: fixed;
+    border-collapse: collapse; text-align: center;
+  }
+  .nas th, .nas td { padding: 0; vertical-align: middle; border: 1px solid #1d1d1d; }
+  .nas .title { background: #0f3a43; color: #fff; font-size: 27px; font-weight: 500; height: 40px; letter-spacing: .3px; border-color: #0f3a43; }
+  .nas .hd { background: #2a1a5c; color: #fff; font-size: 17px; font-weight: 600; height: 28px; border-color: #1b1040; }
+  .nas .hub { background: #fff; color: #111; font-size: 13.5px; font-weight: 500; height: 22px; padding: 0 6px; white-space: nowrap; }
+  .nas .c { background: #fff; color: #111; font-size: 13.5px; font-weight: 400; }
+  .nas .gt { background: #fbe6a0; color: #111; font-size: 15px; font-weight: 600; height: 24px; }
+
+  /* ---------- Narsingdi Cluster - Backlog Report ---------- */
+  .nbr {
+    --navy: #1b2d63;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    width: 100%; overflow-x: auto; box-sizing: border-box;
+    background: #fff; border: 2px solid var(--navy);
+  }
+  .nbr table { width: 100%; min-width: 900px; table-layout: fixed; border-collapse: collapse; text-align: center; }
+  .nbr th, .nbr td { padding: 0; vertical-align: middle; border: 1px solid #bdbdbd; white-space: nowrap; overflow: hidden; }
+  .nbr .title { background: var(--navy); color: #fff; font-size: 32px; font-weight: 700; height: 54px; border: 1px solid var(--navy); border-bottom-color: #6f87b8; }
+  .nbr .hd { color: #fff; font-size: 16px; font-weight: 700; height: 35px; border-color: #6f87b8; }
+  .nbr .h-navy { background: var(--navy); }
+  .nbr .h-red  { background: #c0504d; }
+  .nbr .h-org  { background: #ed9b3f; }
+  .nbr .h-blue { background: #2f7bbf; }
+  .nbr .hub { background: #f2f2f2; color: #000; font-size: 17px; font-weight: 700; text-align: center; height: 23px; padding: 0 8px; }
+  .nbr .v { font-size: 17px; font-weight: 400; color: #1a9a1a; }
+  .nbr .v-red  { background: #f7d5d9; }
+  .nbr .v-org  { background: #fde9d2; }
+  .nbr .v-blue { background: #dce9f6; }
+  .nbr .dash { font-weight: 700; }
+  .nbr .bar {
+    background-color: #fff; color: #000; font-size: 17px; font-weight: 700;
+    background-image: linear-gradient(90deg, #5b9bd5 0%, #e6eff9 100%);
+    background-repeat: no-repeat; background-position: 2px 50%;
+    background-size: var(--w) calc(100% - 3px);
+  }
+  .nbr .ratio { background: #fff; color: #000; font-size: 17px; font-weight: 400; }
+  .nbr .gt { background: var(--navy); color: #fff; font-size: 17px; font-weight: 700; height: 23px; border-color: #6f87b8; }
+  .nbr .gt.l { text-align: center; padding: 0 8px; }
+
+  /* editable cells */
+  .nas [contenteditable="true"], .nbr [contenteditable="true"] { cursor: text; outline: none; }
+  .nas [contenteditable="true"]:hover, .nbr [contenteditable="true"]:hover { box-shadow: inset 0 0 0 1px #ff9800; }
+  .nas [contenteditable="true"]:focus, .nbr [contenteditable="true"]:focus { box-shadow: inset 0 0 0 2px #ff9800; }
+
+
+  /* ====== toolbar: sits ABOVE the report card, separate from it ====== */
+  .cp-bottombar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+  .cp-bottombar .cp-back { margin: 0; }
+  .cp-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
+  .cp-tb-spacer { flex: 1; }
+  .cp-toolbar .cp-back { margin: 0; }
+  .cp-btn-home { background: #12406a; border-color: #1f5f9a; }
+  .cp-btn-home:hover { background: #185185; }
+  .cp-back:focus-visible, .cp-btn-home:focus-visible { outline: 2px solid #5fb3c4; outline-offset: 2px; }
+  .cp-back[disabled] { opacity: .4; cursor: not-allowed; }
+
+  /* refresh button (Agent Summary / Backlog Report) */
+  .rf-btn { background: #0f3a43; border-color: #2f7f92; }
+  .rf-btn:hover { background: #17505c; }
+  .rf-btn:focus-visible { outline: 2px solid #ff9800; outline-offset: 2px; }
+  .rf-ic { display: inline-block; font-size: 17px; line-height: 1; }
+  .rf-btn.spin .rf-ic { animation: rf-spin .6s linear; }
+  @keyframes rf-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .rf-btn.spin .rf-ic { animation: none; } }
+  @media (max-width: 640px) { .cp-tb-spacer { display: none; } .cp-toolbar .cp-back { flex: 1 1 auto; justify-content: center; } }
+</style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
 <div class="toast-notify" id="toastNotify">
@@ -1040,13 +1185,10 @@ try {
 <i class="fa-solid fa-truck-fast"></i>
 </div>
 </div>
-<div class="bg-[#131d36] border border-slate-800 rounded-xl px-3.5 py-3 gap-2.5 flex items-center justify-between shadow-md hover:-translate-y-0.5 hover:border-emerald-800/60 transition-all duration-200 cursor-pointer" onclick="openCurrentDayKpiReport()" title="Open KPI Report" data-hide-key="cardKpi">
+<div class="bg-[#131d36] border border-slate-800 rounded-xl px-3.5 py-3 gap-2.5 flex items-center justify-between shadow-md hover:-translate-y-0.5 hover:border-emerald-800/60 transition-all duration-200 cursor-pointer" onclick="openClusterReport()" title="Cluster Report" data-hide-key="cardKpi">
 <div class="min-w-0">
-<span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">KPI REPORT</span>
-<div class="text-lg leading-tight font-black truncate text-emerald-400 mt-1">KPI Report</div>
-<span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mt-0.5">
-<i class="fa-solid fa-chart-pie"></i> View Hub KPI
-                    </span>
+<span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">CLUSTER REPORT</span>
+<div class="text-lg leading-tight font-black truncate text-emerald-400 mt-1">Cluster Report</div>
 </div>
 <div class="w-9 h-9 shrink-0 bg-emerald-950/60 rounded-xl flex items-center justify-center text-emerald-400 text-base border border-emerald-800/40">
 <i class="fa-solid fa-chart-pie"></i>
@@ -1221,90 +1363,457 @@ try {
             </p>
 </div>
 </div>
-<!-- CURRENT DAY ALL-HUB KPI REPORT -->
-<div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[75] flex items-center justify-center p-3 md:p-5" id="currentDayKpiReportModal">
-<div class="bg-[#131d36] border border-slate-700 rounded-2xl w-full max-w-[1500px] max-h-[94vh] overflow-hidden shadow-2xl">
-<div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-800">
-<div>
-<h2 class="text-base md:text-lg font-black text-white flex items-center gap-2">
-<i class="fa-solid fa-chart-pie text-emerald-400"></i> ALL HUB CURRENT DAY KPI REPORT
-                    </h2>
-<p class="text-[10px] md:text-xs text-slate-400 font-semibold mt-1">Separate Morning &amp; Closing KPI for all hubs — <span id="currentDayKpiReportDate">-</span></p>
-<p id="kpiMissingNote" class="text-[10px] md:text-xs font-bold text-amber-400 mt-1" style="display:none"></p>
+<!-- CLUSTER REPORT (3 report cards) -->
+<div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[75] flex items-center justify-center p-3 md:p-5" id="clusterReportModal" onclick="if (event.target === this) closeClusterReport()">
+<div class="w-full max-w-[1336px] max-h-[92vh] overflow-y-auto bg-[#0a1128] rounded-2xl border border-slate-800 p-4 md:p-6" id="clusterReportPanel">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-sm md:text-base font-black text-emerald-300"><i class="fa-solid fa-chart-pie mr-1"></i> CLUSTER REPORT</h2>
+<button class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black" onclick="closeClusterReport()" type="button">✕ Close</button>
 </div>
-<div class="flex items-center gap-2">
-<button class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[10px] font-black" id="btnKpiPreviousDay" onclick="toggleKpiPreviousDay()" type="button">
-<i class="fa-solid fa-calendar-minus"></i> Previous Day
-                    </button>
-<button class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[10px] font-black" onclick="renderCurrentDayKpiReport()" type="button">
-<i class="fa-solid fa-rotate"></i> Refresh
-                    </button>
-<button class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black" onclick="closeCurrentDayKpiReport()" type="button">
-<i class="fa-solid fa-xmark"></i> Close
-                    </button>
+  <!-- ========== HOME (your report-sections area) ========== -->
+  <div id="home">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+
+      <!-- ===== 3 CARDS: paste into your grid ===== -->
+      <button class="cp-card" type="button" data-cp="cp-perf">
+        <span class="cp-ico"><svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg></span>
+        <span class="cp-txt"><strong>Performance Comparison</strong><small>Hub-wise delivery, ratio, previous day</small></span>
+        <span class="cp-chev">›</span>
+      </button>
+      <button class="cp-card" type="button" data-cp="cp-agent">
+        <span class="cp-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3 2.6-4.6 5.5-4.6s5.1 1.6 5.5 4.6"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.6c1.8.5 3 1.9 3.3 4.4"/></svg></span>
+        <span class="cp-txt"><strong>Agent Summary</strong><small>Present, weekend, absent, training</small></span>
+        <span class="cp-chev">›</span>
+      </button>
+      <button class="cp-card" type="button" data-cp="cp-backlog">
+        <span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/></svg></span>
+        <span class="cp-txt"><strong>Backlog Report</strong><small>Reverse, return pending, backlog</small></span>
+        <span class="cp-chev">›</span>
+      </button>
+      <!-- ===== /CARDS ===== -->
+
+    </div>
+  </div>
+
+  <!-- ========== 3 VIEWS: each opens when its card is clicked ========== -->
+  <section class="cp-view" id="cp-perf" hidden>
+
+<div class="cp-sheet">
+<div class="ncp">
+  <table>
+    <colgroup>
+      <col style="width:15%"><col style="width:7.5%"><col style="width:7.3%"><col style="width:7.5%">
+      <col style="width:7%"><col style="width:6.7%"><col style="width:6.7%"><col style="width:6.7%">
+      <col style="width:8.2%"><col style="width:7.9%"><col style="width:8.2%"><col style="width:10.9%">
+    </colgroup>
+
+    <thead>
+      <tr><th class="title" colspan="12">Narsingdi Cluster Performance Comparison</th></tr>
+      <tr>
+        <th class="hd hub-hd" rowspan="2">Hub Name</th>
+        <th class="hd" rowspan="2">Attempted</th>
+        <th class="hd" rowspan="2">Delivered</th>
+        <th class="hd" rowspan="2">Partial Delivery</th>
+        <th class="hd" rowspan="2">Exchange</th>
+        <th class="hd" rowspan="2">Field Hold</th>
+        <th class="hd" rowspan="2">Field Return</th>
+        <th class="hd" rowspan="2">Paid Return</th>
+        <th class="hd hd-orange" colspan="2">Total Delivered</th>
+        <th class="hd hd-orange" colspan="2">Previous Day Comparision</th>
+      </tr>
+      <tr>
+        <th class="sub-hd">Qty</th>
+        <th class="sub-hd">Ratio</th>
+        <th class="sub-hd" colspan="2">Pre. Day Ratio</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td class="hub">Narsingdi</td>
+        <td class="num">1045</td><td class="num">645</td><td class="num">5</td><td class="num">7</td>
+        <td class="num">248</td><td class="num">98</td><td class="num">43</td>
+        <td class="num">700</td><td class="ratio g-high">67%</td>
+        <td class="prev">68%</td><td class="chg"><span class="down">▼1%</span></td>
+      </tr>
+      <tr>
+        <td class="hub">Narsingdi- Monohardi</td>
+        <td class="num">360</td><td class="num">234</td><td class="num">1</td><td class="num">1</td>
+        <td class="num">51</td><td class="num">63</td><td class="num">10</td>
+        <td class="num">246</td><td class="ratio g-high">68%</td>
+        <td class="prev">70%</td><td class="chg"><span class="down">▼2%</span></td>
+      </tr>
+      <tr>
+        <td class="hub">Narsingdi-Pachdona</td>
+        <td class="num">879</td><td class="num">445</td><td class="num">5</td><td class="num">5</td>
+        <td class="num">240</td><td class="num">145</td><td class="num">39</td>
+        <td class="num">494</td><td class="ratio g-low">56%</td>
+        <td class="prev">58%</td><td class="chg"><span class="down">▼2%</span></td>
+      </tr>
+      <tr>
+        <td class="hub">Narsingdi-Palash</td>
+        <td class="num">351</td><td class="num">210</td><td class="num">1</td><td class="num">2</td>
+        <td class="num">90</td><td class="num">43</td><td class="num">5</td>
+        <td class="num">218</td><td class="ratio g-mid">62%</td>
+        <td class="prev">70%</td><td class="chg"><span class="down">▼8%</span></td>
+      </tr>
+      <tr>
+        <td class="hub">Narsingdi-Shibpur</td>
+        <td class="num">379</td><td class="num">222</td><td class="num">4</td><td class="num">0</td>
+        <td class="num">85</td><td class="num">57</td><td class="num">11</td>
+        <td class="num">237</td><td class="ratio g-mid">63%</td>
+        <td class="prev">63%</td><td class="chg"><span class="flat">~0%</span></td>
+      </tr>
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td class="gt">Grand Total</td>
+        <td class="gt">3014</td><td class="gt">1756</td><td class="gt">16</td><td class="gt">15</td>
+        <td class="gt">714</td><td class="gt">406</td><td class="gt">108</td>
+        <td class="gt">1895</td><td class="gt">63%</td>
+        <td class="gt">69%</td><td class="gt"><span class="down">▼6%</span></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+    </div>
+  <div class="cp-bottombar"><button class="cp-back cp-btn-home" type="button" data-dashboard title="Go to the main dashboard">⌂ Back to Dashboard</button>
+  </div>
+  </section>
+
+  <section class="cp-view" id="cp-agent" hidden>
+
+<div class="cp-sheet">
+<div class="nas">
+  <table>
+    <colgroup>
+      <col style="width:16.4%"><col style="width:8.8%"><col style="width:8%"><col style="width:8.6%">
+      <col style="width:7.4%"><col style="width:7.4%"><col style="width:7.6%"><col style="width:8%">
+      <col style="width:8.8%"><col style="width:9.4%"><col style="width:9.6%">
+    </colgroup>
+    <thead>
+      <tr><th class="title" colspan="11">Narsingdi Cluster Agent Summary</th></tr>
+      <tr>
+        <th class="hd">Hub</th><th class="hd">Total Agents</th><th class="hd">Present</th><th class="hd">Ratio</th>
+        <th class="hd">Weekend</th><th class="hd">Ratio</th><th class="hd">Absent</th><th class="hd">Ratio</th>
+        <th class="hd">Training</th><th class="hd">Onboarded</th><th class="hd">Pipeline</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="hub">Narsingdi</td><td class="c" data-c="tot">37</td><td class="c" contenteditable="true" spellcheck="false" data-k="p"></td><td class="c" data-c="pr">89%</td><td class="c" contenteditable="true" spellcheck="false" data-k="w"></td><td class="c" data-c="wr">11%</td><td class="c" contenteditable="true" spellcheck="false" data-k="a"></td><td class="c" data-c="ar">0%</td><td class="c" contenteditable="true" spellcheck="false" data-k="t"></td><td class="c" contenteditable="true" spellcheck="false" data-k="o"></td><td class="c" contenteditable="true" spellcheck="false" data-k="pl"></td></tr>
+      <tr><td class="hub">Narsingdi- Monohardi</td><td class="c" data-c="tot">14</td><td class="c" contenteditable="true" spellcheck="false" data-k="p"></td><td class="c" data-c="pr">86%</td><td class="c" contenteditable="true" spellcheck="false" data-k="w"></td><td class="c" data-c="wr">14%</td><td class="c" contenteditable="true" spellcheck="false" data-k="a"></td><td class="c" data-c="ar">0%</td><td class="c" contenteditable="true" spellcheck="false" data-k="t"></td><td class="c" contenteditable="true" spellcheck="false" data-k="o"></td><td class="c" contenteditable="true" spellcheck="false" data-k="pl"></td></tr>
+      <tr><td class="hub">Narsingdi-Pachdona</td><td class="c" data-c="tot">24</td><td class="c" contenteditable="true" spellcheck="false" data-k="p"></td><td class="c" data-c="pr">83%</td><td class="c" contenteditable="true" spellcheck="false" data-k="w"></td><td class="c" data-c="wr">8%</td><td class="c" contenteditable="true" spellcheck="false" data-k="a"></td><td class="c" data-c="ar">8%</td><td class="c" contenteditable="true" spellcheck="false" data-k="t"></td><td class="c" contenteditable="true" spellcheck="false" data-k="o"></td><td class="c" contenteditable="true" spellcheck="false" data-k="pl"></td></tr>
+      <tr><td class="hub">Narsingdi-Palash</td><td class="c" data-c="tot">14</td><td class="c" contenteditable="true" spellcheck="false" data-k="p"></td><td class="c" data-c="pr">86%</td><td class="c" contenteditable="true" spellcheck="false" data-k="w"></td><td class="c" data-c="wr">14%</td><td class="c" contenteditable="true" spellcheck="false" data-k="a"></td><td class="c" data-c="ar">0%</td><td class="c" contenteditable="true" spellcheck="false" data-k="t"></td><td class="c" contenteditable="true" spellcheck="false" data-k="o"></td><td class="c" contenteditable="true" spellcheck="false" data-k="pl"></td></tr>
+      <tr><td class="hub">Narsingdi-Shibpur</td><td class="c" data-c="tot">17</td><td class="c" contenteditable="true" spellcheck="false" data-k="p"></td><td class="c" data-c="pr">76%</td><td class="c" contenteditable="true" spellcheck="false" data-k="w"></td><td class="c" data-c="wr">18%</td><td class="c" contenteditable="true" spellcheck="false" data-k="a"></td><td class="c" data-c="ar">6%</td><td class="c" contenteditable="true" spellcheck="false" data-k="t"></td><td class="c" contenteditable="true" spellcheck="false" data-k="o"></td><td class="c" contenteditable="true" spellcheck="false" data-k="pl"></td></tr>
+    </tbody>
+    <tfoot>
+      <tr id="nas-total"><td class="gt">Total</td><td class="gt" data-t="tot">106</td><td class="gt" data-t="p">90</td><td class="gt" data-t="pr">85%</td><td class="gt" data-t="w">13</td><td class="gt" data-t="wr">12%</td><td class="gt" data-t="a">3</td><td class="gt" data-t="ar">3%</td><td class="gt" data-t="t">2</td><td class="gt" data-t="o">0</td><td class="gt" data-t="pl">0</td></tr>
+    </tfoot>
+  </table>
+</div>
+    </div>
+  <div class="cp-bottombar"><button class="cp-back cp-btn-home" type="button" data-dashboard title="Go to the main dashboard">⌂ Back to Dashboard</button>
+    <button class="cp-back rf-btn" type="button" data-refresh="nas" title="Reset edited values"><span class="rf-ic">↻</span> Refresh</button>
+  </div>
+  </section>
+
+  <section class="cp-view" id="cp-backlog" hidden>
+
+<div class="cp-sheet">
+<div class="nbr">
+  <table>
+    <colgroup>
+      <col style="width:21%"><col style="width:18.5%"><col style="width:15.5%">
+      <col style="width:13%"><col style="width:15%"><col style="width:17%">
+    </colgroup>
+    <thead>
+      <tr><th class="title" colspan="6">Narsingdi Cluster - Backlog Report Report</th></tr>
+      <tr>
+        <th class="hd h-navy">Hub</th>
+        <th class="hd h-red">Reverse Pending</th>
+        <th class="hd h-org">Return Pending</th>
+        <th class="hd h-blue">Backlog</th>
+        <th class="hd h-navy">Total Issues</th>
+        <th class="hd h-navy">Ratio of Cluster</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="hub">Narsingdi</td><td class="v v-red" contenteditable="true" spellcheck="false" data-k="r"></td><td class="v v-org" contenteditable="true" spellcheck="false" data-k="t"></td><td class="v v-blue" contenteditable="true" spellcheck="false" data-k="b"></td><td class="bar" data-c="tot" style="--w:60.2%">262</td><td class="ratio" data-c="ratio">25%</td></tr>
+      <tr><td class="hub">Narsingdi-Monohardi</td><td class="v v-red" contenteditable="true" spellcheck="false" data-k="r"></td><td class="v v-org" contenteditable="true" spellcheck="false" data-k="t"></td><td class="v v-blue" contenteditable="true" spellcheck="false" data-k="b"></td><td class="bar" data-c="tot" style="--w:41.8%">169</td><td class="ratio" data-c="ratio">16%</td></tr>
+      <tr><td class="hub">Narsingdi-Pachdona</td><td class="v v-red" contenteditable="true" spellcheck="false" data-k="r"></td><td class="v v-org" contenteditable="true" spellcheck="false" data-k="t"></td><td class="v v-blue" contenteditable="true" spellcheck="false" data-k="b"></td><td class="bar" data-c="tot" style="--w:89.0%">408</td><td class="ratio" data-c="ratio">39%</td></tr>
+      <tr><td class="hub">Narsingdi-Palash</td><td class="v v-red" contenteditable="true" spellcheck="false" data-k="r"></td><td class="v v-org" contenteditable="true" spellcheck="false" data-k="t"></td><td class="v v-blue" contenteditable="true" spellcheck="false" data-k="b"></td><td class="bar" data-c="tot" style="--w:39.1%">155</td><td class="ratio" data-c="ratio">15%</td></tr>
+      <tr><td class="hub">Narsingdi-Shibpur</td><td class="v v-red" contenteditable="true" spellcheck="false" data-k="r"></td><td class="v v-org" contenteditable="true" spellcheck="false" data-k="t"></td><td class="v v-blue" contenteditable="true" spellcheck="false" data-k="b"></td><td class="bar" data-c="tot" style="--w:18.0%">48</td><td class="ratio" data-c="ratio">5%</td></tr>
+    </tbody>
+    <tfoot>
+      <tr id="nbr-total"><td class="gt l">Grand Total</td><td class="gt" data-t="r">269</td><td class="gt" data-t="t">160</td><td class="gt" data-t="b">613</td><td class="gt" data-t="tot">1,042</td><td class="gt" data-t="ratio">100%</td></tr>
+    </tfoot>
+  </table>
+</div>
+    </div>
+  <div class="cp-bottombar"><button class="cp-back cp-btn-home" type="button" data-dashboard title="Go to the main dashboard">⌂ Back to Dashboard</button>
+    <button class="cp-back rf-btn" type="button" data-refresh="nbr" title="Reset edited values"><span class="rf-ic">↻</span> Refresh</button>
+  </div>
+  </section>
 </div>
 </div>
-<div class="p-4 overflow-auto max-h-[calc(94vh-76px)] space-y-5">
-<section>
-<div class="flex items-center justify-between mb-2">
-<h3 class="text-sm md:text-base font-black text-sky-300"><i class="fa-solid fa-sun mr-1"></i> MORNING KPI REPORT</h3>
-<span class="text-[10px] font-bold text-slate-400" id="currentDayMorningCount"></span>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-3" id="currentDayMorningCards"></div>
-<div class="overflow-x-auto rounded-xl border border-slate-800">
-<table class="w-full text-left text-[10px] md:text-[11px] text-slate-300 whitespace-nowrap">
-<thead class="bg-[#0b1329] text-slate-300 uppercase font-black border-b border-slate-700">
-<tr>
-<th class="p-2.5 sticky left-0 bg-[#0b1329] z-10">Hub</th>
-<th class="p-2.5 text-center">Van In</th>
-<th class="p-2.5 text-center">Last Dispatch</th>
-<th class="p-2.5 text-center">Elapsed</th>
-<th class="p-2.5 text-center">Total Parcels</th>
-<th class="p-2.5 text-center">Assign</th>
-<th class="p-2.5 text-center">Assign Rate</th>
-<th class="p-2.5 text-center">Office Hold</th>
-<th class="p-2.5 text-center">Office Hold Ratio</th>
-<th class="p-2.5 text-center">Total DA</th>
-<th class="p-2.5 text-center">Present</th>
-<th class="p-2.5 text-center">Present Ratio</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-800/80" id="currentDayMorningReportBody"></tbody>
-<tfoot class="bg-[#0b1329] border-t-2 border-sky-500 font-black text-white" id="currentDayMorningReportFoot"></tfoot>
-</table>
-</div>
-</section>
-<section>
-<div class="flex items-center justify-between mb-2">
-<h3 class="text-sm md:text-base font-black text-emerald-300"><i class="fa-solid fa-moon mr-1"></i> CLOSING KPI REPORT</h3>
-<span class="text-[10px] font-bold text-slate-400" id="currentDayClosingCount"></span>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-3" id="currentDayClosingCards"></div>
-<div class="overflow-x-auto rounded-xl border border-slate-800">
-<table class="w-full text-left text-[10px] md:text-[11px] text-slate-300 whitespace-nowrap">
-<thead class="bg-[#0b1329] text-slate-300 uppercase font-black border-b border-slate-700">
-<tr>
-<th class="p-2.5 sticky left-0 bg-[#0b1329] z-10">Hub</th>
-<th class="p-2.5 text-center">Attempt For Delivery</th>
-<th class="p-2.5 text-center">Delivered</th>
-<th class="p-2.5 text-center">Delivered %</th>
-<th class="p-2.5 text-center">Field Hold</th>
-<th class="p-2.5 text-center">Field Hold %</th>
-<th class="p-2.5 text-center">Field Return</th>
-<th class="p-2.5 text-center">Field Return %</th>
-<th class="p-2.5 text-center">Office Hold</th>
-<th class="p-2.5 text-center">Total Hold</th>
-<th class="p-2.5 text-center">Collection</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-800/80" id="currentDayClosingReportBody"></tbody>
-<tfoot class="bg-[#0b1329] border-t-2 border-emerald-500 font-black text-white" id="currentDayClosingReportFoot"></tfoot>
-</table>
-</div>
-</section>
-</div>
-</div>
-</div>
+<script>
+(function () {
+  var HOME = document.getElementById("home");      /* <- change to your report-sections container */
+  var DASHBOARD_URL = "";                          /* <- set your main dashboard link here, e.g. "index.html". Empty = go to the report list */
+  var views = Array.prototype.slice.call(document.querySelectorAll(".cp-view"));
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".cp-card"));
+  var current = null;
+
+  function show(id) {
+    current = id;
+    if (HOME) HOME.hidden = !!id;
+    views.forEach(function (v) { v.hidden = v.id !== id; });
+    var pn = document.getElementById("clusterReportPanel"); if (pn) pn.scrollTop = 0;
+    var tgt = id ? document.querySelector("#" + id + " [data-cp-back]") : null;
+    if (id && tgt) tgt.focus({ preventScroll: true });
+    else if (!id) { var i = cards.indexOf(document.querySelector('[data-cp="' + (lastOpen || "") + '"]')); (cards[i] || cards[0]).focus({ preventScroll: true }); }
+  }
+  var lastOpen = null;
+  function open(id) { lastOpen = id; show(id); }
+  document.addEventListener("cp:reset", function () { show(null); });
+
+  cards.forEach(function (b) { b.addEventListener("click", function () { open(b.getAttribute("data-cp")); }); });
+
+  /* Back: return to the report list */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-cp-back]"), function (b) {
+    b.addEventListener("click", function () { show(null); });
+  });
+
+
+  /* Back to Dashboard: separate from the report card */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-dashboard]"), function (b) {
+    b.addEventListener("click", function () {
+      document.dispatchEvent(new CustomEvent("cp:dashboard"));     /* hook for your dashboard */
+      if (DASHBOARD_URL) window.location.href = DASHBOARD_URL; else show(null);
+    });
+  });
+
+  /* Trackpad / mouse pad: swipe left or right = previous / next report page */
+  function goRelative(dir) {
+    var i = views.findIndex(function (v) { return v.id === current; });
+    if (i < 0) return;
+    open(views[(i + dir + views.length) % views.length].id);
+  }
+  /* true if a horizontally scrollable box (e.g. a wide table) can still scroll that way */
+  function canScrollX(el, dir) {
+    while (el && el !== document.body) {
+      if (el.scrollWidth > el.clientWidth + 1) {
+        var ox = getComputedStyle(el).overflowX;
+        if (ox === "auto" || ox === "scroll") {
+          if (dir > 0 && el.scrollLeft + el.clientWidth < el.scrollWidth - 1) return true;
+          if (dir < 0 && el.scrollLeft > 0) return true;
+        }
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+  var swipeAcc = 0, swipeLock = 0, swipeReset = null;
+  document.addEventListener("wheel", function (e) {
+    if (!current || e.ctrlKey) return;                       /* ctrl + wheel is browser zoom / pinch */
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;     /* vertical scrolling: leave alone */
+    if (e.deltaX > 0) { e.preventDefault(); return; }    /* forward swipe: ignored */
+    var dir = -1;                                        /* back swipe */
+    if (canScrollX(e.target, dir)) return;                   /* let a wide table scroll sideways first */
+    e.preventDefault();                                      /* stop the browser's own back/forward swipe */
+    if (Date.now() < swipeLock) return;
+    swipeAcc += e.deltaX;
+    clearTimeout(swipeReset);
+    swipeReset = setTimeout(function () { swipeAcc = 0; }, 150);
+    if (Math.abs(swipeAcc) < 60) return;
+    swipeLock = Date.now() + 600;                            /* one page per swipe */
+    swipeAcc = 0;
+    goRelative(dir);
+  }, { passive: false });
+
+  /* Mouse side buttons: thumb Back = previous report, thumb Forward = next report */
+  var sideLock = 0;
+  function sideButton(e) {
+    if (!current || (e.button !== 3 && e.button !== 4)) return;
+    e.preventDefault();                                     /* stop the browser's own back/forward */
+    e.stopPropagation();
+    if (e.type !== "mousedown") return;                     /* act once, on press */
+    if (Date.now() < sideLock) return;
+    sideLock = Date.now() + 300;
+    goRelative(e.button === 3 ? -1 : 1);
+  }
+  ["mousedown", "mouseup", "auxclick"].forEach(function (t) {
+    document.addEventListener(t, sideButton, true);
+  });
+
+  /* Keyboard:
+     Esc = back to the list.
+     Left / Right arrow (or Ctrl/Cmd + Left / Right) = previous / next report page.
+     On the list, arrow keys move between the report cards. */
+  document.addEventListener("keydown", function (e) {
+    var inCell = !!(e.target && e.target.isContentEditable);
+    var mod = e.ctrlKey || e.metaKey;
+    if (current) {
+      if (e.key === "Escape" && !inCell) { show(null); return; }
+      if (e.altKey || e.shiftKey) return;
+      if (e.key !== "ArrowLeft") return;                /* only Back (←) is used; no forward */
+      if (inCell && !mod) return;                 /* plain arrows move between table cells while editing */
+      var i = views.findIndex(function (v) { return v.id === current; });
+      if (i < 0) return;
+      e.preventDefault();
+      open(views[(i - 1 + views.length) % views.length].id);
+      return;
+    }
+    if (e.altKey || mod) return;
+    var j = cards.indexOf(document.activeElement);
+    if (j < 0) return;
+    var step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    cards[(j + step + cards.length) % cards.length].focus();
+  });
+})();
+</script>
+<script>
+(function () {
+  function num(t) { var n = parseFloat(String(t).replace(/[^0-9.\-]/g, "")); return isNaN(n) ? 0 : n; }
+  function pct(a, b) { return (b ? Math.round(a * 100 / b) : 0) + "%"; }
+  function k(tr, key) { return tr.querySelector('[data-k="' + key + '"]'); }
+  function c(tr, key) { return tr.querySelector('[data-c="' + key + '"]'); }
+
+  /* ---------- Agent Summary ---------- */
+  var nas = document.querySelector(".nas");
+  function nasCalc() {
+    var T = { tot: 0, p: 0, w: 0, a: 0, t: 0, o: 0, pl: 0 };
+    Array.prototype.forEach.call(nas.querySelectorAll("tbody tr"), function (tr) {
+      var p = num(k(tr, "p").textContent), w = num(k(tr, "w").textContent), a = num(k(tr, "a").textContent);
+      var tot = p + w + a;                       /* Total Agents = Present + Weekend + Absent */
+      c(tr, "tot").textContent = tot;
+      c(tr, "pr").textContent = pct(p, tot);
+      c(tr, "wr").textContent = pct(w, tot);
+      c(tr, "ar").textContent = pct(a, tot);
+      T.tot += tot; T.p += p; T.w += w; T.a += a;
+      T.t += num(k(tr, "t").textContent); T.o += num(k(tr, "o").textContent); T.pl += num(k(tr, "pl").textContent);
+    });
+    var f = nas.querySelector("#nas-total");
+    function set(key, v) { f.querySelector('[data-t="' + key + '"]').textContent = v; }
+    set("tot", T.tot); set("p", T.p); set("w", T.w); set("a", T.a); set("t", T.t); set("o", T.o); set("pl", T.pl);
+    set("pr", pct(T.p, T.tot)); set("wr", pct(T.w, T.tot)); set("ar", pct(T.a, T.tot));
+  }
+
+  /* ---------- Backlog Report ---------- */
+  var nbr = document.querySelector(".nbr");
+  function nbrCalc() {
+    var rows = Array.prototype.slice.call(nbr.querySelectorAll("tbody tr"));
+    var G = { r: 0, t: 0, b: 0 }, tots = [];
+    rows.forEach(function (tr) {
+      var r = num(k(tr, "r").textContent), t = num(k(tr, "t").textContent), b = num(k(tr, "b").textContent);
+      G.r += r; G.t += t; G.b += b; tots.push(r + t + b);   /* Total Issues = Reverse + Return + Backlog */
+    });
+    var grand = G.r + G.t + G.b, mx = Math.max.apply(null, tots.concat([1]));
+    rows.forEach(function (tr, i) {
+      var cell = c(tr, "tot");
+      cell.textContent = tots[i];
+      cell.style.setProperty("--w", (8.5 + 80.5 * tots[i] / mx).toFixed(1) + "%");
+      c(tr, "ratio").textContent = pct(tots[i], grand);
+    });
+    var f = nbr.querySelector("#nbr-total");
+    function set(key, v) { f.querySelector('[data-t="' + key + '"]').textContent = v; }
+    set("r", G.r); set("t", G.t); set("b", G.b);
+    set("tot", grand.toLocaleString("en-US")); set("ratio", grand ? "100%" : "0%");
+  }
+
+  /* ---------- shared editing behaviour ---------- */
+  function wire(root, calc, isBacklog) {
+    root.addEventListener("input", calc);
+    root.addEventListener("paste", function (e) {
+      if (!e.target.isContentEditable) return;
+      e.preventDefault();
+      var t = (e.clipboardData || window.clipboardData).getData("text").replace(/\s+/g, " ").trim();
+      document.execCommand("insertText", false, t);
+    });
+    /* Arrow keys / Enter move from one box to the next */
+    root.addEventListener("keydown", function (e) {
+      var td = e.target;
+      if (!td.isContentEditable || e.altKey || e.ctrlKey || e.metaKey) return;
+      var rows = Array.prototype.slice.call(root.querySelectorAll("tbody tr"));
+      var r = rows.indexOf(td.parentNode);
+      var cells = function (tr) { return Array.prototype.slice.call(tr.querySelectorAll('[contenteditable="true"]')); };
+      var ci = cells(td.parentNode).indexOf(td);
+      var go = null;
+      switch (e.key) {
+        case "ArrowRight": go = cells(td.parentNode)[ci + 1]; break;
+        case "ArrowLeft":  go = cells(td.parentNode)[ci - 1]; break;
+        case "ArrowDown":  go = rows[r + 1] && cells(rows[r + 1])[ci]; break;
+        case "ArrowUp":    go = rows[r - 1] && cells(rows[r - 1])[ci]; break;
+        case "Enter":
+          if (e.shiftKey) go = rows[r - 1] && cells(rows[r - 1])[ci];
+          else {
+            go = rows[r + 1] && cells(rows[r + 1])[ci];
+            if (!go) {                                   /* bottom of column: continue at top of the next column */
+              var nextCol = cells(rows[0])[ci + 1];
+              go = nextCol || null;
+            }
+          }
+          break;
+        default: return;
+      }
+      e.preventDefault();
+      if (go) go.focus(); else if (e.key === "Enter") td.blur();
+    });
+    root.addEventListener("focusin", function (e) {
+      var t = e.target;
+      if (!t.isContentEditable) return;
+      if (isBacklog && t.textContent.trim() === "-") t.textContent = "";
+      var r = document.createRange(); r.selectNodeContents(t);
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    });
+    root.addEventListener("focusout", function (e) {         /* tidy up what was typed */
+      var t = e.target;
+      if (!t.isContentEditable) return;
+      var v = num(t.textContent);
+      if (isBacklog) { t.textContent = v === 0 ? "-" : v; t.classList.toggle("dash", v === 0); }
+      else { t.textContent = v; }
+      calc();
+    });
+  }
+  wire(nas, nasCalc, false);
+  wire(nbr, nbrCalc, true);
+  /* ---------- Refresh buttons: put the edited cells back to their original values ---------- */
+  function clearRoot(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('[contenteditable="true"]'), function (el) {
+      el.textContent = "";
+      el.classList.remove("dash");
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("[data-refresh]");
+    if (!btn) return;
+    var key = btn.getAttribute("data-refresh"), root = key === "nas" ? nas : nbr;
+    root.dispatchEvent(new CustomEvent("ncp:refresh", { detail: { table: key } }));   /* hook for live data */
+    if (document.activeElement && root.contains(document.activeElement)) document.activeElement.blur();
+    clearRoot(root);
+    (key === "nas" ? nasCalc : nbrCalc)();
+    btn.classList.remove("spin"); void btn.offsetWidth; btn.classList.add("spin");
+  });
+  nasCalc(); nbrCalc();
+})();
+</script>
+<script>
+function openClusterReport() {
+  var m = document.getElementById('clusterReportModal');
+  if (!m) return;
+  m.classList.remove('hidden');
+  document.dispatchEvent(new CustomEvent('cp:reset'));
+}
+function closeClusterReport() {
+  var m = document.getElementById('clusterReportModal');
+  if (m) m.classList.add('hidden');
+  document.dispatchEvent(new CustomEvent('cp:reset'));   /* drop any open report view and its key/mouse handlers */
+}
+document.addEventListener('cp:dashboard', closeClusterReport);   /* "Back to Dashboard" inside a report */
+</script>
 <!-- COMBINED REPORT VIEW -->
 <div class="hidden report-body-bg min-h-screen" id="hubReportView">
 <div class="rcv-panel" id="reportCheckPanel" data-html2canvas-ignore="true">
@@ -6405,24 +6914,6 @@ const ACCOUNTS = [
             return { present, total };
         }
 
-        function openCurrentDayKpiReport() {
-            const modal = document.getElementById('currentDayKpiReportModal');
-            if (!modal) return;
-            kpiPreviousDayMode = false;
-            kpiReportTargetISO = getTodayISO();
-            const btn = document.getElementById('btnKpiPreviousDay');
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-calendar-minus"></i> Previous Day';
-            renderCurrentDayKpiReport();
-            modal.classList.remove('hidden');
-        }
-
-        function closeCurrentDayKpiReport() {
-            document.getElementById('currentDayKpiReportModal')?.classList.add('hidden');
-        }
-
-        let kpiPreviousDayMode = false;
-        let kpiReportTargetISO = getTodayISO();
-
         function getKpiHistoryFields(hubId, targetISO) {
             const history = hubReportHistory?.[hubId] || {};
             const entry = history[targetISO] || Object.values(history).find(e => e && e.date === targetISO);
@@ -6481,161 +6972,6 @@ const ACCOUNTS = [
                     status: isCurrent ? 'Current Day' : (rawDate ? 'Other Date' : 'No Report')
                 };
             });
-        }
-
-        function renderCurrentDayKpiReport() {
-            const morningBody = document.getElementById('currentDayMorningReportBody');
-            const morningFoot = document.getElementById('currentDayMorningReportFoot');
-            const closingBody = document.getElementById('currentDayClosingReportBody');
-            const closingFoot = document.getElementById('currentDayClosingReportFoot');
-            const morningCards = document.getElementById('currentDayMorningCards');
-            const closingCards = document.getElementById('currentDayClosingCards');
-            const dateEl = document.getElementById('currentDayKpiReportDate');
-            if (!morningBody || !morningFoot || !closingBody || !closingFoot) return;
-
-            const targetISO = kpiReportTargetISO || getTodayISO();
-            const rows = getCurrentDayKpiRows(targetISO);
-            const currentRows = rows.filter(r => r.isCurrent);
-            // Je hub-er aajker report nei, tar naam dekhano (ta-i 'faka' dekhar karon)
-            const missingNote = document.getElementById('kpiMissingNote');
-            if (missingNote) {
-                const missing = rows.filter(r => !r.isCurrent).map(r => String(r.hub.name || 'HUB').replace(/\s*Hub$/i, '').trim());
-                missingNote.style.display = missing.length ? '' : 'none';
-                missingNote.textContent = missing.length ? ('Aajker report nei: ' + missing.join(', ') + ' (tarikh niye report lekhun)') : '';
-            }
-            const sum = key => currentRows.reduce((a, r) => a + (Number(r[key]) || 0), 0);
-            const totalParcels = sum('totalParcels');
-            const totalAssign = sum('totalAssign');
-            const totalDA = sum('totalDA');
-            const presentDA = sum('presentDA');
-            const totalDelivered = sum('delivered');
-            const totalFieldHold = sum('fieldHold');
-            const totalFieldReturn = sum('fieldReturn');
-            const totalHold = sum('totalHold');
-            const totalCollection = sum('collection');
-            const assignRate = totalParcels > 0 ? Math.round(totalAssign / totalParcels * 100) : 0;
-            const attendance = totalDA > 0 ? Math.round(presentDA / totalDA * 100) : 0;
-            // Same base as every hub row and the Closing Report: On The Way parcels.
-            const deliveryBase = currentRows.reduce((a, r) => a + Math.max(0, r.onTheWay), 0);
-            const deliveryRate = deliveryBase > 0 ? Math.round(totalDelivered / deliveryBase * 100) : 0;
-            const fieldHoldRate = deliveryBase > 0 ? Math.round(totalFieldHold / deliveryBase * 100) : 0;
-            const fieldReturnRate = deliveryBase > 0 ? Math.round(totalFieldReturn / deliveryBase * 100) : 0;
-            const parseClockMinutes = value => {
-                const m = String(value || '').trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
-                if (!m) return null;
-                let h = Number(m[1]), min = Number(m[2]);
-                if (m[3]) { const ap = m[3].toUpperCase(); if (ap === 'AM' && h === 12) h = 0; if (ap === 'PM' && h !== 12) h += 12; }
-                return h * 60 + min;
-            };
-            const elapsed = fields => {
-                const saved = String(fields.m_elapsedTime || '').trim();
-                if (saved) {
-                    const vm = parseClockMinutes(fields.m_vanInTime);
-                    const dm = parseClockMinutes(fields.m_dispatchTime);
-                    if (vm !== null && dm !== null) {
-                        let diff = dm - vm;
-                        if (diff < 0) diff += 24 * 60;
-                        return Math.floor(diff / 60) + ' Hours ' + (diff % 60) + ' Minutes';
-                    }
-                    return saved;
-                }
-                const start = parseClockMinutes(fields.m_vanInTime);
-                const end = parseClockMinutes(fields.m_dispatchTime);
-                if (start === null || end === null) return '-';
-                let diff = end - start;
-                if (diff < 0) diff += 24 * 60;
-                return Math.floor(diff / 60) + ' Hours ' + (diff % 60) + ' Minutes';
-            };
-            const training = currentRows.reduce((a, r) => a + (Number(r.fields.m_onTrainingDA) || 0), 0);
-            const officeHold = sum('officeHold');
-            const closingOfficeHold = sum('closingOfficeHold');
-            const capShort = sum('capShort');
-            const totalAttempt = currentRows.reduce((a, r) => a + (Number(r.fields.totalDelivered) || r.delivered + r.fieldHold + r.fieldReturn + r.officeHold + r.capShort), 0);
-            const onWay = currentRows.reduce((a, r) => a + Math.max(0, r.onTheWay), 0);
-
-            if (dateEl) {
-                const d = new Date(targetISO + 'T00:00:00');
-                dateEl.textContent = d.toLocaleDateString('en-GB', {day:'2-digit', month:'long', year:'numeric'});
-            }
-            const reportTitle = document.querySelector('#currentDayKpiReportModal h2');
-            if (reportTitle) reportTitle.innerHTML = `<i class="fa-solid fa-chart-pie text-emerald-400"></i> ALL HUB ${kpiPreviousDayMode ? 'PREVIOUS DAY' : 'CURRENT DAY'} KPI REPORT`;
-            const subTitle = document.querySelector('#currentDayKpiReportModal p');
-            if (subTitle) subTitle.innerHTML = `Separate Morning & Closing KPI for all hubs — <span>${dateEl ? dateEl.textContent : '-'} </span>`;
-            const card = (label, value, icon) => `<div class="bg-[#0b1329] border border-slate-800 rounded-xl p-3"><div class="text-[9px] font-black uppercase text-slate-500">${icon} ${label}</div><div class="text-base md:text-lg font-black text-white mt-1">${value}</div></div>`;
-            if (morningCards) morningCards.innerHTML = [
-                card('Hubs', currentRows.length + ' / ' + rows.length, '🏢'),
-                card('Total Parcels', totalParcels.toLocaleString(), '📦'),
-                card('Assign Rate', assignRate + '%', '🚚'),
-                card('DA Attendance', attendance + '%', '👤'),
-                card('Present DA', presentDA + ' / ' + totalDA, '✓'),
-                card('Office Hold', officeHold.toLocaleString(), '🏢')
-            ].join('');
-            if (closingCards) closingCards.innerHTML = [
-                card('Hubs', currentRows.length + ' / ' + rows.length, '🏢'),
-                card('Delivered', totalDelivered.toLocaleString(), '✅'),
-                card('Delivery Rate', deliveryRate + '%', '📈'),
-                card('Field Hold', totalFieldHold.toLocaleString(), '⏸'),
-                card('Field Return', totalFieldReturn.toLocaleString(), '↩'),
-                card('Collection', totalCollection.toLocaleString(), '৳')
-            ].join('');
-            const morningCount = document.getElementById('currentDayMorningCount');
-            const closingCount = document.getElementById('currentDayClosingCount');
-            if (morningCount) morningCount.textContent = `${currentRows.length} ${kpiPreviousDayMode ? 'previous-day' : 'current-day'} hubs`;
-            if (closingCount) closingCount.textContent = `${currentRows.length} ${kpiPreviousDayMode ? 'previous-day' : 'current-day'} hubs`;
-
-            morningBody.innerHTML = rows.map(r => {
-                const cur = r.isCurrent;
-                return `<tr class="hover:bg-slate-800/30 transition">
-                    <td class="p-2.5 font-black text-white sticky left-0 bg-[#131d36] z-[5]">${escapeHtml(String(r.hub.name || 'HUB').trim().replace(/\s+/g, ' ').replace(/\s*Hub$/i, ''))}</td>
-                    <td class="p-2.5 text-center">${cur ? escapeHtml(r.vanIn) : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? escapeHtml(r.dispatch) : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? escapeHtml(elapsed(r.fields)) : '-'}</td>
-                    <td class="p-2.5 text-center font-bold">${cur ? r.totalParcels.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.totalAssign.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.assignRate : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.officeHold.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.officeHoldPct : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.totalDA.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.presentDA.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.attendance : '-'}</td>
-                </tr>`;
-            }).join('');
-            const officeHoldRatio = totalParcels > 0 ? Math.round((officeHold / totalParcels) * 100) : 0;
-            morningFoot.innerHTML = `<tr><td class="p-3 sticky left-0 bg-[#0b1329] z-[5]">ALL ${kpiPreviousDayMode ? 'PREVIOUS-DAY' : 'CURRENT-DAY'} MORNING TOTAL</td><td colspan="3" class="p-3 text-center text-slate-400">${currentRows.length} hubs</td><td class="p-3 text-center">${totalParcels.toLocaleString()}</td><td class="p-3 text-center">${totalAssign.toLocaleString()}</td><td class="p-3 text-center">${assignRate}%</td><td class="p-3 text-center">${officeHold}</td><td class="p-3 text-center">${officeHoldRatio}%</td><td class="p-3 text-center">${totalDA}</td><td class="p-3 text-center">${presentDA}</td><td class="p-3 text-center">${attendance}%</td></tr>`;
-
-            closingBody.innerHTML = rows.map(r => {
-                const cur = r.isCurrent;
-                return `<tr class="hover:bg-slate-800/30 transition">
-                    <td class="p-2.5 font-black text-white sticky left-0 bg-[#131d36] z-[5]">${escapeHtml(String(r.hub.name || 'HUB').trim().replace(/\s+/g, ' ').replace(/\s*Hub$/i, ''))}</td>
-                    <td class="p-2.5 text-center">${cur ? r.onTheWay.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center font-bold text-emerald-300">${cur ? r.delivered.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.deliveryPct : '-'}</td>
-                    <td class="p-2.5 text-center text-amber-300">${cur ? r.fieldHold.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.fieldHoldPct : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.fieldReturn.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.fieldReturnPct : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.closingOfficeHold.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center text-rose-300">${cur ? r.totalHold.toLocaleString() : '-'}</td>
-                    <td class="p-2.5 text-center">${cur ? r.collection.toLocaleString() : '-'}</td>
-                </tr>`;
-            }).join('');
-            closingFoot.innerHTML = `<tr><td class="p-3 sticky left-0 bg-[#0b1329] z-[5]">ALL ${kpiPreviousDayMode ? 'PREVIOUS-DAY' : 'CURRENT-DAY'} CLOSING TOTAL</td><td class="p-3 text-center">${onWay.toLocaleString()}</td><td class="p-3 text-center text-emerald-300">${totalDelivered.toLocaleString()}</td><td class="p-3 text-center">${deliveryRate}%</td><td class="p-3 text-center text-amber-300">${totalFieldHold.toLocaleString()}</td><td class="p-3 text-center">${fieldHoldRate}%</td><td class="p-3 text-center">${totalFieldReturn.toLocaleString()}</td><td class="p-3 text-center">${fieldReturnRate}%</td><td class="p-3 text-center">${closingOfficeHold.toLocaleString()}</td><td class="p-3 text-center text-rose-300">${totalHold.toLocaleString()}</td><td class="p-3 text-center">${totalCollection.toLocaleString()}</td></tr>`;
-        }
-
-        function toggleKpiPreviousDay() {
-            if (!kpiPreviousDayMode) {
-                const todayISO = getTodayISO();
-                const d = new Date(todayISO + 'T00:00:00');
-                d.setDate(d.getDate() - 1);
-                kpiReportTargetISO = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-                kpiPreviousDayMode = true;
-            } else {
-                kpiReportTargetISO = getTodayISO();
-                kpiPreviousDayMode = false;
-            }
-            const btn = document.getElementById('btnKpiPreviousDay');
-            if (btn) btn.innerHTML = kpiPreviousDayMode ? '<i class="fa-solid fa-calendar-day"></i> Current Day' : '<i class="fa-solid fa-calendar-minus"></i> Previous Day';
-            renderCurrentDayKpiReport();
         }
 
         // Keeps every hub's Success % identical to the Closing Report:
@@ -7966,7 +8302,7 @@ const ACCOUNTS = [
             { group: 'cards',    key: 'cardPerformance', icon: 'fa-file-excel',        label: 'Performance Checker (card + menu)' },
             { group: 'cards',    key: 'cardAgeing',      icon: 'fa-table',             label: 'Ageing Report (card + menu)' },
             { group: 'cards',    key: 'cardDailyOps',   icon: 'fa-truck-fast',        label: 'Daily Ops Report card' },
-            { group: 'cards',    key: 'cardKpi',         icon: 'fa-chart-pie',         label: 'KPI Report card' },
+            { group: 'cards',    key: 'cardKpi',         icon: 'fa-chart-pie',         label: 'Cluster Report card' },
             { group: 'sections', key: 'hubCards',        icon: 'fa-cubes',             label: 'Narsingdi Cluster Hubs (whole section)' },
             { group: 'sections', key: 'taskTabs',        icon: 'fa-star',              label: 'Daily Task Sheet tabs (all tabs at once)' },
             { group: 'hubbtns',  key: 'hubBtnReport',    icon: 'fa-file-lines',        label: 'Morning & Closing Report button' },
@@ -10825,7 +11161,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     hid('excelImportReportView', 'closeExcelImportReportView', function () { call('openExcelImportReportView'); }),
     /* popup / modal */
     hid('hubSummaryModal', 'closeHubSummaryModal', reopenRec('openHubSummaryModal')),
-    hid('currentDayKpiReportModal', 'closeCurrentDayKpiReport', function () { call('openCurrentDayKpiReport'); }),
+    hid('clusterReportModal', 'closeClusterReport'),
     hid('agentPerformancePageModal', 'closeAgentPerformanceReport', reopenRec('openAgentPerformanceReport')),
     hid('ageingConsignmentModal', 'closeAgeingConsignmentModal'),
     hid('inventoryClearConfirm', 'closeInventoryClearConfirm'),
@@ -10870,7 +11206,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   var NAMES = {
     hubReportView: 'Morning-Closing-Report', attendanceReportView: 'Attendance-Report', inventoryReportView: 'Inventory-Report',
     ageingReportView: 'Ageing-Report', excelImportReportView: 'Excel-Import-Report',
-    hubSummaryModal: 'Hub-Summary', currentDayKpiReportModal: 'Current-Day-KPI-Report',
+    hubSummaryModal: 'Hub-Summary', clusterReportModal: 'Cluster-Report',
     agentPerformancePageModal: 'Agent-Performance', ageingConsignmentModal: 'Ageing-Consignment', inventoryClearConfirm: 'Clear-Inventory',
     addSheetModal: 'Add-Sheet', manageTabsModal: 'Manage-Tabs', addHubModal: 'Add-Hub', removeHubModal: 'Remove-Hub',
     visibilityModal: 'Visibility', ownerAccessModal: 'Owner-Access', dashboardNotificationModal: 'Notifications',
@@ -10896,7 +11232,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   /* je report / popup kono hub-er jonno khole, tar hub-er naam */
   var HUBFN = { hubReportView: 'generateReport', attendanceReportView: 'generateAttendanceReport', inventoryReportView: 'generateInventoryReport',
-                hubSummaryModal: 'openHubSummaryModal', agentPerformancePageModal: 'openAgentPerformanceReport' };
+                hubSummaryModal: 'openHubSummaryModal', clusterReportModal: 'openClusterReport', agentPerformancePageModal: 'openAgentPerformanceReport' };
   function hubOf(id) {
     try {
       var f = HUBFN[id] && window[HUBFN[id]], a = f && f.__navArgs;
