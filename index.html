@@ -1814,6 +1814,60 @@ function closeClusterReport() {
 }
 document.addEventListener('cp:dashboard', closeClusterReport);   /* "Back to Dashboard" inside a report */
 </script>
+<script>
+/* ---- Performance Comparison: live from the Daily Ops Closing Summary ---- */
+(function () {
+  var st = document.createElement('style');
+  st.textContent = '.ncp .up{color:#7CFC00;font-weight:600}';
+  document.head.appendChild(st);
+
+  function cls(p) { return p == null ? '' : p >= 65 ? 'g-high' : p >= 60 ? 'g-mid' : 'g-low'; }
+  function chg(v) {
+    if (v == null) return '-';
+    var a = Math.abs(Math.round(v));
+    if (a === 0) return '<span class="flat">~0%</span>';
+    return v > 0 ? '<span class="up">\u25B2' + a + '%</span>' : '<span class="down">\u25BC' + a + '%</span>';
+  }
+  function n(v) { return Number(v || 0).toLocaleString('en-US'); }
+  function pct(p) { return p == null ? '-' : p + '%'; }
+
+  function rowHtml(r, isTotal) {
+    var c = isTotal ? 'gt' : 'num';
+    var hub = isTotal ? '<td class="gt">' + r.name + '</td>' : '<td class="hub">' + r.name + '</td>';
+    if (!r.has && !isTotal) {
+      return '<tr>' + hub + '<td class="num" colspan="8">no saved report</td><td class="ratio">-</td><td class="prev">-</td><td class="chg">-</td></tr>';
+    }
+    var nums = [r.B, r.C, r.D, r.E, r.F, r.G, r.H, r.I].map(function (v) {
+      return '<td class="' + c + '">' + n(v) + '</td>';
+    }).join('');
+    var ratioCell = isTotal ? '<td class="gt">' + pct(r.cur) + '</td>'
+                            : '<td class="ratio ' + cls(r.cur) + '">' + pct(r.cur) + '</td>';
+    var prevCell = isTotal ? '<td class="gt">' + pct(r.prev) + '</td>' : '<td class="prev">' + pct(r.prev) + '</td>';
+    var chgCell = isTotal ? '<td class="gt">' + chg(r.delta) + '</td>' : '<td class="chg">' + chg(r.delta) + '</td>';
+    return '<tr>' + hub + nums + ratioCell + prevCell + chgCell + '</tr>';
+  }
+
+  function renderClusterPerf() {
+    var tbl = document.querySelector('#cp-perf .ncp table');
+    if (!tbl || typeof window.__dailyOpsPerf !== 'function') return;
+    var d;
+    try { d = window.__dailyOpsPerf(); } catch (e) { return; }
+    var body = tbl.querySelector('tbody'), foot = tbl.querySelector('tfoot');
+    body.innerHTML = d.rows.map(function (r) { return rowHtml(r, false); }).join('');
+    foot.innerHTML = rowHtml(d.total, true);
+  }
+  window.renderClusterPerf = renderClusterPerf;
+
+  /* refresh while the Performance page is open, and on opening it */
+  setInterval(function () {
+    var m = document.getElementById('clusterReportModal'), pv = document.getElementById('cp-perf');
+    if (m && !m.classList.contains('hidden') && pv && !pv.hidden) renderClusterPerf();
+  }, 2000);
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('[data-cp="cp-perf"]')) setTimeout(renderClusterPerf, 0);
+  });
+})();
+</script>
 <!-- COMBINED REPORT VIEW -->
 <div class="hidden report-body-bg min-h-screen" id="hubReportView">
 <div class="rcv-panel" id="reportCheckPanel" data-html2canvas-ignore="true">
@@ -11017,6 +11071,30 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   }
   function SYNC(){Object.keys(HS).forEach(function(k){FILL(+k,HS[k]);RECALC[+k](HS[k])});try{updateMissing()}catch(e){}}
   window.__dailyOpsSync=SYNC;
+  /* Cluster Report > Performance Comparison: same numbers as the Closing Summary (selected day + previous day) */
+  var PERF_HUBS=['Narsingdi','Narsingdi-Monohardi','Narsingdi-Pachdona','Narsingdi-Palash','Narsingdi-Shibpur'];
+  window.__dailyOpsPerf=function(){
+    var kp=kpiPrev(),rows=[],T={B:0,C:0,D:0,E:0,F:0,G:0,H:0,I:0};
+    PERF_HUBS.forEach(function(name){
+      var hub=hubForRow(name),f=hub?fieldsFor(hub,selISO):null,d=f?derive(f):null;
+      var sp=d?splitDel(name,d.del):null;
+      var r={name:name,has:!!d,B:0,C:0,D:0,E:0,F:0,G:0,H:0,I:0,cur:null,prev:null,delta:null};
+      if(d){
+        r.B=d.assign;r.C=sp.c;r.D=sp.p;r.E=sp.e;r.F=d.fh;r.G=d.fr;r.H=sp.pr;
+        r.I=r.C+r.D+r.E+r.H;
+        r.cur=r.B>0?Math.round(r.I*100/r.B):null;
+      }
+      var p=(hub&&kp.byId[hub.id])?parseFloat(kp.byId[hub.id]):NaN;
+      r.prev=isNaN(p)?null:p;
+      if(r.cur!=null&&r.prev!=null)r.delta=r.cur-r.prev;
+      ['B','C','D','E','F','G','H','I'].forEach(function(c){T[c]+=r[c]});
+      rows.push(r);
+    });
+    var tot={name:'Grand Total',has:rows.some(function(r){return r.has}),B:T.B,C:T.C,D:T.D,E:T.E,F:T.F,G:T.G,H:T.H,I:T.I,
+      cur:T.B>0?Math.round(T.I*100/T.B):null,prev:kp.total!=null?parseFloat(kp.total):null,delta:null};
+    if(tot.cur!=null&&tot.prev!=null)tot.delta=tot.cur-tot.prev;
+    return {rows:rows,total:tot,date:selISO};
+  };
   setInterval(function(){var o=document.getElementById('dailyOpsOverlay');if(o&&o.style.display==='block'){try{SYNC()}catch(e){}}},3000);
   /* ===== Previous Day button (date picker nai) =====
      Click korle ager diner (calendar-er exact previous day) saved report dekhay -- sudhu oi diner data, ajker kichu thake na.
