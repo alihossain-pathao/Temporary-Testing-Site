@@ -1114,6 +1114,180 @@ html:not(.nsd-light) body .bg-emerald-600, html:not(.nsd-light) body .bg-emerald
 html:not(.nsd-light) body .bg-white:not(.absolute):not([class*="rounded-full"]):not([class*="w-4"]){ color:#1E293B; }
 html:not(.nsd-light) body #sidebarLoginBtn{ background:#fff !important; color:#1E293B !important; }
 /* ===== /GLASS THEME v3 ===== */
+
+/* ===== GLASS THEME v4: WHITE background (overrides the dark values above) ===== */
+html:not(.nsd-light){
+  --g-shadow:0 8px 28px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.9);
+  --g-border-soft:rgba(15,23,42,.10); --glass-border:rgba(15,23,42,.10);
+  --g-inset:#ffffff; color-scheme:light; background:#ffffff !important;
+}
+html:not(.nsd-light) body{
+  background:linear-gradient(180deg,#ffffff 0%,#ffffff 55%,#f5f8fc 100%) !important;
+  background-attachment:fixed !important; color:#0f172a;
+}
+/* surfaces */
+html:not(.nsd-light) body [class*="bg-[#131d36]"], html:not(.nsd-light) body [class*="bg-[#0a1128]"],
+html:not(.nsd-light) body .cp-card, html:not(.nsd-light) body .nsd-card, html:not(.nsd-light) body .nsd-sheet,
+html:not(.nsd-light) body .nsd-closed-card, html:not(.nsd-light) body #nsdBar, html:not(.nsd-light) body .inv-cf-card{
+  background:rgba(248,250,252,.94) !important; border:1px solid rgba(15,23,42,.10) !important; box-shadow:var(--g-shadow) !important;
+}
+html:not(.nsd-light) body .cp-card:hover, html:not(.nsd-light) body [class*="bg-[#131d36]"]:hover{ background:#ffffff !important; border-color:rgba(27,132,255,.40) !important; }
+html:not(.nsd-light) body #sidebarDrawer{ background:rgba(255,255,255,.96) !important; border:1px solid rgba(15,23,42,.08) !important; box-shadow:0 20px 60px rgba(15,23,42,.18) !important; }
+html:not(.nsd-light) body #sidebarOverlay{ background:rgba(15,23,42,.35) !important; }
+/* inputs */
+html:not(.nsd-light) body [class*="bg-[#0b1329]"]:not(#authGate):not([type="checkbox"]), html:not(.nsd-light) body .nsd-input,
+html:not(.nsd-light) body .nsd-row, html:not(.nsd-light) body .nsd-code, html:not(.nsd-light) body .nsd-opt, html:not(.nsd-light) body #nsdBar input{
+  background:#ffffff !important; border-color:#d5dde8 !important; color:#0f172a !important;
+}
+html:not(.nsd-light) body input::placeholder, html:not(.nsd-light) body textarea::placeholder, html:not(.nsd-light) body .nsd-input::placeholder{ color:#94a3b8 !important; }
+html:not(.nsd-light) body input:focus, html:not(.nsd-light) body select:focus, html:not(.nsd-light) body textarea:focus{ border-color:#1B84FF !important; box-shadow:0 0 0 3px rgba(27,132,255,.18); }
+html:not(.nsd-light) body input[type="checkbox"]{ background:#fff !important; border-color:#94a3b8 !important; }
+html:not(.nsd-light) body select option{ background:#fff; color:#0f172a; }
+html:not(.nsd-light) body .text-white, html:not(.nsd-light) body h1, html:not(.nsd-light) body h2, html:not(.nsd-light) body h3{ color:#0f172a; text-shadow:none; }
+/* login / overlays */
+html:not(.nsd-light) body #authGate, html:not(.nsd-light) body #nsdClosedOverlay{
+  background:radial-gradient(900px 520px at 75% 10%, rgba(27,132,255,.10), transparent 64%), linear-gradient(180deg,#ffffff,#f3f6fb) !important;
+}
+html:not(.nsd-light) body #authGate h2, html:not(.nsd-light) body .nsd-closed-card h2{ color:#0f172a !important; }
+html:not(.nsd-light) body .nsd-closed-card p{ color:#334155 !important; }
+/* borders */
+html:not(.nsd-light) body .border-slate-800, html:not(.nsd-light) body .border-slate-700, html:not(.nsd-light) body .border-slate-600,
+html:not(.nsd-light) body [class*="border-slate-800/"], html:not(.nsd-light) body [class*="border-slate-700/"], html:not(.nsd-light) body .border-white\/10{ border-color:rgba(15,23,42,.10) !important; }
+html:not(.nsd-light) body [class*="divide-slate-"]>*{ border-color:rgba(15,23,42,.10) !important; }
+/* text */
+html:not(.nsd-light) body .text-slate-200{ color:#1e293b !important; }
+html:not(.nsd-light) body .text-slate-300{ color:#334155 !important; }
+html:not(.nsd-light) body .text-slate-400{ color:#475569 !important; }
+html:not(.nsd-light) body .text-slate-500{ color:#64748b !important; }
+html:not(.nsd-light) body .text-slate-600{ color:#94a3b8 !important; }
+html:not(.nsd-light) body .text-sky-400, html:not(.nsd-light) body .text-sky-500{ color:#0369a1 !important; }
+html:not(.nsd-light) body .text-cyan-400{ color:#0e7490 !important; }
+html:not(.nsd-light) body .text-emerald-400, html:not(.nsd-light) body .text-emerald-500{ color:#059669 !important; }
+html:not(.nsd-light) body .text-emerald-300{ color:#047857 !important; }
+html:not(.nsd-light) body .text-amber-400{ color:#b45309 !important; }
+html:not(.nsd-light) body .text-amber-200{ color:#92400e !important; }
+html:not(.nsd-light) body .text-rose-400{ color:#e11d48 !important; }
+html:not(.nsd-light) body .text-rose-300{ color:#be123c !important; }
+html:not(.nsd-light) body .text-violet-400, html:not(.nsd-light) body .text-indigo-400{ color:#db2777 !important; }
+/* tinted chips */
+html:not(.nsd-light) body .bg-sky-950\/60{ background-color:rgba(27,132,255,.12) !important; }
+html:not(.nsd-light) body .bg-violet-950\/60{ background-color:rgba(255,94,147,.12) !important; }
+html:not(.nsd-light) body .bg-rose-950\/60{ background-color:rgba(244,63,94,.10) !important; }
+html:not(.nsd-light) body .bg-emerald-950\/60{ background-color:rgba(16,185,129,.12) !important; }
+html:not(.nsd-light) body .bg-amber-950\/60, html:not(.nsd-light) body .bg-amber-950\/30{ background-color:rgba(245,158,11,.14) !important; }
+html:not(.nsd-light) body .bg-cyan-950\/60{ background-color:rgba(6,182,212,.12) !important; }
+html:not(.nsd-light) body .border-sky-800\/40, html:not(.nsd-light) body .border-cyan-800\/40{ border-color:rgba(27,132,255,.30) !important; }
+html:not(.nsd-light) body .border-rose-800\/40{ border-color:rgba(244,63,94,.30) !important; }
+html:not(.nsd-light) body .border-emerald-800\/40{ border-color:rgba(16,185,129,.32) !important; }
+html:not(.nsd-light) body .border-amber-800\/40{ border-color:rgba(245,158,11,.35) !important; }
+html:not(.nsd-light) body .border-violet-800\/40{ border-color:rgba(255,94,147,.32) !important; }
+/* neutral buttons / chips */
+html:not(.nsd-light) body .bg-slate-800, html:not(.nsd-light) body .bg-slate-700, html:not(.nsd-light) body .bg-slate-900\/50,
+html:not(.nsd-light) body .nsd-btn, html:not(.nsd-light) body .nsd-eye, html:not(.nsd-light) body #nsdBar button, html:not(.nsd-light) body .nsd-av{
+  background-color:rgba(15,23,42,.06) !important; border-color:rgba(15,23,42,.12) !important;
+}
+html:not(.nsd-light) body [class*="hover:bg-slate-800"]:hover, html:not(.nsd-light) body [class*="hover:bg-slate-700"]:hover{ background-color:rgba(15,23,42,.10) !important; }
+html:not(.nsd-light) body .nsd-btn:not(.primary), html:not(.nsd-light) body #nsdBar button, html:not(.nsd-light) body .nsd-eye, html:not(.nsd-light) body .nsd-x, html:not(.nsd-light) body .nsd-badge.user, html:not(.nsd-light) body .nsd-av{ color:#1e293b !important; text-shadow:none; }
+html:not(.nsd-light) body .nsd-btn.primary, html:not(.nsd-light) body .nsd-btn.primary:disabled{ background:linear-gradient(135deg,#3d9bff,#1B84FF) !important; color:#ffffff !important; border-color:#1B84FF !important; }
+html:not(.nsd-light) body .nsd-btn.primary:hover{ background:#1673e6 !important; }
+html:not(.nsd-light) body #sidebarLoginBtn{ background:#0f172a !important; color:#ffffff !important; }
+/* solid-colour buttons keep white text */
+html:not(.nsd-light) body [class*="bg-sky-600"], html:not(.nsd-light) body [class*="bg-rose-6"], html:not(.nsd-light) body [class*="bg-rose-7"],
+html:not(.nsd-light) body [class*="bg-emerald-5"], html:not(.nsd-light) body [class*="bg-emerald-6"], html:not(.nsd-light) body [class*="bg-emerald-7"],
+html:not(.nsd-light) body [class*="bg-amber-6"], html:not(.nsd-light) body [class*="bg-[#0284c7]"], html:not(.nsd-light) body [class*="bg-[#0d9488]"],
+html:not(.nsd-light) body [class*="bg-[#c27ba0]"], html:not(.nsd-light) body [class*="bg-[#7c3aed]"], html:not(.nsd-light) body .inventory-action-btn.primary{ color:#ffffff !important; }
+html:not(.nsd-light) body [class*="bg-sky-600"] *, html:not(.nsd-light) body [class*="bg-rose-6"] *, html:not(.nsd-light) body [class*="bg-rose-7"] *,
+html:not(.nsd-light) body [class*="bg-emerald-5"] *, html:not(.nsd-light) body [class*="bg-emerald-6"] *, html:not(.nsd-light) body [class*="bg-emerald-7"] *,
+html:not(.nsd-light) body [class*="bg-amber-6"] *, html:not(.nsd-light) body .inventory-action-btn.primary *{ color:#ffffff !important; }
+/* notice ticker */
+html:not(.nsd-light) body .notice-bar{ background:linear-gradient(110deg,rgba(27,132,255,.14) 0%,rgba(248,250,252,.96) 42%) !important; border:1px solid rgba(27,132,255,.25) !important; box-shadow:var(--g-shadow) !important; }
+html:not(.nsd-light) body .notice-badge{ background:rgba(27,132,255,.12) !important; border-color:rgba(27,132,255,.35) !important; color:#1d4ed8 !important; }
+html:not(.nsd-light) body .notice-item{ background:#ffffff !important; border-color:rgba(15,23,42,.10) !important; }
+html:not(.nsd-light) body .notice-item-title{ color:#0f172a !important; }
+html:not(.nsd-light) body .notice-item-msg{ color:#334155 !important; }
+html:not(.nsd-light) body .notice-item-time{ color:#64748b !important; }
+html:not(.nsd-light) body .notice-bar.nsd-maint{ background:linear-gradient(110deg,rgba(245,158,11,.20) 0%,rgba(248,250,252,.96) 45%) !important; }
+html:not(.nsd-light) body .notice-bar.nsd-maint.closed{ background:linear-gradient(110deg,rgba(244,63,94,.18) 0%,rgba(248,250,252,.96) 45%) !important; }
+html:not(.nsd-light) body .nsd-maint .notice-badge{ color:#92400e !important; }
+html:not(.nsd-light) body .nsd-maint.closed .notice-badge{ color:#9f1239 !important; }
+/* chrome */
+html:not(.nsd-light) body .toast-notify{ background:rgba(15,23,42,.92) !important; color:#fff; }
+html:not(.nsd-light) body #nsdBottom{ background:rgba(255,255,255,.95) !important; border-top:1px solid rgba(15,23,42,.10) !important; }
+html:not(.nsd-light) body #nsdBottom button{ color:#475569 !important; }
+html:not(.nsd-light) body #nsdBottom button i{ color:#1B84FF; }
+html:not(.nsd-light) body #hubCardsGrid:empty{ background:linear-gradient(100deg,#eef2f7 30%,#f8fafc 50%,#eef2f7 70%) !important; background-size:200% 100% !important; }
+html:not(.nsd-light) body .cp-card{ color:#0f172a !important; }
+html:not(.nsd-light) body .cp-txt small, html:not(.nsd-light) body #nsdCount, html:not(.nsd-light) body #nsdEmpty, html:not(.nsd-light) body .nsd-opt-desc{ color:#64748b !important; }
+html:not(.nsd-light) body .cp-chev{ background:rgba(15,23,42,.06) !important; color:#334155 !important; }
+html:not(.nsd-light) body .cp-ico, html:not(.nsd-light) body #ncr .ncr-card .ic{ background:linear-gradient(145deg,#4a9dff,#1368d6) !important; }
+html:not(.nsd-light) body .btn-back-dashboard{ background:#0f172a !important; color:#fff !important; }
+html:not(.nsd-light) body .att-date-bar{ background:#0f172a !important; }
+/* login text */
+html:not(.nsd-light) body .nsd-hint{ color:#475569 !important; }
+html:not(.nsd-light) body .nsd-lbl{ color:#1e293b !important; }
+html:not(.nsd-light) body .nsd-err{ color:#dc2626 !important; }
+html:not(.nsd-light) body .nsd-gate-closed{ color:#92400e !important; background:rgba(245,158,11,.16) !important; }
+html:not(.nsd-light) body .nsd-code{ color:#0369a1 !important; }
+/* scrollbars */
+html:not(.nsd-light) *{ scrollbar-color:rgba(15,23,42,.28) transparent; }
+html:not(.nsd-light) ::-webkit-scrollbar-thumb{ background:rgba(15,23,42,.25); border-radius:8px; }
+/* ===== /GLASS THEME v4 ===== */
+
+/* ===== GLASS THEME v5: white background + visible frosted-blur glass ===== */
+html:not(.nsd-light) body{
+  background:
+    radial-gradient(520px 420px at 10% 8%,  rgba(27,132,255,.24), transparent 70%),
+    radial-gradient(480px 420px at 90% 14%, rgba(255,94,147,.18), transparent 70%),
+    radial-gradient(580px 460px at 72% 88%, rgba(56,189,248,.24), transparent 70%),
+    radial-gradient(480px 420px at 6% 82%,  rgba(139,92,246,.15), transparent 70%),
+    #ffffff !important;
+  background-attachment:fixed !important;
+}
+html:not(.nsd-light) body [class*="bg-[#131d36]"], html:not(.nsd-light) body [class*="bg-[#0a1128]"],
+html:not(.nsd-light) body .cp-card, html:not(.nsd-light) body .nsd-card, html:not(.nsd-light) body #nsdBar, html:not(.nsd-light) body .inv-cf-card{
+  background:rgba(255,255,255,.52) !important;
+  -webkit-backdrop-filter:blur(26px) saturate(175%); backdrop-filter:blur(26px) saturate(175%);
+  border:1px solid rgba(255,255,255,.75) !important;
+  box-shadow:0 8px 32px rgba(31,60,110,.12), 0 0 0 1px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+html:not(.nsd-light) body .cp-card:hover, html:not(.nsd-light) body [class*="bg-[#131d36]"]:hover{ background:rgba(255,255,255,.72) !important; border-color:rgba(27,132,255,.45) !important; }
+html:not(.nsd-light) body #sidebarDrawer{
+  background:rgba(255,255,255,.62) !important;
+  -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid rgba(255,255,255,.8) !important; box-shadow:0 20px 60px rgba(31,60,110,.22), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+/* popups / modals sit over a dark overlay -> keep them more solid so text stays readable */
+html:not(.nsd-light) body .fixed [class*="bg-[#131d36]"], html:not(.nsd-light) body .fixed [class*="bg-[#0a1128]"],
+html:not(.nsd-light) body .nsd-sheet, html:not(.nsd-light) body .nsd-closed-card, html:not(.nsd-light) body #dashboardNotificationPanel{
+  background:rgba(255,255,255,.90) !important;
+  -webkit-backdrop-filter:blur(26px) saturate(170%); backdrop-filter:blur(26px) saturate(170%);
+  border:1px solid rgba(255,255,255,.9) !important; box-shadow:0 24px 60px rgba(15,23,42,.30), inset 0 1px 0 #fff !important;
+}
+html:not(.nsd-light) body .nsd-card{ background:rgba(255,255,255,.58) !important; }
+html:not(.nsd-light) body #sidebarOverlay{ background:rgba(15,23,42,.28) !important; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+/* inputs & inset boxes: slightly frosted */
+html:not(.nsd-light) body [class*="bg-[#0b1329]"]:not(#authGate):not([type="checkbox"]), html:not(.nsd-light) body .nsd-input,
+html:not(.nsd-light) body .nsd-row, html:not(.nsd-light) body .nsd-opt, html:not(.nsd-light) body #nsdBar input{
+  background:rgba(255,255,255,.66) !important; border-color:rgba(15,23,42,.12) !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+}
+html:not(.nsd-light) body .nsd-btn:not(.primary), html:not(.nsd-light) body .nsd-eye{ background-color:rgba(255,255,255,.6) !important; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+/* notice ticker & bottom bar */
+html:not(.nsd-light) body .notice-bar{
+  background:linear-gradient(110deg,rgba(27,132,255,.18) 0%,rgba(255,255,255,.55) 42%) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(175%); backdrop-filter:blur(24px) saturate(175%);
+  border:1px solid rgba(255,255,255,.75) !important;
+}
+html:not(.nsd-light) body .notice-item{ background:rgba(255,255,255,.65) !important; }
+html:not(.nsd-light) body #nsdBottom{ background:rgba(255,255,255,.70) !important; -webkit-backdrop-filter:blur(24px) saturate(175%); backdrop-filter:blur(24px) saturate(175%); }
+html:not(.nsd-light) body #authGate, html:not(.nsd-light) body #nsdClosedOverlay{
+  background:
+    radial-gradient(520px 420px at 12% 10%, rgba(27,132,255,.26), transparent 70%),
+    radial-gradient(480px 420px at 90% 20%, rgba(255,94,147,.20), transparent 70%),
+    radial-gradient(580px 460px at 70% 90%, rgba(56,189,248,.26), transparent 70%),
+    #ffffff !important;
+}
+/* ===== /GLASS THEME v5 ===== */
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
