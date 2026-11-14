@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html class="app-booting nsd-white" lang="en">
+<html class="app-booting" lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
@@ -926,7 +926,6 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
-<div id="nsdGlassBg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
 <div class="toast-notify" id="toastNotify">
 <span id="toastMsg">Action completed successfully</span>
 </div>
@@ -2766,13 +2765,13 @@ const OWNER_EMAIL = 'ali.hossain@pathao.com';
 
 /* 2) SALT — password hash-er sathe mishano hoy. Ekbar thik kore rakhun.
       SAVDHAN: SALT bodlale ager sob hash kaj korbe na, sob line notun kore banate hobe (#hash diye). */
-const SALT = 'YOUR_SALT';
+const SALT = 'nsd-cluster-ops|change-this-salt-once';
 
 /* 3) Firebase Realtime Database URL — accounts / remove list / profile real-time sync-er jonno.
       Jemon: 'https://YOUR-PROJECT-default-rtdb.firebaseio.com'
       Khali ('') rakhle sudhu ei device-e (local) kaj korbe.
       Database Rules-e  nsdAuth  node-e read/write allow thakte hobe (login-er age accounts porte hoy). */
-const DB_URL = 'YOUR_FIREBASE_RTDB_URL';
+const DB_URL = 'https://nsd-cluster-ops-dashboar-923cc-default-rtdb.firebaseio.com';
 
 /* 4) ACCOUNTS — hash = SHA-256(SALT + email + ":" + password). Password plain text e kothao nei.
       Notun line banate: file-er address-er shesh-e  #hash  likhe Enter dilei generator khulbe.
@@ -2780,8 +2779,8 @@ const DB_URL = 'YOUR_FIREBASE_RTDB_URL';
       - Kono line delete korle sei user-er login bondho (se login thakle sathe sathe logout).
       Format:  {email:"x@gmail.com", name:"Naam", role:"owner|admin|user", hash:"64-hex"},          */
 const ACCOUNTS = [
-  // {email:"YOUR_OWNER_EMAIL", name:"YOUR_NAME", role:"owner", hash:"PASTE-HASH-HERE"},
-  {email:"YOUR_OWNER_EMAIL", name:"YOUR_NAME", role:"owner", hash:"PASTE-HASH-HERE"},
+  // {email:"ali.hossain@pathao.com", name:"Ali Hossain", role:"owner", hash:"PASTE-HASH-HERE"},
+  {email:"ali.hossain@pathao.com", name:"Ali Hossain", role:"owner", hash:"8e0d3f15faa6fa23cc15ee4f0486f8649d148dc62d66759b6e785f6768ce8be9"},
 ];
 </script>
 
@@ -4035,13 +4034,13 @@ const ACCOUNTS = [
         }
 
         const FIREBASE_CONFIG = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
+            apiKey: "AIzaSyAhV_HigmlMaluZhJTaMfifhgZaZ5FMIBo",
+            authDomain: "nsd-cluster-ops-dashboar-923cc.firebaseapp.com",
+            projectId: "nsd-cluster-ops-dashboar-923cc",
+            storageBucket: "nsd-cluster-ops-dashboar-923cc.firebasestorage.app",
+            messagingSenderId: "997703960764",
+            appId: "1:997703960764:web:a36b22050d1621497ba8b9",
+            measurementId: "G-MEHKLRF8XV"
         };
 
         function createFirebaseDb() {
@@ -11765,222 +11764,5 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   if (/[?&]debug=1/.test(location.search)) setTimeout(runDebug, 4000);
 })();
 </script>
-<style id="nsdGlassCss">
-/* =====================================================================
-   WHITE GLASS THEME (design only, no JS / logic touched)
-   PASTE: <style id="nsdGlassCss"> ... </style>  right before </body>
-   (must come AFTER all existing styles)
-   Revert: delete this block + the #nsdGlassBg div + remove class nsd-white from <html>
-   ===================================================================== */
-
-html.nsd-white {
-  --g-ink: #0f172a;
-  --g-ink2: #334155;
-  --g-muted: #64748b;
-  --g-card: rgba(255, 255, 255, .58);
-  --g-card-strong: rgba(255, 255, 255, .82);
-  --g-line: rgba(148, 163, 184, .38);
-  --g-edge: rgba(255, 255, 255, .75);
-  --g-shadow: 0 8px 32px rgba(31, 38, 135, .10);
-  --g-blur: blur(18px) saturate(160%);
-  --g-red: #e4002b;               /* Pathao red, accent only */
-  color-scheme: light;
-  background: linear-gradient(135deg, #eef4ff 0%, #f8fafc 45%, #f3ecff 100%) !important;
-}
-html.nsd-white body {
-  background: transparent !important;
-  color: var(--g-ink) !important;
-}
-
-/* ---------- Background layer (HTML hook: #nsdGlassBg) ---------- */
-#nsdGlassBg { display: none; }
-html.nsd-white #nsdGlassBg {
-  display: block; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
-  background: linear-gradient(135deg, #eaf2ff 0%, #f8fafc 45%, #f4edff 100%);
-}
-html.nsd-white #nsdGlassBg i {
-  position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55;
-}
-html.nsd-white #nsdGlassBg .b1 { width: 46vw; height: 46vw; left: -10vw; top: -12vw; background: #93c5fd; }
-html.nsd-white #nsdGlassBg .b2 { width: 42vw; height: 42vw; right: -8vw; top: 10vh; background: #c4b5fd; }
-html.nsd-white #nsdGlassBg .b3 { width: 38vw; height: 38vw; left: 25vw; bottom: -18vw; background: #bae6fd; }
-html.nsd-white #nsdGlassBg .b4 { width: 22vw; height: 22vw; right: 6vw; bottom: -6vw; background: var(--g-red); opacity: .13; } /* soft red touch */
-
-/* ---------- Glass surfaces (cards, header, panels) ---------- */
-html.nsd-white [class~="bg-[#131d36]"],
-html.nsd-white [class~="bg-[#0a1128]"],
-html.nsd-white .nsd-card,
-html.nsd-white .nsd-sheet,
-html.nsd-white .nsd-closed-card,
-html.nsd-white .digital-header-clock,
-html.nsd-white .cp-card,
-html.nsd-white .inv-bulk-panel {
-  background: var(--g-card) !important;
-  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
-  border: 1px solid var(--g-edge) !important;
-  box-shadow: var(--g-shadow) !important;
-  color: var(--g-ink);
-}
-/* inner boxes / inputs */
-html.nsd-white [class~="bg-[#0b1329]"],
-html.nsd-white .nsd-input,
-html.nsd-white .nsd-row,
-html.nsd-white .nsd-opt,
-html.nsd-white .nsd-code,
-html.nsd-white #nsdBar input {
-  background: var(--g-card-strong) !important;
-  border-color: var(--g-line) !important;
-  color: var(--g-ink) !important;
-}
-html.nsd-white input::placeholder, html.nsd-white textarea::placeholder { color: #94a3b8 !important; }
-html.nsd-white [class~="bg-[#0b1329]"]:focus,
-html.nsd-white .nsd-input:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56,189,248,.2) !important; }
-
-/* hover lift on hub cards */
-html.nsd-white [data-hide-key^="hub_"]:hover { box-shadow: 0 14px 40px rgba(31,38,135,.16) !important; }
-
-/* ---------- Header: thin red accent line ---------- */
-html.nsd-white .sticky.z-30 { border-bottom: 2px solid rgba(228,0,43,.55) !important; }
-
-/* ---------- Sidebar + overlays ---------- */
-html.nsd-white #sidebarDrawer {
-  background: rgba(255,255,255,.78) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
-  border-right: 1px solid var(--g-edge) !important;
-}
-html.nsd-white #sidebarOverlay { background: rgba(15,23,42,.22) !important; }
-html.nsd-white [class~="bg-black/70"], html.nsd-white [class~="bg-black/60"],
-html.nsd-white .nsd-overlay, html.nsd-white .ageing-modal-backdrop {
-  background: rgba(30,41,59,.28) !important;
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-}
-html.nsd-white #authGate, html.nsd-white #nsdHashBox,
-html.nsd-white #nsdClosedOverlay { background: linear-gradient(135deg,#eaf2ff,#f8fafc 50%,#f4edff) !important; }
-html.nsd-white #dailyOpsOverlay {
-  background: linear-gradient(135deg,#eaf2ff 0%,#f8fafc 50%,#f4edff 100%) !important;
-}
-html.nsd-white #dailyOpsOverlay > div > button {
-  background: var(--g-card) !important; color: var(--g-ink) !important; border: 1px solid var(--g-edge) !important;
-}
-
-/* ---------- Text contrast ---------- */
-html.nsd-white .text-white { color: var(--g-ink) !important; }
-html.nsd-white .text-slate-100, html.nsd-white .text-slate-200 { color: #1e293b !important; }
-html.nsd-white .text-slate-300 { color: var(--g-ink2) !important; }
-html.nsd-white .text-slate-400 { color: #475569 !important; }
-html.nsd-white .text-slate-500, html.nsd-white .text-slate-600 { color: var(--g-muted) !important; }
-html.nsd-white h1, html.nsd-white h2, html.nsd-white h3 { color: var(--g-ink); }
-html.nsd-white .nsd-lbl, html.nsd-white .nsd-hint { color: var(--g-muted) !important; }
-html.nsd-white .digital-clock-time { color: var(--g-ink) !important; }
-html.nsd-white .digital-clock-date { color: var(--g-muted) !important; }
-html.nsd-white .digital-clock-label { color: #0284c7 !important; }
-html.nsd-white .nsd-closed-card p, html.nsd-white .nsd-closed-card h2 { color: var(--g-ink) !important; }
-
-/* accent text: darker shades for white background */
-html.nsd-white .text-sky-300, html.nsd-white .text-sky-400 { color: #0369a1 !important; }
-html.nsd-white .text-emerald-300, html.nsd-white .text-emerald-400 { color: #047857 !important; }
-html.nsd-white .text-amber-300, html.nsd-white .text-amber-400 { color: #b45309 !important; }
-html.nsd-white .text-rose-300, html.nsd-white .text-rose-400 { color: var(--g-red) !important; }
-html.nsd-white .text-violet-300, html.nsd-white .text-violet-400 { color: #6d28d9 !important; }
-html.nsd-white .text-cyan-300, html.nsd-white .text-cyan-400 { color: #0e7490 !important; }
-html.nsd-white .text-indigo-300, html.nsd-white .text-indigo-400 { color: #4338ca !important; }
-html.nsd-white .text-teal-300, html.nsd-white .text-teal-400 { color: #0f766e !important; }
-html.nsd-white .text-purple-300, html.nsd-white .text-purple-400 { color: #7e22ce !important; }
-html.nsd-white .text-orange-300, html.nsd-white .text-orange-400 { color: #c2410c !important; }
-html.nsd-white .text-lime-300, html.nsd-white .text-lime-400 { color: #4d7c0f !important; }
-html.nsd-white .text-pink-300, html.nsd-white .text-pink-400 { color: #be185d !important; }
-
-/* solid coloured buttons keep WHITE text */
-html.nsd-white [class*="bg-sky-6"], html.nsd-white [class*="bg-sky-7"],
-html.nsd-white [class*="bg-emerald-6"], html.nsd-white [class*="bg-emerald-7"],
-html.nsd-white [class*="bg-rose-6"], html.nsd-white [class*="bg-rose-7"],
-html.nsd-white [class*="bg-violet-6"], html.nsd-white [class*="bg-amber-6"],
-html.nsd-white [class*="bg-indigo-6"], html.nsd-white [class*="bg-teal-6"],
-html.nsd-white [class*="bg-orange-6"], html.nsd-white [class*="bg-purple-6"],
-html.nsd-white [class*="bg-cyan-6"], html.nsd-white .nsd-btn.primary,
-html.nsd-white .btn-back-dashboard, html.nsd-white .sc-ok,
-html.nsd-white [class*="bg-sky-6"] *, html.nsd-white [class*="bg-emerald-6"] *,
-html.nsd-white [class*="bg-rose-6"] *, html.nsd-white [class*="bg-violet-6"] *,
-html.nsd-white [class*="bg-amber-6"] *, html.nsd-white [class*="bg-indigo-6"] *,
-html.nsd-white [class*="bg-teal-6"] *, html.nsd-white [class*="bg-orange-6"] *,
-html.nsd-white [class*="bg-purple-6"] *, html.nsd-white [class*="bg-cyan-6"] * {
-  color: #fff !important;
-}
-/* delete / danger buttons: red accent */
-html.nsd-white [class*="bg-rose-6"] { background-color: var(--g-red) !important; }
-
-/* ---------- Neutral dark chips / buttons -> light glass ---------- */
-html.nsd-white [class~="bg-slate-800"], html.nsd-white [class~="bg-slate-900"],
-html.nsd-white [class~="bg-slate-700"], html.nsd-white .nsd-btn:not(.primary):not(.danger),
-html.nsd-white .nsd-eye, html.nsd-white .cp-back {
-  background-color: rgba(255,255,255,.7) !important;
-  color: var(--g-ink) !important;
-  border-color: var(--g-line) !important;
-}
-html.nsd-white [class*="hover:bg-slate-7"]:hover, html.nsd-white [class*="hover:bg-slate-8"]:hover {
-  background-color: #fff !important;
-}
-html.nsd-white [class~="bg-slate-800"] .text-white, html.nsd-white [class~="bg-slate-700"] .text-white { color: var(--g-ink) !important; }
-/* tinted icon boxes (bg-xxx-950/60) */
-html.nsd-white [class*="-950/"] { background-color: rgba(99,102,241,.10) !important; border-color: rgba(99,102,241,.22) !important; }
-html.nsd-white [class*="border-slate-"], html.nsd-white [class*="border-sky-8"],
-html.nsd-white [class*="border-amber-8"], html.nsd-white [class*="border-rose-8"],
-html.nsd-white [class*="border-emerald-8"], html.nsd-white [class*="border-violet-8"],
-html.nsd-white [class*="border-cyan-8"] { border-color: var(--g-line) !important; }
-html.nsd-white [class*="divide-slate-"] > * { border-color: var(--g-line) !important; }
-html.nsd-white .cp-back:hover { background: #fff !important; }
-
-/* ---------- Notice ticker / maintenance bar ---------- */
-html.nsd-white .notice-bar {
-  background: var(--g-card) !important; border: 1px solid var(--g-edge) !important;
-  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
-}
-html.nsd-white .notice-item { background: rgba(255,255,255,.7) !important; border-color: var(--g-line) !important; }
-html.nsd-white .notice-item-title { color: var(--g-ink) !important; }
-html.nsd-white .notice-item-msg { color: var(--g-ink2) !important; }
-html.nsd-white .notice-badge { color: #6d28d9 !important; background: rgba(139,92,246,.12) !important; }
-
-/* ---------- Cluster Report (cp-*) ---------- */
-html.nsd-white .cp-card { color: var(--g-ink) !important; }
-html.nsd-white .cp-txt small { color: var(--g-muted) !important; }
-html.nsd-white .cp-chev { background: rgba(255,255,255,.8) !important; color: var(--g-ink2) !important; }
-html.nsd-white .cp-sheet { background: var(--g-card-strong) !important; }
-
-/* ---------- Daily Ops (#ncr) variables ---------- */
-html.nsd-white #ncr.ncr-dark {
-  --c-card: rgba(255,255,255,.7); --c-ink: #10262f; --c-sub: #52666f;
-  --c-line: rgba(148,163,184,.4); --c-accent: #1d546d; --c-panel: rgba(255,255,255,.85);
-  --c-shadow: var(--g-shadow);
-}
-html.nsd-white #ncr .ncr-card { -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
-
-/* ---------- Toast, scrollbars, tables ---------- */
-html.nsd-white .toast-notify { background: rgba(15,23,42,.92) !important; color: #fff !important; }
-html.nsd-white ::-webkit-scrollbar { width: 10px; height: 10px; }
-html.nsd-white ::-webkit-scrollbar-thumb { background: rgba(100,116,139,.45); border-radius: 10px; }
-html.nsd-white ::-webkit-scrollbar-track { background: transparent; }
-/* Report tables / Excel-style tables keep their own colours; only the outer frame is glass */
-html.nsd-white .report-body-bg, html.nsd-white .import-report-wrap,
-html.nsd-white .ageing-report-wrap, html.nsd-white .inventory-report-wrap { background: transparent !important; }
-html.nsd-white .report-card, html.nsd-white .att-card, html.nsd-white .import-report-card,
-html.nsd-white .ageing-card, html.nsd-white .ag-pv-card {
-  background: var(--g-card-strong) !important;
-  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
-  border: 1px solid var(--g-edge) !important; box-shadow: var(--g-shadow) !important;
-}
-/* Pathao red accent on primary report action */
-html.nsd-white .btn-back-dashboard { background: var(--g-red) !important; border-color: var(--g-red) !important; }
-
-/* ---------- Fallback if backdrop-filter unsupported ---------- */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html.nsd-white { --g-card: rgba(255,255,255,.9); }
-}
-@media (max-width: 640px) {
-  html.nsd-white { --g-blur: blur(10px) saturate(150%); }
-  html.nsd-white #nsdGlassBg i { filter: blur(60px); }
-}
-@media print { #nsdGlassBg { display: none !important; } html.nsd-white body { background: #fff !important; } }
-
-</style>
 </body>
 </html>
