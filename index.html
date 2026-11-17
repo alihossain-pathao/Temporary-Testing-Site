@@ -779,7 +779,7 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
 .nsd-sitestat.notice{background:#78350f;color:#fcd34d}
 .nsd-sitestat.closed{background:#4c0519;color:#fda4af}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
   /* ====== tab cards + views ====== */
   .cp-card {
@@ -923,6 +923,34 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
   @keyframes rf-spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .rf-btn.spin .rf-ic { animation: none; } }
   @media (max-width: 640px) { .cp-tb-spacer { display: none; } .cp-toolbar .cp-back { flex: 1 1 auto; justify-content: center; } }
+
+  /* ====== Operational Overview report (Cluster Report > 4th card) ====== */
+  .nco { --fs-h:clamp(11px,.86vw,15px); --fs-b:clamp(11px,.8vw,14px); --fs-t:clamp(15px,1.38vw,24px);
+    width:100%; overflow-x:auto; box-sizing:border-box; background:#fff; font-family:"Oswald","Arial Narrow",Impact,sans-serif; }
+  .nco table { width:100%; min-width:1100px; table-layout:fixed; border-collapse:collapse; text-align:center;
+    font-weight:600; font-size:var(--fs-b); color:#000; }
+  .nco th, .nco td { border:1px solid #000; padding:0 3px; overflow:hidden; white-space:nowrap; vertical-align:middle; line-height:1; box-sizing:border-box; }
+  .nco .o-title { position:relative; height:40px; padding:0; background:#5b0f00; color:#fff;
+    font-family:"Roboto Mono","Courier New",monospace; font-weight:600; font-size:var(--fs-t); }
+  .nco .o-t { position:absolute; top:0; height:100%; display:flex; align-items:center; justify-content:center; white-space:nowrap; }
+  .nco .o-t1 { left:0; width:89.2%; letter-spacing:.3px; }
+  .nco .o-t2 { left:75.4%; width:24.6%; }
+  .nco .o-r1 th, .nco .o-r2 th { height:23px; padding-top:0; padding-bottom:0; }
+  .nco .o-hd { background:#20124d; color:#fff; font-size:var(--fs-h); }
+  .nco .o-sb { background:#741b47; color:#fff; font-size:var(--fs-h); }
+  .nco .o-rs { background:#85200c; color:#fff; font-size:var(--fs-h); line-height:1.15; }
+  .nco .o-two { line-height:1.15; }
+  .nco .o-red { color:#f00; }
+  .nco tbody td { height:23px; background:#fff; font-size:var(--fs-b); }
+  .nco tbody td.o-hn { background:#0c343d; color:#fff; font-size:var(--fs-h); }
+  .nco tbody td.o-sl { padding:3px 8px 3px 6px; }
+  .nco .o-pill { display:block; width:100%; height:17px; border:0; border-radius:9px; margin:0;
+    background:#e8eaed url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='5'><path d='M0 0h9L4.5 5z' fill='%23000'/></svg>") no-repeat right 8px center;
+    font-family:inherit; font-weight:600; font-size:var(--fs-b); color:#000; -webkit-appearance:none; appearance:none; cursor:pointer;
+    text-align:center; text-align-last:center; padding:0 22px 0 4px; }
+  .nco .o-pill:focus-visible { outline:2px solid #5b8def; outline-offset:1px; }
+  .nco tfoot td { height:23px; background:#b45f06; color:#fff; font-size:var(--fs-h); }
+  .nco tfoot td .o-ic { display:inline-block; vertical-align:middle; margin-right:5px; }
 </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col owner-permission-pending">
@@ -1390,6 +1418,11 @@ try {
         <span class="cp-txt"><strong>Backlog Report</strong><small>Reverse, return pending, backlog</small></span>
         <span class="cp-chev">›</span>
       </button>
+      <button class="cp-card" type="button" data-cp="cp-ops">
+        <span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10M15 9.5v10"/></svg></span>
+        <span class="cp-txt"><strong>Operational Overview</strong><small>Conversion, 48 hours, returns, payment status</small></span>
+        <span class="cp-chev">›</span>
+      </button>
       <!-- ===== /CARDS ===== -->
 
     </div>
@@ -1555,6 +1588,80 @@ try {
     <button class="cp-back rf-btn" type="button" data-refresh="nbr" title="Reset edited values"><span class="rf-ic">↻</span> Refresh</button>
   </div>
   </section>
+
+  <section class="cp-view" id="cp-ops" hidden>
+
+<div class="cp-sheet">
+<div class="nco">
+  <table>
+    <colgroup>
+      <col style="width:10.80%"><col style="width:5.46%"><col style="width:5.63%"><col style="width:5.46%"><col style="width:5.17%"><col style="width:5.34%">
+      <col style="width:8.85%"><col style="width:8.16%"><col style="width:7.01%"><col style="width:7.01%"><col style="width:13.61%"><col style="width:17.50%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th class="o-title" colspan="12">
+          <span class="o-t o-t1">Narsingdi Cluster Operational Performance Overview</span>
+          <span class="o-t o-t2" id="nco-date">17-November-2026</span>
+        </th>
+      </tr>
+      <tr class="o-r1">
+        <th class="o-hd" rowspan="2">Hub Name</th>
+        <th class="o-hd" colspan="3">Delivery Conversion Ratio</th>
+        <th class="o-hd" colspan="2">Delivered Within 48 Hours</th>
+        <th class="o-hd o-two" rowspan="2">Return Request Parcel</th>
+        <th class="o-hd o-two" rowspan="2"><span class="o-red">Pending</span> Open Orders<br>(7+ Day Parcels)</th>
+        <th class="o-rs" rowspan="2">Agent Productivity</th>
+        <th class="o-rs" rowspan="2">Current Cap Per<br>Agent</th>
+        <th class="o-hd" rowspan="2">Hub Payment Status</th>
+        <th class="o-hd" rowspan="2">Remark</th>
+      </tr>
+      <tr class="o-r2">
+        <th class="o-sb">Attempted</th><th class="o-sb">Total Delivered</th><th class="o-sb">Ratio</th>
+        <th class="o-sb">Qty</th><th class="o-sb">Ratio</th>
+      </tr>
+    </thead>
+    <tbody id="nco-tbody"></tbody>
+    <tfoot><tr id="nco-total"></tr></tfoot>
+  </table>
+</div>
+    </div>
+  <div class="cp-bottombar"><button class="cp-back cp-btn-home" type="button" data-dashboard title="Go to the main dashboard">&#8962; Back to Dashboard</button>
+  </div>
+  </section>
+<script>
+/* ---- Operational Overview: edit the numbers here ---- */
+(function () {
+  var hubs = [
+    {name:"Narsingdi",            att:404,  del:252, ratio:"62%", qty:187, qratio:"74%", ret:25, pend:0,  prod:25, cap:40, pay:"Unpaid"},
+    {name:"Narsingdi- Monohardi", att:432,  del:291, ratio:"67%", qty:272, qratio:"93%", ret:18, pend:2,  prod:22, cap:33, pay:"Paid"},
+    {name:"Narsingdi-Pachdona",   att:1248, del:841, ratio:"67%", qty:773, qratio:"92%", ret:55, pend:14, prod:29, cap:43, pay:"Paid"},
+    {name:"Narsingdi-Palash",     att:906,  del:511, ratio:"56%", qty:338, qratio:"66%", ret:61, pend:11, prod:24, cap:43, pay:"Paid"},
+    {name:"Narsingdi-Shibpur",    att:483,  del:324, ratio:"67%", qty:304, qratio:"94%", ret:11, pend:1,  prod:25, cap:37, pay:"Unpaid"}
+  ];
+  var total = {att:402, del:230, ratio:"64%", qty:1874, qratio:"84%", ret:170, pend:28, prod:25, cap:39};
+  var label = {Paid:"Paid \u2705", Unpaid:"Unpaid \u274C"};
+  function pay(v) {
+    return '<td class="o-sl"><select class="o-pill">' +
+      '<option value="Paid"' + (v === "Paid" ? " selected" : "") + '>' + label.Paid + '</option>' +
+      '<option value="Unpaid"' + (v === "Unpaid" ? " selected" : "") + '>' + label.Unpaid + '</option></select></td>';
+  }
+  function remark() {
+    return '<td class="o-sl"><select class="o-pill"><option value="" selected></option>' +
+      '<option>Payment Pending</option><option>Follow-up Needed</option><option>Cleared</option></select></td>';
+  }
+  var tb = document.getElementById("nco-tbody"), tr = document.getElementById("nco-total");
+  if (!tb || !tr) return;
+  tb.innerHTML = hubs.map(function (h) {
+    return '<tr><td class="o-hn">' + h.name + '</td><td>' + h.att + '</td><td>' + h.del + '</td><td>' + h.ratio +
+      '</td><td>' + h.qty + '</td><td>' + h.qratio + '</td><td>' + h.ret + '</td><td>' + h.pend +
+      '</td><td>' + h.prod + '</td><td>' + h.cap + '</td>' + pay(h.pay) + remark() + '</tr>';
+  }).join("");
+  tr.innerHTML = '<td>Total</td><td>' + total.att + '</td><td>' + total.del + '</td><td>' + total.ratio +
+    '</td><td>' + total.qty + '</td><td>' + total.qratio + '</td><td>' + total.ret + '</td><td>' + total.pend +
+    '</td><td>' + total.prod + '</td><td>' + total.cap + '</td><td colspan="2"><span class="o-ic">\uD83D\uDCB3</span>Payment</td>';
+})();
+</script>
 </div>
 </div>
 <script>
