@@ -225,27 +225,6 @@
         @media print {
             #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { box-shadow:none; border-radius:0; }
         }
-        /* ===== Ageing Report: compact output (table / cell / font size choto) ===== */
-        #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { border-radius:10px; box-shadow:0 2px 10px rgba(15,23,42,.06); }
-        #ageingReportView .ageing-card { width:fit-content; max-width:100%; min-width:300px; }
-        #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { min-width:260px; }
-        #ageingReportView .ag-title { padding:8px 12px 6px; }
-        #ageingReportView .ag-title .t { font-size:13.5px; }
-        #ageingReportView .ag-title .st { font-size:10px; margin-top:2px; }
-        #ageingReportView .ag-pv-table { font-size:11.5px; }
-        #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:3px 8px; }
-        #ageingReportView .ag-pv-table thead th { font-size:11px; }
-        #ageingReportView .ag-pv-table .count-link, #ageingReportView .ageing-table .count-link { padding:0 4px; }
-        #ageingReportView .ag-x-table td.ind { padding-left:22px; }
-        #ageingReportView .ag-pv-total { padding:6px 12px; font-size:12px; gap:22px; }
-        #ageingReportView .ageing-table, #ageingReportView .ageing-card.ag-themed .ageing-table { width:auto; min-width:0; font-size:11px; }
-        #ageingReportView .ageing-table th, #ageingReportView .ageing-table td,
-        #ageingReportView .ageing-card.ag-themed .ageing-table th, #ageingReportView .ageing-card.ag-themed .ageing-table td { padding:3px 8px; }
-        #ageingReportView .ageing-table .row-label { min-width:110px; }
-        #ageingReportView .ageing-result-meta { font-size:11px; margin-bottom:6px; }
-        @media (max-width:640px) {
-            #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:3px 6px; }
-        }
         .ageing-bsec input[type=text].plain { width:100%; border:1px solid #cbd5e1; border-radius:5px; padding:5px 7px; font-size:11px; font-weight:700; background:#fff; color:#111827; margin-bottom:6px; }
         @media print { .ageing-card, .ageing-card * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
         .ageing-modal-backdrop {
@@ -1893,10 +1872,12 @@ try {
      Left / Right arrow (or Ctrl/Cmd + Left / Right) = previous / next report page.
      On the list, arrow keys move between the report cards. */
   document.addEventListener("keydown", function (e) {
-    var inCell = !!(e.target && e.target.isContentEditable);
+    var inCell = !!(e.target && (e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)));
     var mod = e.ctrlKey || e.metaKey;
+    var cpModal = document.getElementById('clusterReportModal');
+    var cpOpen = !!(cpModal && !cpModal.classList.contains('hidden'));
     if (current) {
-      if (e.key === "Escape" && !inCell) { show(null); return; }
+      if (e.key === "Escape") { if (inCell && e.target.blur) e.target.blur(); show(null); return; }
       if (e.altKey || e.shiftKey) return;
       if (e.key !== "ArrowLeft") return;                /* only Back (←) is used; no forward */
       if (inCell && !mod) return;                 /* plain arrows move between table cells while editing */
@@ -1906,6 +1887,7 @@ try {
       open(views[(i - 1 + views.length) % views.length].id);
       return;
     }
+    if (e.key === "Escape" && cpOpen && typeof closeClusterReport === "function") { e.preventDefault(); closeClusterReport(); return; }
     if (e.altKey || mod) return;
     var j = cards.indexOf(document.activeElement);
     if (j < 0) return;
@@ -12037,6 +12019,68 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     if (e.ctrlKey && e.altKey && isD) { e.preventDefault(); runDebug(); }
   }, true);
   if (/[?&]debug=1/.test(location.search)) setTimeout(runDebug, 4000);
+})();
+</script>
+<script>
+/* Global Esc = Back: closes the top popup / report page, else leaves a task tab or leaderboard to Overview */
+(function () {
+  var MODALS = [
+    ['inventoryClearConfirm','closeInventoryClearConfirm'],['ageingConsignmentModal','closeAgeingConsignmentModal'],
+    ['dashboardNotificationModal','closeDashboardNotificationModal'],['addSheetModal','closeAddSheetModal'],
+    ['manageTabsModal','closeManageTabsModal'],['addHubModal','closeAddHubModal'],['removeHubModal','closeRemoveHubModal'],
+    ['visibilityModal','closeVisibilityModal'],['ownerAccessModal','closeOwnerAccessModal'],
+    ['hubSummaryModal','closeHubSummaryModal'],['agentPerformancePageModal','closeAgentPerformanceReport'],
+    ['sidebarOverlay','toggleSidebar']
+  ];
+  var PAGES = [
+    ['hubReportView','closeReportView'],['attendanceReportView','closeAttendanceReportView'],
+    ['inventoryReportView','closeInventoryReportView'],['ageingReportView','closeAgeingReportView'],
+    ['excelImportReportView','closeExcelImportReportView']
+  ];
+  function shown(el) {
+    if (!el || el.classList.contains('hidden') || el.hidden) return false;
+    var cs = getComputedStyle(el);
+    return cs.display !== 'none' && cs.visibility !== 'hidden';
+  }
+  function run(fn) { try { if (typeof window[fn] === 'function') { window[fn](); return true; } } catch (err) { console.warn(err); } return false; }
+  function isOpen(id) { return shown(document.getElementById(id)); }
+  window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.isComposing || e.defaultPrevented) return;
+    var d = document;
+    if (d.body.classList.contains('nsd-locked')) return;
+    var ops = d.getElementById('dailyOpsOverlay');
+    if (ops && ops.style.display === 'block') return;
+    if (isOpen('clusterReportModal')) return;
+    if (d.querySelector('.sc-back, .inv-cf-back, #nsdAskBox, #nsdMenu, .ncr-modal.open')) return;
+    var ps = d.getElementById('nsdProfileSheet'), ap = d.getElementById('nsdAdminPanel'), hb = d.getElementById('nsdHashBox');
+    if ((ps && ps.style.display && ps.style.display !== 'none') || (ap && ap.style.display && ap.style.display !== 'none') || (hb && shown(hb))) return;
+    var done = false, t = e.target;
+    var typing = !!(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)));
+    var site = d.getElementById('nsdSiteCtl');
+    if (site && site.style.display === 'flex' && window.NSD_AUTH && NSD_AUTH.closeSite) { NSD_AUTH.closeSite(); done = true; }
+    if (!done) {
+      var np = d.getElementById('dashboardNotificationPanel');
+      if (np && !np.classList.contains('hidden')) { np.classList.add('hidden'); done = true; }
+    }
+    if (!done) {
+      for (var i = 0; i < MODALS.length && !done; i++) if (isOpen(MODALS[i][0])) done = run(MODALS[i][1]);
+    }
+    if (!done) {
+      for (var k = 0; k < PAGES.length && !done; k++) if (isOpen(PAGES[k][0])) {
+        if (typing && t.blur) { t.blur(); done = true; } else done = run(PAGES[k][1]);
+      }
+    }
+    if (!done) {
+      var inTab = false;
+      try { inTab = (typeof currentGenericTabType !== 'undefined' && !!currentGenericTabType); } catch (x) {}
+      if (!inTab && isOpen('viewLeaderboard')) inTab = true;
+      if (inTab) {
+        if (typing && t.blur) t.blur();
+        try { if (typeof switchDashboardTab === 'function') { switchDashboardTab('overview'); done = true; } } catch (y) { console.warn(y); }
+      }
+    }
+    if (done) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
 })();
 </script>
 </body>
