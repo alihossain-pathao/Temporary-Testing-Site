@@ -225,6 +225,27 @@
         @media print {
             #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { box-shadow:none; border-radius:0; }
         }
+        /* ===== Ageing Report: compact output (table / cell / font size choto) ===== */
+        #ageingReportView .ageing-card, #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { border-radius:10px; box-shadow:0 2px 10px rgba(15,23,42,.06); }
+        #ageingReportView .ageing-card { width:fit-content; max-width:100%; min-width:300px; }
+        #ageingReportView .ag-pv-card, #ageingReportView .ag-x-card { min-width:260px; }
+        #ageingReportView .ag-title { padding:8px 12px 6px; }
+        #ageingReportView .ag-title .t { font-size:13.5px; }
+        #ageingReportView .ag-title .st { font-size:10px; margin-top:2px; }
+        #ageingReportView .ag-pv-table { font-size:11.5px; }
+        #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:3px 8px; }
+        #ageingReportView .ag-pv-table thead th { font-size:11px; }
+        #ageingReportView .ag-pv-table .count-link, #ageingReportView .ageing-table .count-link { padding:0 4px; }
+        #ageingReportView .ag-x-table td.ind { padding-left:22px; }
+        #ageingReportView .ag-pv-total { padding:6px 12px; font-size:12px; gap:22px; }
+        #ageingReportView .ageing-table, #ageingReportView .ageing-card.ag-themed .ageing-table { width:auto; min-width:0; font-size:11px; }
+        #ageingReportView .ageing-table th, #ageingReportView .ageing-table td,
+        #ageingReportView .ageing-card.ag-themed .ageing-table th, #ageingReportView .ageing-card.ag-themed .ageing-table td { padding:3px 8px; }
+        #ageingReportView .ageing-table .row-label { min-width:110px; }
+        #ageingReportView .ageing-result-meta { font-size:11px; margin-bottom:6px; }
+        @media (max-width:640px) {
+            #ageingReportView .ag-pv-table th, #ageingReportView .ag-pv-table td { padding:3px 6px; }
+        }
         .ageing-bsec input[type=text].plain { width:100%; border:1px solid #cbd5e1; border-radius:5px; padding:5px 7px; font-size:11px; font-weight:700; background:#fff; color:#111827; margin-bottom:6px; }
         @media print { .ageing-card, .ageing-card * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
         .ageing-modal-backdrop {
