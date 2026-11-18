@@ -1764,6 +1764,28 @@ try {
   tb.addEventListener("input", onEdit);
   tb.addEventListener("change", onEdit);
 
+  /* Excel paste: multi-line / tab-separated data fills rows downward and columns rightward */
+  tb.addEventListener("paste", function (e) {
+    var el = e.target, k0 = el.getAttribute && el.getAttribute("data-k"), row0 = el.closest && el.closest("tr[data-i]");
+    if (!k0 || !row0) return;
+    var raw = (e.clipboardData || window.clipboardData).getData("text") || "";
+    var lines = raw.replace(/\r/g, "").split("\n");
+    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+    if (lines.length < 2 && raw.indexOf("\t") < 0) return;
+    e.preventDefault();
+    var cols = ["ret", "pend", "rem"], c0 = cols.indexOf(k0), r0 = +row0.getAttribute("data-i");
+    if (c0 < 0) return;
+    lines.forEach(function (ln, li) {
+      var tr = tb.querySelector('tr[data-i="' + (r0 + li) + '"]'); if (!tr) return;
+      ln.split("\t").forEach(function (v, vi) {
+        var key = cols[c0 + vi]; if (!key) return;
+        var inp = tr.querySelector('[data-k="' + key + '"]'); if (!inp) return;
+        inp.value = (key === "rem") ? v.trim() : v.replace(/[^0-9]/g, "");
+        onEdit({ target: inp });
+      });
+    });
+  });
+
   /* refresh while this page is open, and on opening it (same pattern as Performance Comparison) */
   setInterval(function () {
     var m = document.getElementById("clusterReportModal"), v = document.getElementById("cp-ops");
