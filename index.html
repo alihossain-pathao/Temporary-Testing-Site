@@ -1953,7 +1953,35 @@ try {
     root.addEventListener("paste", function (e) {
       if (!e.target.isContentEditable) return;
       e.preventDefault();
-      var t = (e.clipboardData || window.clipboardData).getData("text").replace(/\s+/g, " ").trim();
+      var raw = (e.clipboardData || window.clipboardData).getData("text");
+      var lines = raw.replace(/\r/g, "").split("\n");
+      while (lines.length && !lines[lines.length - 1].trim()) lines.pop();   /* ignore trailing blank line */
+      if (lines.length > 1 || /\t/.test(lines[0] || "")) {
+        /* multi-line / spreadsheet paste: first value goes in the clicked box, the rest fill downward (tabs fill rightward) */
+        var rows = Array.prototype.slice.call(root.querySelectorAll("tbody tr"));
+        var cellsOf = function (tr) { return Array.prototype.slice.call(tr.querySelectorAll('[contenteditable="true"]')); };
+        var r0 = rows.indexOf(e.target.parentNode), c0 = cellsOf(e.target.parentNode).indexOf(e.target);
+        if (r0 >= 0 && c0 >= 0) {
+          lines.forEach(function (ln, li) {
+            var tr = rows[r0 + li]; if (!tr) return;
+            ln.split("\t").forEach(function (val, vi) {
+              var cell = cellsOf(tr)[c0 + vi]; if (!cell) return;
+              var v = val.replace(/[^\d.\-]/g, "");
+              cell.textContent = v === "" ? "" : num(v);
+              cell.classList.remove("dash");
+            });
+          });
+          if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+          rows.forEach(function (tr) {
+            cellsOf(tr).forEach(function (cell) {
+              if (isBacklog) { var n = num(cell.textContent); cell.textContent = n === 0 ? "-" : n; cell.classList.toggle("dash", n === 0); }
+            });
+          });
+          calc();
+          return;
+        }
+      }
+      var t = raw.replace(/\s+/g, " ").trim();
       document.execCommand("insertText", false, t);
     });
     /* Arrow keys / Enter move from one box to the next */
