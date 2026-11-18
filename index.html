@@ -957,6 +957,7 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
     font-family:inherit; font-weight:600; font-size:var(--fs-b); color:#000; text-align:center; outline:none; box-sizing:border-box; }
   .nco .o-in:focus { background:#fff8d6; box-shadow:inset 0 0 0 2px #5b8def; }
   .nco input.o-pill.o-rm { background:#e8eaed; padding:0 8px; cursor:text; }
+  .nco .o-pay { background-image:none; cursor:default; font-size:calc(var(--fs-b) - 1px); line-height:17px; padding:0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .nco input.o-pill.o-rm::-webkit-calendar-picker-indicator { opacity:.55; }
   .nco tfoot td { height:23px; background:#b45f06; color:#fff; font-size:var(--fs-h); }
   .nco tfoot td .o-ic { display:inline-block; vertical-align:middle; margin-right:5px; }
@@ -1643,10 +1644,10 @@ try {
    Attempted / Total Delivered ......... Daily Ops > Closing Summary
    Within 48 Hours (Qty, Ratio) ........ Daily Ops > Delivery Ageing Report
    Agent Productivity / Current Cap .... each hub's Morning & Closing Report > Agent Performance Report
+   Hub Payment Status ................. Daily Ops > Payment Summary > Status
    Return Request Parcel / Pending (7+ Day) / Remark ... manual input (saved per date in this browser) */
 (function () {
   var HUBS = ["Narsingdi", "Narsingdi- Monohardi", "Narsingdi-Pachdona", "Narsingdi-Palash", "Narsingdi-Shibpur"];
-  var PAY0 = ["Unpaid", "Paid", "Paid", "Paid", "Unpaid"];          /* default Hub Payment Status (same as before) */
   var REMARKS = ["Payment Pending", "Follow-up Needed", "Cleared"];  /* suggestions only - any text can be typed */
   var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   var LS = "nsd_nco_inputs_v1";
@@ -1674,7 +1675,7 @@ try {
       '<td class="o-ed"><input class="o-in" data-k="ret" type="text" inputmode="numeric" autocomplete="off" aria-label="Return Request Parcel"></td>' +
       '<td class="o-ed"><input class="o-in" data-k="pend" type="text" inputmode="numeric" autocomplete="off" aria-label="Pending 7+ Day Parcels"></td>' +
       '<td data-c="prod"></td><td data-c="cap"></td>' +
-      '<td class="o-sl"><select class="o-pill" data-k="pay"><option value="Paid">Paid \u2705</option><option value="Unpaid">Unpaid \u274C</option></select></td>' +
+      '<td class="o-sl" data-c="pay"></td>' +
       '<td class="o-sl"><input class="o-pill o-rm" data-k="rem" type="text" list="nco-remarks" autocomplete="off" aria-label="Remark"></td></tr>';
   }).join("");
   var dl = document.createElement("datalist");
@@ -1692,6 +1693,18 @@ try {
     var t = (v === null || v === undefined) ? "" : String(v);
     if (td.textContent !== t) td.textContent = t;
   }
+  function payCell(row, r) {                      /* Hub Payment Status: read-only, mirrors Daily Ops > Payment Summary > Status */
+    var td = row.querySelector('[data-c="pay"]');
+    if (!td) return;
+    var v = r && r.pay ? r.pay : "", key = v + "|" + (r && r.payBg || "");
+    if (td.dataset.k === key) return;
+    td.dataset.k = key; td.textContent = "";
+    if (!v) return;
+    var sp = document.createElement("span");
+    sp.className = "o-pill o-pay"; sp.textContent = v; sp.title = v;
+    sp.style.background = r.payBg; sp.style.color = r.payFg;
+    td.appendChild(sp);
+  }
   function field(row, k) { return row.querySelector('[data-k="' + k + '"]'); }
 
   var curISO = null;
@@ -1703,7 +1716,6 @@ try {
       field(row, "ret").value = v.ret || "";
       field(row, "pend").value = v.pend || "";
       field(row, "rem").value = v.rem || "";
-      field(row, "pay").value = v.pay || PAY0[i];
     });
   }
   function inputTotals() {
@@ -1729,6 +1741,7 @@ try {
     Array.prototype.forEach.call(tb.rows, function (row, i) {
       var r = d && d.rows[i] && d.rows[i].has ? d.rows[i] : null;
       ["att", "del", "ratio", "qty", "qratio", "prod", "cap"].forEach(function (k) { put(row, k, r ? r[k] : ""); });
+      payCell(row, d && d.rows[i] ? d.rows[i] : null);
     });
     var t = d && d.total && d.total.has ? d.total : null;
     ["att", "del", "ratio", "qty", "qratio", "prod", "cap"].forEach(function (k) { put(tr, k, t ? t[k] : ""); });
@@ -10722,6 +10735,7 @@ html.nsd-light #nsdBar button{background:#f1f5f9;color:#0f172a;border-color:#cbd
 #ncr table{border:0;border-collapse:collapse;table-layout:fixed;background:#fff;font-family:Arial,sans-serif;margin:0;max-width:none}
 #ncr td{padding:0 3px;overflow:hidden;box-sizing:border-box;line-height:1.25;background-clip:padding-box}
 #ncr td:focus{outline:1px solid #1a73e8;outline-offset:-1px}
+#ncr td[data-hd="1"],#ncr td[data-hd="1"] *{user-select:text!important;-webkit-user-select:text!important;cursor:text}
 #ncr td.ncr-nm{user-select:none;-webkit-user-select:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #ncr td.ncr-flash{outline:2px solid #FFF2CC!important;outline-offset:-2px;filter:brightness(1.35)}
 </style><style>#ncr.ncr-dark{--c-card:#131d36;--c-ink:#e8f0f3;--c-sub:#9bb0b9;--c-line:#1e2a4a;--c-accent:#7fc4dc;--c-panel:#0f1830;--c-shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3)}</style>
@@ -11069,7 +11083,7 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
       if(c0&&/^(Narsingdi(?!\s+Cluster).*|Total)$/.test(tx)){hd=i;break}
     }
     for(i=0;i<hd;i++)Array.prototype.forEach.call(rows[i].cells,function(td){
-      td.contentEditable='false';td.dataset.hd='1';td.style.cursor='default';td.style.userSelect='none';td.style.webkitUserSelect='none';
+      td.contentEditable='false';td.dataset.hd='1';td.style.cursor='text';td.style.userSelect='text';td.style.webkitUserSelect='text';
     });
   }
   /* Freeze panes: title + header rows upore, Hub Name column bam-e (scroll korleo thakbe) */
@@ -11305,13 +11319,19 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
   /* Cluster Report > Operational Overview (same hubs / same day as the Closing Summary):
      Attempted + Total Delivered  = Closing Summary  (Attempted Today, Delivered+Partial+Exchange+Paid Return)
      Within 48 Hours Qty / Ratio  = Delivery Ageing Report (24 hrs + 48 hrs, % of total ageing parcels)
+     Hub Payment Status           = Payment Summary > Status
      Agent Productivity / Cap     = hub-er Morning & Closing Report > Agent Performance Report (same formula:
                                     Delivered / Present DA  and  Assign For Delivery / Present DA) */
   window.__dailyOpsOverview=function(){
-    var rows=[],T={att:0,del:0,qty:0,age:0,da:0,has:false};
-    PERF_HUBS.forEach(function(name){
+    var rows=[],T={att:0,del:0,qty:0,age:0,da:0,has:false},pst=HS[2];
+    PERF_HUBS.forEach(function(name,idx){
       var hub=hubForRow(name),f=hub?fieldsFor(hub,selISO):null,d=f?derive(f):null;
       var r={name:name,has:!!d};
+      /* Hub Payment Status = Payment Summary > Status (Same day; if empty, Next day) -- jeta Daily Ops e select kora ache */
+      var pv='';
+      if(pst){var te=pst.m['E'+(28+idx)],ti=pst.m['I'+(28+idx)];pv=(te&&te.dataset.v)||(ti&&ti.dataset.v)||''}
+      var pc=ST.filter(function(x){return x[0]===pv})[0];
+      r.pay=pv;r.payBg=pc?pc[1]:'#e8eaed';r.payFg=pc?pc[2]:'#000';
       if(d){
         var sp=splitDel(name,d.del),da=num(f.m_presentDA),age=d.a24+d.a48+d.a72+d.a72p;
         r.att=d.assign;
