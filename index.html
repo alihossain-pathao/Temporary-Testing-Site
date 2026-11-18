@@ -952,6 +952,12 @@ body.nsd-site-closed>*:not(#nsdClosedOverlay):not(#authGate):not(#toastNotify):n
     font-family:inherit; font-weight:600; font-size:var(--fs-b); color:#000; -webkit-appearance:none; appearance:none; cursor:pointer;
     text-align:center; text-align-last:center; padding:0 22px 0 4px; }
   .nco .o-pill:focus-visible { outline:2px solid #5b8def; outline-offset:1px; }
+  .nco td.o-ed { padding:0; }
+  .nco .o-in { display:block; width:100%; height:23px; margin:0; padding:0 3px; border:0; border-radius:0; background:transparent;
+    font-family:inherit; font-weight:600; font-size:var(--fs-b); color:#000; text-align:center; outline:none; box-sizing:border-box; }
+  .nco .o-in:focus { background:#fff8d6; box-shadow:inset 0 0 0 2px #5b8def; }
+  .nco input.o-pill.o-rm { background:#e8eaed; padding:0 8px; cursor:text; }
+  .nco input.o-pill.o-rm::-webkit-calendar-picker-indicator { opacity:.55; }
   .nco tfoot td { height:23px; background:#b45f06; color:#fff; font-size:var(--fs-h); }
   .nco tfoot td .o-ic { display:inline-block; vertical-align:middle; margin-right:5px; }
 </style>
@@ -1633,36 +1639,127 @@ try {
   </div>
   </section>
 <script>
-/* ---- Operational Overview: edit the numbers here ---- */
+/* ---- Operational Overview ----
+   Attempted / Total Delivered ......... Daily Ops > Closing Summary
+   Within 48 Hours (Qty, Ratio) ........ Daily Ops > Delivery Ageing Report
+   Agent Productivity / Current Cap .... each hub's Morning & Closing Report > Agent Performance Report
+   Return Request Parcel / Pending (7+ Day) / Remark ... manual input (saved per date in this browser) */
 (function () {
-  var hubs = [
-    {name:"Narsingdi",            att:404,  del:252, ratio:"62%", qty:187, qratio:"74%", ret:25, pend:0,  prod:25, cap:40, pay:"Unpaid"},
-    {name:"Narsingdi- Monohardi", att:432,  del:291, ratio:"67%", qty:272, qratio:"93%", ret:18, pend:2,  prod:22, cap:33, pay:"Paid"},
-    {name:"Narsingdi-Pachdona",   att:1248, del:841, ratio:"67%", qty:773, qratio:"92%", ret:55, pend:14, prod:29, cap:43, pay:"Paid"},
-    {name:"Narsingdi-Palash",     att:906,  del:511, ratio:"56%", qty:338, qratio:"66%", ret:61, pend:11, prod:24, cap:43, pay:"Paid"},
-    {name:"Narsingdi-Shibpur",    att:483,  del:324, ratio:"67%", qty:304, qratio:"94%", ret:11, pend:1,  prod:25, cap:37, pay:"Unpaid"}
-  ];
-  var total = {att:402, del:230, ratio:"64%", qty:1874, qratio:"84%", ret:170, pend:28, prod:25, cap:39};
-  var label = {Paid:"Paid \u2705", Unpaid:"Unpaid \u274C"};
-  function pay(v) {
-    return '<td class="o-sl"><select class="o-pill">' +
-      '<option value="Paid"' + (v === "Paid" ? " selected" : "") + '>' + label.Paid + '</option>' +
-      '<option value="Unpaid"' + (v === "Unpaid" ? " selected" : "") + '>' + label.Unpaid + '</option></select></td>';
-  }
-  function remark() {
-    return '<td class="o-sl"><select class="o-pill"><option value="" selected></option>' +
-      '<option>Payment Pending</option><option>Follow-up Needed</option><option>Cleared</option></select></td>';
-  }
-  var tb = document.getElementById("nco-tbody"), tr = document.getElementById("nco-total");
+  var HUBS = ["Narsingdi", "Narsingdi- Monohardi", "Narsingdi-Pachdona", "Narsingdi-Palash", "Narsingdi-Shibpur"];
+  var PAY0 = ["Unpaid", "Paid", "Paid", "Paid", "Unpaid"];          /* default Hub Payment Status (same as before) */
+  var REMARKS = ["Payment Pending", "Follow-up Needed", "Cleared"];  /* suggestions only - any text can be typed */
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var LS = "nsd_nco_inputs_v1";
+  var tb = document.getElementById("nco-tbody"), tr = document.getElementById("nco-total"), dEl = document.getElementById("nco-date");
   if (!tb || !tr) return;
-  tb.innerHTML = hubs.map(function (h) {
-    return '<tr><td class="o-hn">' + h.name + '</td><td>' + h.att + '</td><td>' + h.del + '</td><td>' + h.ratio +
-      '</td><td>' + h.qty + '</td><td>' + h.qratio + '</td><td>' + h.ret + '</td><td>' + h.pend +
-      '</td><td>' + h.prod + '</td><td>' + h.cap + '</td>' + pay(h.pay) + remark() + '</tr>';
+
+  function isoOf(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function niceDate(iso) {
+    var p = String(iso).split("-");
+    return ("0" + (+p[2])).slice(-2) + "-" + MONTHS[(+p[1]) - 1] + "-" + p[0];
+  }
+  function loadDb() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
+  function saveDb(db) {
+    try {
+      var ks = Object.keys(db).sort();
+      while (ks.length > 62) delete db[ks.shift()];                 /* keep the last ~2 months only */
+      localStorage.setItem(LS, JSON.stringify(db));
+    } catch (e) {}
+  }
+
+  /* ---- build the table once; later refreshes touch only the data-c cells, so typed input is never lost ---- */
+  tb.innerHTML = HUBS.map(function (name, i) {
+    return '<tr data-i="' + i + '"><td class="o-hn">' + name + '</td>' +
+      '<td data-c="att"></td><td data-c="del"></td><td data-c="ratio"></td><td data-c="qty"></td><td data-c="qratio"></td>' +
+      '<td class="o-ed"><input class="o-in" data-k="ret" type="text" inputmode="numeric" autocomplete="off" aria-label="Return Request Parcel"></td>' +
+      '<td class="o-ed"><input class="o-in" data-k="pend" type="text" inputmode="numeric" autocomplete="off" aria-label="Pending 7+ Day Parcels"></td>' +
+      '<td data-c="prod"></td><td data-c="cap"></td>' +
+      '<td class="o-sl"><select class="o-pill" data-k="pay"><option value="Paid">Paid \u2705</option><option value="Unpaid">Unpaid \u274C</option></select></td>' +
+      '<td class="o-sl"><input class="o-pill o-rm" data-k="rem" type="text" list="nco-remarks" autocomplete="off" aria-label="Remark"></td></tr>';
   }).join("");
-  tr.innerHTML = '<td>Total</td><td>' + total.att + '</td><td>' + total.del + '</td><td>' + total.ratio +
-    '</td><td>' + total.qty + '</td><td>' + total.qratio + '</td><td>' + total.ret + '</td><td>' + total.pend +
-    '</td><td>' + total.prod + '</td><td>' + total.cap + '</td><td colspan="2"><span class="o-ic">\uD83D\uDCB3</span>Payment</td>';
+  var dl = document.createElement("datalist");
+  dl.id = "nco-remarks";
+  dl.innerHTML = REMARKS.map(function (r) { return '<option value="' + r + '"></option>'; }).join("");
+  tb.parentNode.parentNode.appendChild(dl);
+
+  tr.innerHTML = '<td>Total</td><td data-c="att"></td><td data-c="del"></td><td data-c="ratio"></td><td data-c="qty"></td><td data-c="qratio"></td>' +
+    '<td data-c="ret"></td><td data-c="pend"></td><td data-c="prod"></td><td data-c="cap"></td>' +
+    '<td colspan="2"><span class="o-ic">\uD83D\uDCB3</span>Payment</td>';
+
+  function put(row, key, v) {
+    var td = row.querySelector('[data-c="' + key + '"]');
+    if (!td) return;
+    var t = (v === null || v === undefined) ? "" : String(v);
+    if (td.textContent !== t) td.textContent = t;
+  }
+  function field(row, k) { return row.querySelector('[data-k="' + k + '"]'); }
+
+  var curISO = null;
+
+  function restoreInputs(iso) {
+    var box = loadDb()[iso] || {};
+    Array.prototype.forEach.call(tb.rows, function (row, i) {
+      var v = box[i] || {};
+      field(row, "ret").value = v.ret || "";
+      field(row, "pend").value = v.pend || "";
+      field(row, "rem").value = v.rem || "";
+      field(row, "pay").value = v.pay || PAY0[i];
+    });
+  }
+  function inputTotals() {
+    ["ret", "pend"].forEach(function (k) {
+      var sum = 0, any = false;
+      Array.prototype.forEach.call(tb.rows, function (row) {
+        var raw = field(row, k).value.trim();
+        if (raw !== "") { any = true; sum += parseInt(raw, 10) || 0; }
+      });
+      put(tr, k, any ? sum : "");
+    });
+  }
+
+  function render() {
+    var d = null;
+    if (typeof window.__dailyOpsOverview === "function") { try { d = window.__dailyOpsOverview(); } catch (e) { d = null; } }
+    var iso = d && d.date ? d.date : isoOf(new Date());
+    if (iso !== curISO) {                       /* date changed (e.g. Previous Day) -> show that day's saved inputs */
+      curISO = iso;
+      restoreInputs(iso);
+      if (dEl) dEl.textContent = niceDate(iso);
+    }
+    Array.prototype.forEach.call(tb.rows, function (row, i) {
+      var r = d && d.rows[i] && d.rows[i].has ? d.rows[i] : null;
+      ["att", "del", "ratio", "qty", "qratio", "prod", "cap"].forEach(function (k) { put(row, k, r ? r[k] : ""); });
+    });
+    var t = d && d.total && d.total.has ? d.total : null;
+    ["att", "del", "ratio", "qty", "qratio", "prod", "cap"].forEach(function (k) { put(tr, k, t ? t[k] : ""); });
+    inputTotals();
+  }
+
+  function onEdit(e) {
+    var el = e.target, k = el.getAttribute && el.getAttribute("data-k"), row = el.closest && el.closest("tr[data-i]");
+    if (!k || !row) return;
+    if (k === "ret" || k === "pend") {
+      var clean = el.value.replace(/[^0-9]/g, "");
+      if (clean !== el.value) el.value = clean;
+    }
+    var db = loadDb(), box = db[curISO] || (db[curISO] = {}), i = row.getAttribute("data-i");
+    var rec = box[i] || (box[i] = {});
+    rec[k] = el.value;
+    saveDb(db);
+    inputTotals();
+  }
+  tb.addEventListener("input", onEdit);
+  tb.addEventListener("change", onEdit);
+
+  /* refresh while this page is open, and on opening it (same pattern as Performance Comparison) */
+  setInterval(function () {
+    var m = document.getElementById("clusterReportModal"), v = document.getElementById("cp-ops");
+    if (m && !m.classList.contains("hidden") && v && !v.hidden) render();
+  }, 2000);
+  document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest('[data-cp="cp-ops"]')) setTimeout(render, 0);
+  });
+  render();
 })();
 </script>
 </div>
@@ -11203,6 +11300,33 @@ document.addEventListener('keydown',function(e){var o=document.getElementById('d
     var tot={name:'Grand Total',has:rows.some(function(r){return r.has}),B:T.B,C:T.C,D:T.D,E:T.E,F:T.F,G:T.G,H:T.H,I:T.I,
       cur:T.B>0?Math.round(T.I*100/T.B):null,prev:kp.total!=null?parseFloat(kp.total):null,delta:null};
     if(tot.cur!=null&&tot.prev!=null)tot.delta=tot.cur-tot.prev;
+    return {rows:rows,total:tot,date:selISO};
+  };
+  /* Cluster Report > Operational Overview (same hubs / same day as the Closing Summary):
+     Attempted + Total Delivered  = Closing Summary  (Attempted Today, Delivered+Partial+Exchange+Paid Return)
+     Within 48 Hours Qty / Ratio  = Delivery Ageing Report (24 hrs + 48 hrs, % of total ageing parcels)
+     Agent Productivity / Cap     = hub-er Morning & Closing Report > Agent Performance Report (same formula:
+                                    Delivered / Present DA  and  Assign For Delivery / Present DA) */
+  window.__dailyOpsOverview=function(){
+    var rows=[],T={att:0,del:0,qty:0,age:0,da:0,has:false};
+    PERF_HUBS.forEach(function(name){
+      var hub=hubForRow(name),f=hub?fieldsFor(hub,selISO):null,d=f?derive(f):null;
+      var r={name:name,has:!!d};
+      if(d){
+        var sp=splitDel(name,d.del),da=num(f.m_presentDA),age=d.a24+d.a48+d.a72+d.a72p;
+        r.att=d.assign;
+        r.del=sp.c+sp.p+sp.e+sp.pr;
+        r.ratio=r.att>0?Math.round(r.del*100/r.att)+'%':'';
+        r.qty=d.a24+d.a48;
+        r.qratio=age>0?Math.floor(r.qty/age*100+1e-9)+'%':'';
+        r.prod=da>0?Math.round(d.del/da):0;
+        r.cap=da>0?Math.round(d.assign/da):0;
+        T.att+=r.att;T.del+=d.del;T.qty+=r.qty;T.age+=age;T.da+=da;T.has=true;
+      }
+      rows.push(r);
+    });
+    var tot={has:T.has,att:T.att,del:T.del,ratio:T.att>0?Math.round(T.del*100/T.att)+'%':'',qty:T.qty,
+      qratio:T.age>0?Math.floor(T.qty/T.age*100+1e-9)+'%':'',prod:T.da>0?Math.round(T.del/T.da):0,cap:T.da>0?Math.round(T.att/T.da):0};
     return {rows:rows,total:tot,date:selISO};
   };
   setInterval(function(){var o=document.getElementById('dailyOpsOverlay');if(o&&o.style.display==='block'){try{SYNC()}catch(e){}}},3000);
