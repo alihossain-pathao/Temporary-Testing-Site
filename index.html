@@ -12218,7 +12218,6 @@ document.addEventListener('click', function (e) {
     var k = keyOf(e.target);
     if (!k || !isLocked(k) || isOwner()) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    toast('🔒 Ei report/tab owner locked kore rekhechhe.');
   }, true);
 
   /* non-owner-er jonno, locked report already khola thakle bondho kora */
@@ -12241,9 +12240,6 @@ document.addEventListener('click', function (e) {
   function paint() {
     var owner = isOwner();
     var sel = '.ncr-card[data-title],.cp-card[data-cp],[onclick*="ageingSetMode("],[onclick*="openDailyOpsReport("],[onclick*="openClusterReport("],[onclick*="triggerAgeingReportImport("]';
-    document.querySelectorAll(sel).forEach(function (el) {
-      el.classList.toggle('rl-locked', isLocked(keyOf(el)) && owner);
-    });
     var btn = document.getElementById('rlSideBtn');
     if (btn) btn.style.display = owner ? '' : 'none';
     var n = Object.keys(locks).filter(function (k) { return locks[k]; }).length;
