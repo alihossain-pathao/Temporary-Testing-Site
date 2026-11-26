@@ -12180,7 +12180,7 @@ document.addEventListener('click', function (e) {
       <b style="font-size:14px">Report Lock (owner)</b>
       <button type="button" onclick="rlClose()" style="background:#334155;color:#fff;border:0;border-radius:8px;padding:5px 10px;font-weight:800">✕</button>
     </div>
-    <div style="color:#94a3b8;font-size:11px">Lock thakle owner chara baki user oi report/tab khulte parbe na. Owner shob shobsomoy dekhbe.</div>
+    <div style="color:#94a3b8;font-size:11px">Lock thakle keu oi report/tab khulte parbe na. Khulte hole age Unlock korte hobe.</div>
     <div id="rlList"></div>
   </div>
 </div>
@@ -12216,7 +12216,7 @@ document.addEventListener('click', function (e) {
   /* click guard: capture phase, tai original onclick-o chalbe na */
   document.addEventListener('click', function (e) {
     var k = keyOf(e.target);
-    if (!k || !isLocked(k) || isOwner()) return;
+    if (!k || !isLocked(k)) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
     toast('🔒 Ei report/tab owner locked kore rekhechhe.');
   }, true);
@@ -12242,16 +12242,15 @@ document.addEventListener('click', function (e) {
     var owner = isOwner();
     var sel = '.ncr-card[data-title],.cp-card[data-cp],[onclick*="ageingSetMode("],[onclick*="openDailyOpsReport("],[onclick*="openClusterReport("],[onclick*="triggerAgeingReportImport("]';
     document.querySelectorAll(sel).forEach(function (el) {
-      var on = isLocked(keyOf(el));
-      el.classList.toggle('rl-locked', on && !owner);
+      el.classList.toggle('rl-locked', isLocked(keyOf(el)));
     });
     var btn = document.getElementById('rlSideBtn');
     if (btn) btn.style.display = owner ? '' : 'none';
     var n = Object.keys(locks).filter(function (k) { return locks[k]; }).length;
     var pill = document.getElementById('rlSidePill');
-    if (pill) { pill.textContent = n ? (n + ' locked') : 'OFF';
+    if (pill) { var pt = n ? (n + ' locked') : 'OFF'; if (pill.textContent !== pt) pill.textContent = pt;
       pill.className = 'px-2 py-0.5 rounded-full text-[9px] font-black ' + (n ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400'); }
-    if (!owner) closeLockedOpen();
+    closeLockedOpen();
   }
 
   /* save: local + Firestore (owner-i write korbe) */
@@ -12265,6 +12264,12 @@ document.addEventListener('click', function (e) {
     pushCloud();
     paint(); rlRender();
   }
+
+  /* DOM badle gele (re-render) lock look hariye na jay */
+  var sched = false;
+  function schedule() { if (sched) return; sched = true; setTimeout(function () { sched = false; paint(); }, 80); }
+  try { new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+  window.addEventListener('storage', function (e) { if (e.key === LS) { try { locks = JSON.parse(e.newValue) || {}; } catch (x) {} schedule(); } });
 
   /* owner modal */
   function row(k, label, sub) {
